@@ -1,7 +1,11 @@
 # TinnitusMediApp – Projektdokumentation
 
 **Arbeitstitel:** TinnitusMediApp | **Produktname:** Ohreninsel
-**Stand:** v0.5.1 (Hintergründe, Icons, Glas-UI – 02.06.2026)
+**Stand:** v0.7.3 (Karussell, Slide-Transition, Frosted Glass, Update-Button, PWA live – 02.06.2026)
+
+**PWA live:** https://boris1900.github.io/ohreninsel/ (GitHub Pages, master-Branch)
+Für iPhone (Katharina): URL in Safari → Teilen → Zum Home-Bildschirm.
+Ablauf neuer Stand: Code ändern → Version hoch (app.js + sw.js) → commit → push (PWA aktualisiert sich) → APK bauen → Release. PWA und APK immer zusammen aktuell halten.
 
 ---
 
@@ -72,6 +76,7 @@ Im Menü weiterhin manuell änderbar.
 | Bach | `bach_0.1.jpg` | `bg-bach` | `theme-bach` |
 | Regen | `regen_0.1.jpg` | `bg-regen` | `theme-regen` |
 | Café | `cafe_0.1.jpg` | `bg-cafe` | `theme-cafe` |
+| Berg | `berglandschaft_0.1.jpg` | `bg-berg` | `theme-berg` |
 
 Farb-Thema je Hintergrund (--sun / --sun-rim in style.css):
 - Meer: Türkis · Nacht: Blau · Wald: Grün · Bach: Teal · Regen: Amber · Café: Orange · Berg: Gold
@@ -102,50 +107,44 @@ Download-URL: `https://github.com/Boris1900/ohreninsel/releases/tag/vX.X`
 
 ---
 
-## ⚠️ Nächste Session: Play-Button-Sichtbarkeit
+## Wisch-Karussell + Hintergründe
 
-**Problem:** Play-Button ist zu wenig sichtbar (zu transparent).
-**Ziel:** Glas-Look beibehalten, aber Button klar erkennbar als "drück mich".
+7 Hintergründe per Swipe (links/rechts) auf der Stage durchblätterbar:
+Wellen → Rauschen → Vögel → Bach → Regen → Café → Berg (Reihenfolge in `carouselItems` in app.js).
+- Wischen wechselt Sound + Hintergrund, bei laufendem Audio mit Crossfade.
+- Slide-Transition: alter Hintergrund gleitet raus, neuer (`#bg-slide`) kommt rein (~380ms).
+  Wichtig: beim Snap am Ende erst `transition:none` auf `#bg`, dann `setBg()`, dann reflow, dann Transition wieder an – sonst blitzt der alte Hintergrund kurz durch (war ein Bug, gefixt in v0.6.5).
+- Swipe-Technik: Pointer Events + `touch-action: pan-y` auf `#stage` (CSS). Funktioniert auf Android WebView UND iOS Safari PWA. `pointerdown` ignoriert Starts im unteren Bedienbereich (`#lower`), sonst klaut der Swipe den Slider.
+- Farben (Grün/Blau/Grau/Nacht/Schwarz) bewusst NICHT im Karussell – nur im Menü. Hinweistext im Menü: „Jeder Sound passt zu jedem Hintergrund."
 
-**Aktueller Stand des Buttons:**
-- Fläche: `background: transparent` (korrekt – Glaskugel-Look)
-- Rand idle: `border: 1px solid var(--sun-rim)` (farbiger Rand je Thema)
-- Rand running: `border-color: var(--sun-rim)` + `box-shadow: 0 0 22px rgba(var(--sun), 0.30)`
-- Play-Symbol: weiße Balken/Dreieck via `.glyph .bar`
+## Start-Button (Glaskugel-Logik)
 
-**Mögliche Fixes:**
-1. Play-Symbol (Dreieck/Balken) heller/größer machen
-2. Rand dicker machen (`border: 2px solid`)
-3. Glow im Idle-Zustand ergänzen
-4. Button-Größe leicht erhöhen
+- Idle: Frosted Glass (`background: rgba(0,0,0,0.18)` + `backdrop-filter: blur(10px)`), farbiger Rand je Thema (`--sun-rim`).
+- Wald + Bach: weißer Rand im Idle (Themenfarbe sonst zu ähnlich zum Bild), farbiger Rand erst beim Laufen.
+- Beim Play: sanfter Übergang (1.4s) zu fast klarer Glaskugel (`background: transparent`, `blur(0px)`), nur Rand + Glow bleiben.
+- Berg folgt denselben Regeln wie alle anderen (alte Berg-Sonderregeln entfernt in v0.7).
 
 ---
 
-## ✅ Erledigtes (diese Session)
+## ✅ Erledigtes (v0.6 – v0.7.3)
 
-- APK-Build-Workflow eingerichtet (Capacitor, android/, local.properties)
-- App-Icon: Inselbild mit Palme (`Icon_Insel_0.1.png` → `icon-1024.png`)
-- Android mipmap-Icons generiert (`make-icons.js`)
-- Blauer-Kreuz-Bug behoben (Launch Theme + WebView backgroundColor)
-- Ohr-Icon auf Splashscreen + Header (`ohr3.png`)
-- 5 neue Hintergründe eingebaut + Sound-Hintergrund-Pairing
-- Glas-Look: Sound-Tiles transparent, #lower mit dunklem Verlauf
-- Start-Button: transparent, farbiger Rand per Thema
-- Timer-Anzeige über 60 Minuten gefixt (1:20:00 statt 20:00)
-- Menü-Button safe-area-inset-top (nicht mehr in Statusleiste)
-- Dim-Slider Preset auf 15%
-- Versionsnummer im Header (`#app-version`)
-- Start-Preset: Vögel + Wald
+- Frosted-Glass-Button + sanfter Übergang zur klaren Glaskugel beim Play
+- Button-Sichtbarkeit Wald/Bach/Café gefixt (weißer Rand idle)
+- Wisch-Karussell mit Slide-Transition (Flash-Bug gefixt)
+- Berg ins Karussell + eigener Sound (`Sounds/Berg_0.1.mp3`)
+- localStorage: letzter Sound/Hintergrund wird gemerkt (`ohreninsel-carousel`)
+- Versionsnummer aus Header raus, nur noch unten im Menü (mit Nachkommastelle!)
+- Update-Button im Menü (GitHub-Check, APK-Link auf Android / Cache-Reload auf PWA)
+- PWA live via GitHub Pages
 
 ---
 
 ## Offene Punkte
 
-- **Play-Button-Sichtbarkeit** (nächste Session – siehe oben)
-- **iOS-Test**: Katharina
-- **localStorage**: Letzten Sound + Hintergrund speichern
-- **Berg-Button-Test**: Ausblenden nach Start noch nicht getestet
-- **PWA deployment**: Subdomain noch festzulegen
+- **iOS-Test**: Katharina (Swipe, Frosted Glass, Audio, Update-Button auf Safari PWA)
+- **Berg-Sound**: vorläufig Vogel/Wald-Aufnahme – evtl. später typischere Bergatmosphäre
+- **Eigene Subdomain** statt github.io (z.B. ohreninsel.tinnituspraxis-seedorf.de) – optional
+- **Lead Magnet** (Phase 6): App gegen E-Mail-Adresse – strategisches Hauptziel
 
 ---
 
@@ -163,6 +162,9 @@ Download-URL: `https://github.com/Boris1900/ohreninsel/releases/tag/vX.X`
 - **Nicht pushen ohne Boris-OK**
 - **Neue Features erst lokal testen**, dann APK, dann Release
 - **Diktierfehler beachten:** Fachbegriffe, Domains, Dateinamen gegenchecken
+- **Versionsnummer immer mit Nachkommastelle** im Menü (z.B. `v0.7.3`, nicht `v0.7`)
+- **Version an 3 Stellen hochzählen:** `app.js` (APP_VERSION), `sw.js` (CACHE_NAME), Release-Tag
+- **PWA + APK zusammen aktuell halten:** nach push aktualisiert sich die PWA automatisch (GitHub Pages), APK separat bauen + Release
 
 ---
 
