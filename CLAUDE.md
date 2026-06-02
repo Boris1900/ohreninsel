@@ -1,7 +1,7 @@
 # TinnitusMediApp – Projektdokumentation
 
-**Arbeitstitel:** TinnitusMediApp | **Möglicher Produktname:** Ohreninsel
-**Stand:** v0.3 (Modi, Gong-System, Countdown, Abdunkeln – 02.06.2026)
+**Arbeitstitel:** TinnitusMediApp | **Produktname:** Ohreninsel
+**Stand:** v0.5.1 (Hintergründe, Icons, Glas-UI – 02.06.2026)
 
 ---
 
@@ -25,7 +25,7 @@ Ambient-Sound-App für Tinnitus-Betroffene mit drei Kernnutzungen:
 PWA + Android APK, basierend auf der MediApp (Augenblick v1.79).
 Offline-fähig, Flugmodus, kein Tracking – bewusster USP für Tinnitus-Betroffene.
 
-**6 eigene Field Recordings (selbst aufgenommen):**
+**6 eigene Field Recordings:**
 Wellen Nordsee · Rauschen Nordsee · Vögel im Wald · Bachplätschern · Regen & Gewitter · Straßencafé
 
 Zielgruppe: Tinnitus-Betroffene (Patienten von Boris, Websitebesucher)
@@ -36,8 +36,6 @@ Späteres Ziel: Lead Magnet (App gegen E-Mail-Adresse)
 ## Referenz-Projekt
 
 **MediApp (Augenblick v1.79):** `C:\Users\Boris\Projekte\MeditationsApp\`
-Relevante Dateien: `index.html`, `app.js`, `style.css`, `sw.js`, `manifest.json`, `build-android.ps1`
-Wichtig: Horizont-Regel (getBoundingClientRect, nie window.innerHeight), Audio-Menü-Logik
 
 ---
 
@@ -45,92 +43,126 @@ Wichtig: Horizont-Regel (getBoundingClientRect, nie window.innerHeight), Audio-M
 
 | Datei | Inhalt |
 |---|---|
-| `A - Projektbeschreibung.md` | Was, für wen, Ziel, Technik, Zeitrahmen |
-| `B - Aufgaben.md` | Phasen, Aufgaben, Meilensteine |
-| `C - Protokoll.md` | Log-Index + alle Logs |
-| `F - Entscheidungen.md` | Warum was so entschieden wurde |
-| `01-Basis/` | Kopie der MediApp-Basis (Snapshot) |
-| `02-Audio/loop-prototyp.html` | Crossfade-Loop-Prototyp (Web Audio API, direkt im Browser öffnen) |
-| `02-Audio/` | Field Recordings, Audio-Konzept, Lizenzen |
-| `03-Design/layout-mockup.html` | Vollständiges Design-Mockup (interaktiv, direkt im Browser öffnen) |
-| `03-Design/` | Design-Referenzen, Icons, Farbcodes |
-| `04-Deployment/` | PWA-Konfiguration, Build-Scripts |
-| `xold/` | Veraltete Dateien (nie löschen, hier parken) |
+| `index.html` | Haupt-App |
+| `app.js` | Gesamte App-Logik |
+| `style.css` | Styling |
+| `sw.js` | Service Worker (Cache: ohreninsel-v1.0) |
+| `manifest.json` | PWA-Manifest |
+| `capacitor.config.json` | Capacitor-Konfiguration |
+| `build-android.ps1` | Build-Script (Root → www → APK) |
+| `make-icon.js` | Icon-Generator (sharp) |
+| `make-icons.js` | Android-Mipmap-Icons-Generator |
+| `01-Basis/` | Alte Snapshot-Kopie (nicht mehr aktiv) |
+| `02-Audio/` | Field Recordings, Audio-Konzept |
+| `03-Design/` | Design-Referenzen |
+| `xold/` | Veraltete Dateien (nie löschen) |
 
 ---
 
-## Nächste Session: Offene Punkte
+## Hintergrundbilder + Sound-Pairing
 
-- **Sound-Hintergrund-Pairing** (Idee): Wellen → Meer, Vögel → Berg o.ä. – bei Sound-Wahl automatisch passenden Hintergrund vorschlagen/setzen
-- **Vollbild-Test**: App als PWA installieren oder APK bauen – Boris hat bisher nur Browser-Ansicht mit Adressleiste gesehen
-- **iOS-Test**: Katharina (AUDIO-08)
-- **localStorage**: Letzten Hintergrund speichern (vor Veröffentlichung)
+Automatisches Pairing: Sound antippen → Hintergrund wechselt.
+Im Menü weiterhin manuell änderbar.
 
----
+| Sound | Hintergrund-Datei | CSS-Klasse | Theme-Klasse |
+|---|---|---|---|
+| Vögel (Start-Preset) | `wald_0.1.jpg` | `bg-wald` | `theme-wald` |
+| Wellen | `meer_0.2.jpg` | `bg-meer` | `theme-meer` |
+| Rauschen | `nacht_meer_0.1.jpg` | `bg-nacht-meer` | `theme-nacht` |
+| Bach | `bach_0.1.jpg` | `bg-bach` | `theme-bach` |
+| Regen | `regen_0.1.jpg` | `bg-regen` | `theme-regen` |
+| Café | `cafe_0.1.jpg` | `bg-cafe` | `theme-cafe` |
 
-## ✅ Button-Sprung beim Moduswechsel – BEHOBEN (03.06.2026)
-
-`#start-btn` + `#status-word` + `#medi-timer` in `#btn-area` gewrapped, absolut positioniert (`top: 38%`). `#stage` hat kein `justify-content` mehr. Getestet: kein Sprung bei Einschlafen ↔ Meditieren.
-
----
-
-## ⚠️ Noch zu testen: Berg-Button – von Boris noch nicht getestet
-
-**Was gebaut wurde (LOG-011, noch ungetestet):**
-- Berg-Hintergrund: Button vor dem Start kaum sichtbar (kein milchiger Fleck über Bergspitze)
-- Nach Start: Button blendet nach 1,5s komplett aus (opacity 0)
-- Screen antippen: Button kommt dezent transparent zurück → Stop erkennbar
-- Stop drücken: Session beendet
-
-**Testen:**
-1. Berg-Hintergrund auswählen
-2. Timer + Modus wählen, Play drücken
-3. Prüfen: blendet der Button sauber aus?
-4. Screen antippen: kommt er zurück?
-5. Stop drücken: funktioniert alles?
-
-Falls etwas nicht stimmt → CSS in `style.css` (Bereich "Berg-Theme") und JS in `app.js` (fadeDelay) anpassen.
+Farb-Thema je Hintergrund (--sun / --sun-rim in style.css):
+- Meer: Türkis · Nacht: Blau · Wald: Grün · Bach: Teal · Regen: Amber · Café: Orange · Berg: Gold
 
 ---
 
-## Nächste Session: Play-Button auf Foto-Hintergründen
+## Build-Workflow Android APK
 
-**Ziel:** Play-Button auf Berg + Meer (und ggf. allen Foto-Hintergründen) deutlich transparenter gestalten, damit die Landschaft sichtbar bleibt.
+```powershell
+# 1. Dateien nach www/ kopieren + cap sync
+.\build-android.ps1
 
-**Was Boris will:**
-- Meer: bereits gut (halbtransparent) – als Referenz nehmen
-- Berg: Bergspitze wird aktuell verdeckt → Button soll fast komplett durchsichtig sein, nur dezentes Play-Symbol sichtbar
-- Laufend (running): Button auf Foto-Hintergründen fast unsichtbar ausblenden – Fokus liegt auf der Atmosphäre, nicht dem Interface
-- Ggf. auf allen Foto-Hintergründen (Berg + Meer) einheitlich umsetzen
+# 2. APK bauen
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
+cd android
+.\gradlew assembleDebug
 
-**Technischer Ansatz (Idee):**
-- Neue CSS-Klassen `body.theme-meer` und `body.theme-berg` existieren bereits (für Sonnen-Farbe)
-- Dort `#start-btn` mit stärker reduzierter `background` opacity stylen
-- Für running-State: zusätzlich `opacity` des gesamten Buttons reduzieren wenn `theme-berg` oder `theme-meer` aktiv
+# 3. APK umbenennen
+Copy-Item android\app\build\outputs\apk\debug\app-debug.apk Ohreninsel-vX.X.apk
 
-**App-Version:** v0.3 (sw.js Cache: ohreninsel-v0.9)
+# 4. Release
+gh release create vX.X Ohreninsel-vX.X.apk --title "Ohreninsel vX.X" --notes "..."
+```
+
+GitHub: `Boris1900/ohreninsel`
+Download-URL: `https://github.com/Boris1900/ohreninsel/releases/tag/vX.X`
+
+---
+
+## ⚠️ Nächste Session: Play-Button-Sichtbarkeit
+
+**Problem:** Play-Button ist zu wenig sichtbar (zu transparent).
+**Ziel:** Glas-Look beibehalten, aber Button klar erkennbar als "drück mich".
+
+**Aktueller Stand des Buttons:**
+- Fläche: `background: transparent` (korrekt – Glaskugel-Look)
+- Rand idle: `border: 1px solid var(--sun-rim)` (farbiger Rand je Thema)
+- Rand running: `border-color: var(--sun-rim)` + `box-shadow: 0 0 22px rgba(var(--sun), 0.30)`
+- Play-Symbol: weiße Balken/Dreieck via `.glyph .bar`
+
+**Mögliche Fixes:**
+1. Play-Symbol (Dreieck/Balken) heller/größer machen
+2. Rand dicker machen (`border: 2px solid`)
+3. Glow im Idle-Zustand ergänzen
+4. Button-Größe leicht erhöhen
+
+---
+
+## ✅ Erledigtes (diese Session)
+
+- APK-Build-Workflow eingerichtet (Capacitor, android/, local.properties)
+- App-Icon: Inselbild mit Palme (`Icon_Insel_0.1.png` → `icon-1024.png`)
+- Android mipmap-Icons generiert (`make-icons.js`)
+- Blauer-Kreuz-Bug behoben (Launch Theme + WebView backgroundColor)
+- Ohr-Icon auf Splashscreen + Header (`ohr3.png`)
+- 5 neue Hintergründe eingebaut + Sound-Hintergrund-Pairing
+- Glas-Look: Sound-Tiles transparent, #lower mit dunklem Verlauf
+- Start-Button: transparent, farbiger Rand per Thema
+- Timer-Anzeige über 60 Minuten gefixt (1:20:00 statt 20:00)
+- Menü-Button safe-area-inset-top (nicht mehr in Statusleiste)
+- Dim-Slider Preset auf 15%
+- Versionsnummer im Header (`#app-version`)
+- Start-Preset: Vögel + Wald
+
+---
+
+## Offene Punkte
+
+- **Play-Button-Sichtbarkeit** (nächste Session – siehe oben)
+- **iOS-Test**: Katharina
+- **localStorage**: Letzten Sound + Hintergrund speichern
+- **Berg-Button-Test**: Ausblenden nach Start noch nicht getestet
+- **PWA deployment**: Subdomain noch festzulegen
 
 ---
 
 ## Session-Start-Regeln
 
-1. `A - Projektbeschreibung.md` lesen
-2. `B - Aufgaben.md` lesen (Phasen + offene Tasks)
-3. `C - Protokoll.md` LOG-007 lesen (offenes MEDI-TIMER Problem)
-4. Kurze Zusammenfassung geben: Stand, nächste 2-3 To-dos
-5. Nach Context-Compact: alles nochmal lesen
+1. Diese CLAUDE.md lesen
+2. Kurze Zusammenfassung: Stand + nächste 1-2 To-dos
+3. Dann loslegen
 
 ---
 
 ## Arbeitsregeln
 
 - **Nie Dateien löschen** – nach `xold/` verschieben
-- **Versionierung:** V01 → V02, nie überschreiben. Alte Version → `xold/`
-- **Alle Pfade aktuell halten:** Neue Dateiversion → CLAUDE.md sofort updaten
 - **Nicht pushen ohne Boris-OK**
-- **Neue Features erst lokal testen**, dann Feedback, dann Build/Deploy
-- **Diktierfehler beachten:** Fachbegriffe, Domains, Dateinamen immer gegenchecken
-- **Projektreview** nach jeweils 10 abgeschlossenen Aufgaben
+- **Neue Features erst lokal testen**, dann APK, dann Release
+- **Diktierfehler beachten:** Fachbegriffe, Domains, Dateinamen gegenchecken
 
 ---
 
@@ -138,7 +170,8 @@ Falls etwas nicht stimmt → CSS in `style.css` (Bereich "Berg-Theme") und JS in
 
 - Basis: PWA via HTML/CSS/JS + Capacitor für Android APK
 - Audio: Web Audio API (gapless loop mit Crossfade)
-- Deployment: Subdomain unter tinnituspraxis-seedorf.de (noch festzulegen)
-- Android: debug APK, gleicher Build-Workflow wie MediApp
+- Android: debug APK, OnePlus 5
 - Testgeräte: OnePlus 5 Android (Boris), iPhone (Katharina)
+- SDK: `C:\Users\Boris\AppData\Local\Android\Sdk`
+- Java: `C:\Program Files\Android\Android Studio\jbr`
 - Sprache: Deutsch
