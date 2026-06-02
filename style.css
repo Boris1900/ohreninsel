@@ -152,18 +152,33 @@ header {
 #start-btn {
   width: 128px; height: 128px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.18);
+  background: transparent;
   border: 1px solid var(--sun-rim);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  transition: border-color 0.6s, background 1.4s, backdrop-filter 1.4s, transform 0.25s;
-  -webkit-transition: border-color 0.6s, background 1.4s, -webkit-backdrop-filter 1.4s, transform 0.25s;
+  transition: border-color 0.6s, transform 0.25s;
   user-select: none;
   position: relative;
 }
 #start-btn:active { transform: scale(0.97); }
+
+/* Glas-Ebene: konstanter Blur, nur opacity wird gefadet.
+   Grund: backdrop-filter-blur-Werte animieren nicht sauber (springen auf iOS/WebView),
+   opacity dagegen ist überall butterweich. Idle = sichtbares Frosted Glass,
+   Running = fast unsichtbar (klare Glaskugel). */
+#start-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.18);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 1;
+  transition: opacity 1.4s ease;
+  pointer-events: none;
+  z-index: 0;
+}
 
 #start-btn::before {
   content: "";
@@ -184,6 +199,7 @@ header {
 /* Play/Pause-Symbol */
 .glyph {
   position: relative;
+  z-index: 1; /* über der Glas-Ebene (::after, z-index 0) */
   width: 30px; height: 34px;
   display: flex; align-items: center; justify-content: center;
 }
@@ -212,12 +228,12 @@ body.running .glyph .bar    { opacity: 1; }
 
 body.running #start-btn {
   border-color: var(--sun-rim);
-  background: transparent;
-  backdrop-filter: blur(0px);
-  -webkit-backdrop-filter: blur(0px);
   box-shadow: 0 0 22px rgba(var(--sun), 0.30);
-  transition: border-color 0.6s, background 1.4s ease-in, backdrop-filter 1.4s ease-in, transform 0.25s;
-  -webkit-transition: border-color 0.6s, background 1.4s ease-in, -webkit-backdrop-filter 1.4s ease-in, transform 0.25s;
+  transition: border-color 0.6s, box-shadow 1.4s ease, transform 0.25s;
+}
+/* Glas-Ebene fadet beim Start sanft weg → klare Glaskugel */
+body.running #start-btn::after {
+  opacity: 0;
 }
 
 #status-word {
@@ -722,12 +738,13 @@ body.theme-bach.running #start-btn {
 /* body.stopping überschreibt body.running – Button faded sanft zurück */
 body.stopping #start-btn {
   border-color: var(--w12);
-  background: rgba(0,0,0,0.18);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   box-shadow: none;
-  transition: border-color 1.5s ease, background 1.5s ease,
-              backdrop-filter 1.5s ease, box-shadow 1.5s ease, transform 0.25s;
+  transition: border-color 1.5s ease, box-shadow 1.5s ease, transform 0.25s;
+}
+/* Glas-Ebene fadet beim Stop sanft zurück (Frosted Glass) */
+body.stopping #start-btn::after {
+  opacity: 1;
+  transition: opacity 1.5s ease;
 }
 body.stopping .glyph .bar {
   opacity: 0;
