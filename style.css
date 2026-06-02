@@ -131,10 +131,8 @@ header {
 #start-btn {
   width: 128px; height: 128px;
   border-radius: 50%;
-  background: var(--w06);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
-  border: 1px solid var(--w12);
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.25);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: border-color 0.6s, background 0.6s, transform 0.25s;
@@ -214,6 +212,8 @@ body.running #status-word { color: var(--sun-rim); }
   flex-direction: column;
   gap: 14px;
   transition: opacity var(--fade) ease;
+  background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.20) 60%, transparent 100%);
+  padding-top: 40px;
 }
 body.running.idle #lower { opacity: 0; pointer-events: none; }
 
