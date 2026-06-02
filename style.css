@@ -244,8 +244,8 @@ body.medi-active #lower {
   flex-shrink: 0;
   width: 54px; height: 54px;
   position: relative;
-  background: var(--w06);
-  border: 1px solid var(--w08);
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.18);
   border-radius: 16px;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 4px;
@@ -267,9 +267,9 @@ body.medi-active #lower {
   transition: color 0.25s;
 }
 .sound-tile.active {
-  background: rgba(126,217,87,0.10);
-  border-color: var(--gruen-soft);
-  box-shadow: 0 0 18px rgba(126,217,87,0.10);
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.50);
+  box-shadow: 0 0 14px rgba(255,255,255,0.08);
 }
 .sound-tile.active i      { color: var(--gruen); }
 .sound-tile.active .tile-label { color: var(--gruen); }
@@ -282,30 +282,6 @@ body.medi-active #lower {
 .sound-tile.none-tile.active i          { color: var(--w55); }
 .sound-tile.none-tile.active .tile-label { color: var(--w55); }
 
-/* ─── Foto-Hintergründe: Kacheln als Glas ──────────── */
-body.theme-photo .sound-tile {
-  background: transparent !important;
-  border-color: rgba(255,255,255,0.22) !important;
-}
-body.theme-photo .sound-tile.active {
-  background: rgba(255,255,255,0.07) !important;
-  border-color: rgba(255,255,255,0.55) !important;
-  box-shadow: 0 0 12px rgba(255,255,255,0.08) !important;
-}
-body.theme-meer  .sound-tile { border-color: rgba(80,210,240,0.22); }
-body.theme-meer  .sound-tile.active { border-color: rgba(80,210,240,0.55); }
-body.theme-nacht .sound-tile { border-color: rgba(120,170,255,0.22); }
-body.theme-nacht .sound-tile.active { border-color: rgba(120,170,255,0.55); }
-body.theme-berg  .sound-tile { border-color: rgba(255,210,100,0.22); }
-body.theme-berg  .sound-tile.active { border-color: rgba(255,210,100,0.55); }
-body.theme-wald  .sound-tile { border-color: rgba(100,220,120,0.22); }
-body.theme-wald  .sound-tile.active { border-color: rgba(100,220,120,0.55); }
-body.theme-bach  .sound-tile { border-color: rgba(100,210,200,0.22); }
-body.theme-bach  .sound-tile.active { border-color: rgba(100,210,200,0.55); }
-body.theme-regen .sound-tile { border-color: rgba(220,180,100,0.25); }
-body.theme-regen .sound-tile.active { border-color: rgba(220,180,100,0.58); }
-body.theme-cafe  .sound-tile { border-color: rgba(255,170,60,0.25); }
-body.theme-cafe  .sound-tile.active { border-color: rgba(255,170,60,0.58); }
 
 /* ─── Timer ───────────────────────────────────────────────── */
 #timer-section { display: flex; flex-direction: column; gap: 10px; }
