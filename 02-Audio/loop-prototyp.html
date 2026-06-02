@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loop-Prototyp – Ohreninsel</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: sans-serif;
+      background: #0a1a0a;
+      color: #e0e0e0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      gap: 28px;
+      padding: 24px;
+    }
+
+    h1 { color: #7ed957; margin: 0; font-size: 1.6em; letter-spacing: 1px; }
+    .subtitle { color: #888; font-size: 0.85em; margin: 0; }
+
+    #status {
+      font-size: 0.9em;
+      color: #7ed957;
+      min-height: 1.4em;
+      text-align: center;
+    }
+
+    .timer-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9em;
+      color: #aaa;
+    }
+
+    input[type="number"] {
+      width: 64px;
+      padding: 6px 8px;
+      background: #1a2e1a;
+      border: 1px solid #3a5a3a;
+      color: #e0e0e0;
+      border-radius: 8px;
+      font-size: 1em;
+      text-align: center;
+    }
+
+    #toggleBtn {
+      width: 120px;
+      height: 120px;
+      font-size: 1.1em;
+      font-weight: bold;
+      background: #7ed957;
+      color: #0a1a0a;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    #toggleBtn:hover:not(:disabled) { background: #73bf53; transform: scale(1.04); }
+    #toggleBtn:disabled { background: #1e2e1e; color: #445; cursor: default; transform: none; }
+    #toggleBtn.running { background: #1a2e1a; color: #7ed957; border: 2px solid #7ed957; }
+
+    .params {
+      font-size: 0.78em;
+      color: #445;
+      text-align: center;
+      line-height: 2;
+    }
+    .params b { color: #7ed957; }
+
+    .hint {
+      font-size: 0.72em;
+      color: #334;
+      text-align: center;
+      max-width: 320px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Ohreninsel</h1>
+  <p class="subtitle">Loop-Prototyp · Regen & Gewitter</p>
+
+  <p id="status">Bitte MP3-Datei wählen</p>
+
+  <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+    <label id="fileLabel" style="
+      display: inline-block;
+      padding: 10px 24px;
+      background: #1a2e1a;
+      border: 1px solid #3a5a3a;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9em;
+      color: #aaa;
+    ">
+      🎵 MP3 auswählen
+      <input type="file" id="fileInput" accept=".mp3,audio/*" style="display:none">
+    </label>
+    <button id="genTestBtn" style="
+      padding: 10px 20px;
+      background: #1a2e1a;
+      border: 1px solid #3a5a3a;
+      border-radius: 8px;
+      color: #aaa;
+      cursor: pointer;
+      font-size: 0.9em;
+    ">🔧 Testton generieren</button>
+  </div>
+
+  <div class="timer-row">
+    <label for="timerInput">Timer (Min):</label>
+    <input type="number" id="timerInput" value="5" min="0" max="120" step="1">
+    <span style="font-size:0.85em; color:#445">(0 = kein Timer)</span>
+  </div>
+
+  <div style="display:flex; gap:12px; align-items:center;">
+    <button id="toggleBtn" disabled>Start</button>
+    <button id="loopTestBtn" disabled style="
+      padding: 10px 18px;
+      background: #1a2e1a;
+      border: 1px solid #3a5a3a;
+      border-radius: 20px;
+      color: #aaa;
+      cursor: pointer;
+      font-size: 0.85em;
+    ">🔁 Loop testen</button>
+  </div>
+
+  <div class="params">
+    Crossfade Loop: <b>4 s</b> &nbsp;·&nbsp; Fade-in Start: <b>3 s</b><br>
+    Fade-out Timer-Ende: <b>5 s</b> &nbsp;·&nbsp; Fade-out Stop: <b>1,5 s</b>
+  </div>
+
+  <p class="hint">
+    Datei direkt im Browser öffnen – kein Server nötig.
+  </p>
+
+<script>
+  // Fade-Dauern in Sekunden
+  const CF_DUR         = 4;    // Crossfade am Loop-Punkt
+  const FADE_IN        = 3;    // Einblenden beim Start
+  const TIMER_FADE_OUT = 5;    // Ausblenden vor Timer-Ende
+  const STOP_FADE_OUT  = 1.5;  // Ausblenden bei manuellem Stop
+
+  let rawBuffer     = null;   // ArrayBuffer (aus FileReader)
+  let decodedBuffer = null;   // AudioBuffer (dekodiert beim ersten Start)
+  let audioCtx      = null;
+  let masterGain    = null;
+
+  let isPlaying      = false;
+  let activeNodes    = [];
+  let nextSrcStart   = 0;
+  let pendingOffset  = 0;    // Startposition im File für die erste Source
+  let schedulerTimer = null;
+  let timerTimeout   = null;
+
+  const btn         = document.getElementById('toggleBtn');
+  const loopTestBtn = document.getElementById('loopTestBtn');
+  const genTestBtn  = document.getElementById('genTestBtn');
+  const statusEl    = document.getElementById('status');
+  const timerIn     = document.getElementById('timerInput');
+  const fileInput   = document.getElementById('fileInput');
+  const fileLabel   = document.getElementById('fileLabel');
+
+  function fmt(secs) {
+    const m = Math.floor(secs / 60);
+    const s = String(Math.floor(secs % 60)).padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  // ── Datei per FileReader laden ───────────────────────────────────────────
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    statusEl.textContent = 'Lese Datei…';
+    decodedBuffer = null; // neu dekodieren bei neuem File
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      rawBuffer = e.target.result;
+      btn.disabled = false;
+      loopTestBtn.disabled = false;
+      fileLabel.style.borderColor = '#7ed957';
+      fileLabel.style.color = '#7ed957';
+      statusEl.textContent = `Bereit: ${file.name}`;
+    };
+    reader.onerror = () => {
+      statusEl.textContent = '⚠ Datei konnte nicht gelesen werden';
+    };
+    reader.readAsArrayBuffer(file);
+  });
+
+  // ── Eine Source mit eigenem Gain in den Loop einreihen ───────────────────
+  // fileOffset: ab welcher Stelle im Buffer gestartet wird (Standard: 0)
+  function scheduleSource(fileOffset = 0) {
+    const t0       = nextSrcStart;
+    const dur      = decodedBuffer.duration;
+    const cf       = CF_DUR;
+    const playDur  = dur - fileOffset; // verbleibende Spielzeit im Buffer
+
+    const source = audioCtx.createBufferSource();
+    source.buffer = decodedBuffer;
+
+    const gain = audioCtx.createGain();
+
+    // Fade in am Anfang dieser Source
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(1, t0 + cf);
+    // Fade out am Ende dieser Source
+    gain.gain.setValueAtTime(1, t0 + playDur - cf);
+    gain.gain.linearRampToValueAtTime(0, t0 + playDur);
+
+    source.connect(gain);
+    gain.connect(masterGain);
+    source.start(t0, fileOffset);          // fileOffset = Startposition im File
+    source.stop(t0 + playDur + 0.1);
+
+    activeNodes.push({ source, gain, endTime: t0 + playDur });
+
+    // Nächste Source beginnt CF_DUR vor Ende dieser → ab hier wieder ab 0
+    nextSrcStart = t0 + playDur - cf;
+  }
+
+  // ── Scheduler-Schleife (alle 250 ms) ────────────────────────────────────
+  let firstSource = true; // merkt sich ob die erste Source schon geplant ist
+
+  function runScheduler() {
+    if (!isPlaying) return;
+
+    // Sources bis 2 Sekunden in die Zukunft vorplanen
+    // Die erste Source kann mit Offset starten (Loop-Test), alle weiteren ab 0
+    while (nextSrcStart < audioCtx.currentTime + 2.0) {
+      if (firstSource) {
+        firstSource = false;
+        scheduleSource(pendingOffset);
+      } else {
+        scheduleSource(0);
+      }
+    }
+
+    // Abgeschlossene Nodes aufräumen
+    activeNodes = activeNodes.filter(({ gain, endTime }) => {
+      if (endTime < audioCtx.currentTime - 1) {
+        try { gain.disconnect(); } catch (_) {}
+        return false;
+      }
+      return true;
+    });
+
+    schedulerTimer = setTimeout(runScheduler, 250);
+  }
+
+  // ── Wiedergabe starten ───────────────────────────────────────────────────
+  async function startPlayback(offset = 0) {
+    pendingOffset = offset;
+    firstSource   = true;
+    btn.disabled = true;
+
+    audioCtx   = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0;
+    masterGain.connect(audioCtx.destination);
+
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+    // Dekodieren (nur beim allerersten Start)
+    if (!decodedBuffer) {
+      statusEl.textContent = 'Dekodiere…';
+      decodedBuffer = await audioCtx.decodeAudioData(rawBuffer.slice(0));
+    }
+
+    isPlaying    = true;
+    nextSrcStart = audioCtx.currentTime;
+
+    // Master-Fade-in
+    const t = audioCtx.currentTime;
+    masterGain.gain.cancelScheduledValues(t);
+    masterGain.gain.setValueAtTime(0, t);
+    masterGain.gain.linearRampToValueAtTime(1, t + FADE_IN);
+
+    runScheduler();
+
+    // Timer-Logik
+    const minutes = parseFloat(timerIn.value) || 0;
+    if (minutes > 0) {
+      const totalMs     = minutes * 60 * 1000;
+      const fadeStartMs = totalMs - TIMER_FADE_OUT * 1000;
+
+      statusEl.textContent = `Läuft · Timer: ${minutes} min`;
+
+      timerTimeout = setTimeout(() => {
+        if (!isPlaying) return;
+        statusEl.textContent = 'Timer – Ausblenden…';
+        const now = audioCtx.currentTime;
+        masterGain.gain.cancelScheduledValues(now);
+        masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+        masterGain.gain.linearRampToValueAtTime(0, now + TIMER_FADE_OUT);
+        setTimeout(() => stopPlayback(false), TIMER_FADE_OUT * 1000 + 200);
+      }, fadeStartMs);
+
+    } else {
+      statusEl.textContent = 'Läuft · kein Timer';
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Stop';
+    btn.classList.add('running');
+  }
+
+  // ── Wiedergabe stoppen ───────────────────────────────────────────────────
+  function stopPlayback(withFade = true) {
+    isPlaying = false;
+    btn.disabled = true;
+    clearTimeout(schedulerTimer);
+    clearTimeout(timerTimeout);
+
+    function cleanup() {
+      activeNodes.forEach(({ source, gain }) => {
+        try { source.stop(); }  catch (_) {}
+        try { gain.disconnect(); } catch (_) {}
+      });
+      activeNodes = [];
+      try { audioCtx.close(); } catch (_) {}
+      audioCtx   = null;
+      masterGain = null;
+
+      btn.textContent = 'Start';
+      btn.classList.remove('running');
+      btn.disabled = false;
+      statusEl.textContent = 'Gestoppt';
+    }
+
+    if (withFade && masterGain) {
+      statusEl.textContent = 'Blendet aus…';
+      const now = audioCtx.currentTime;
+      masterGain.gain.cancelScheduledValues(now);
+      masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+      masterGain.gain.linearRampToValueAtTime(0, now + STOP_FADE_OUT);
+      setTimeout(cleanup, STOP_FADE_OUT * 1000 + 200);
+    } else {
+      cleanup();
+    }
+  }
+
+  // ── Button-Handler ───────────────────────────────────────────────────────
+  btn.addEventListener('click', async () => {
+    if (!isPlaying) {
+      await startPlayback(0);
+    } else {
+      stopPlayback(true); // Spotify-Fade
+    }
+  });
+
+  // ── Testton im Browser generieren ───────────────────────────────────────
+  // 12 Sekunden, jede Sekunde ein Ping auf steigender Frequenz (200→800 Hz).
+  // Beim Crossfade (Sekunde 8→12) hörst du: hohe Pings faden aus,
+  // tiefe Pings (Sekunde 0→4) faden ein – eindeutig erkennbar.
+  genTestBtn.addEventListener('click', async () => {
+    genTestBtn.disabled = true;
+    genTestBtn.textContent = '⏳ Generiere…';
+
+    const duration   = 12;
+    const sampleRate = 44100;
+    const offCtx     = new OfflineAudioContext(1, sampleRate * duration, sampleRate);
+
+    // Leiser Hintergrundton (Sweep 200→800 Hz) als Orientierung
+    const sweep = offCtx.createOscillator();
+    sweep.frequency.setValueAtTime(200, 0);
+    sweep.frequency.linearRampToValueAtTime(800, duration);
+    const sweepGain = offCtx.createGain();
+    sweepGain.gain.value = 0.07;
+    sweep.connect(sweepGain);
+    sweepGain.connect(offCtx.destination);
+    sweep.start(0);
+    sweep.stop(duration);
+
+    // Pro Sekunde ein Ping auf eindeutig anderer Frequenz
+    const freqs = [220, 277, 330, 392, 440, 523, 587, 659, 784, 880, 988, 1047];
+    for (let i = 0; i < duration; i++) {
+      const osc  = offCtx.createOscillator();
+      const gain = offCtx.createGain();
+      osc.frequency.value = freqs[i] || 440;
+      gain.gain.setValueAtTime(0.7, i);
+      gain.gain.linearRampToValueAtTime(0, i + 0.25);
+      osc.connect(gain);
+      gain.connect(offCtx.destination);
+      osc.start(i);
+      osc.stop(i + 0.3);
+    }
+
+    decodedBuffer = await offCtx.startRendering();
+    rawBuffer     = null; // kein rawBuffer, direkt decodedBuffer gesetzt
+
+    btn.disabled         = false;
+    loopTestBtn.disabled = false;
+    genTestBtn.textContent  = '✅ Testton geladen';
+    statusEl.textContent = `Testton: ${duration} s · jede Sekunde ein Ping (Crossfade bei ~Sek. 8)`;
+  });
+
+  loopTestBtn.addEventListener('click', async () => {
+    if (isPlaying) stopPlayback(false); // sofort stoppen, kein Fade
+    // 3 Sekunden vor dem Crossfade-Punkt starten
+    const offset = Math.max(0, decodedBuffer.duration - CF_DUR - 3);
+    statusEl.textContent = `Loop-Test: startet bei ${fmt(offset)} (Crossfade in ~3 s)`;
+    await startPlayback(offset);
+  });
+
+
+</script>
+</body>
+</html>

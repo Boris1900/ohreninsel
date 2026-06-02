@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <style>html,body{background:#000}</style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>Ohreninsel</title>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Ohreninsel">
+  <link rel="apple-touch-icon" href="icon-1024.png">
+  <link rel="preload" as="image" href="background.jpg">
+  <link rel="preload" as="image" href="berglandschaft_0.1.jpg">
+  <link rel="preload" as="image" href="meer_0.2.jpg">
+  <meta name="theme-color" content="#1a1a1a">
+  <meta name="color-scheme" content="dark">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Hintergrundbild: eigenes Element, Höhe per JS auf screen.height fixiert -->
+  <div id="app-bg" aria-hidden="true"></div>
+
+  <!-- Berg-Nacht-Overlay: liegt über dem Hintergrundbild, wird per JS mit Timer aufgehellt -->
+  <div id="berg-overlay" aria-hidden="true"></div>
+  <!-- Berg-Sterne: eingeblendet zu Beginn, verblassen im Verlauf -->
+  <div id="berg-stars" aria-hidden="true"></div>
+
+  <!-- Buddha-Lächeln: blendet über app-bg ein, liegt unter dem Dimm-Overlay -->
+  <div id="bg-smile" aria-hidden="true"></div>
+
+  <!-- Dimm-Overlay -->
+  <div id="overlay"></div>
+
+  <!-- Buddha-Aura: liegt über dem Dimm-Overlay, leuchtet auch im Dunkeln -->
+  <div id="buddha-aura" aria-hidden="true"></div>
+
+  <!-- Menü -->
+  <div id="audio-menu" class="hidden">
+    <div class="menu-content">
+      <button id="close-menu" class="menu-close-x" aria-label="Schließen">✕</button>
+
+      <!-- ═══════════════════════════════════════════════════
+           SEKTION 1: AMBIENT KLÄNGE (Tinnitus-spezifisch)
+           ═══════════════════════════════════════════════════ -->
+      <h2>Ambient-Klang wählen</h2>
+      <p class="menu-hint">Wähle einen Klang oder nutze die App ohne Audio</p>
+      <div id="ambient-buttons">
+        <!-- TODO Phase 2: Werden durch echte Field-Recording-Buttons ersetzt -->
+        <div style="color:#888; font-size:13px; padding:12px 0; font-style:italic">
+          🎵 Field Recordings werden in Phase 2 eingebunden<br>
+          (Meeresrauschen, Wald, Vögel, Stadt, Hafen)
+        </div>
+      </div>
+      <div id="ios-mute-hint" style="display:none; background:#1a2a1a; border:1.5px solid #4a7a4a; border-radius:10px; padding:10px 14px; font-size:12px; color:#a0d0a0; line-height:1.5; margin-top:12px;">
+        📱 <strong>iPhone-Nutzer:</strong> Der seitliche Stummschalter muss <strong>ausgeschaltet</strong> sein (kein orangefarbener Streifen) – sonst ist kein Ton zu hören.
+      </div>
+      <hr class="menu-divider">
+
+      <!-- ═══════════════════════════════════════════════════
+           SEKTION 2: START/STOP-KLANG (Gong-Sound)
+           ═══════════════════════════════════════════════════ -->
+      <h2>Start/Stop-Klang wählen</h2>
+      <p class="menu-hint">Lade deine eigene MP3-Datei</p>
+      <label class="upload-btn">
+        <input type="file" id="audio-file-input" accept="audio/*">
+        MP3 auswählen
+      </label>
+      <div id="current-audio-name">Kein Klang gewählt</div>
+      <button class="demo-btn klang-btn" data-file="Sounds/Klangschale Morgenstern.mp3" data-label="Klangschale Morgenstern">Klangschale Morgenstern</button>
+      <button class="demo-btn klang-btn" data-file="Sounds/Klangschale Mittagspause.mp3" data-label="Klangschale Mittagspause">Klangschale Mittagspause</button>
+      <button class="demo-btn klang-btn" data-file="Sounds/Klangschale Abendrot.mp3" data-label="Klangschale Abendrot">Klangschale Abendrot</button>
+      <hr class="menu-divider">
+
+      <!-- ═══════════════════════════════════════════════════
+           SEKTION 3: ZWISCHEN-GONG
+           ═══════════════════════════════════════════════════ -->
+      <label class="flicker-toggle">
+        <input type="checkbox" id="zgong-checkbox">
+        <span>Zwischen-Gong <span style="font-style:normal">🔔</span></span>
+      </label>
+      <div id="zgong-slider-section" class="hidden">
+        <div class="dim-slider-row">
+          <span class="dim-end-label">1 Min</span>
+          <input type="range" id="zgong-slider" min="1" max="39" value="20" step="1">
+          <span class="dim-end-label" id="zgong-max-label">39 Min</span>
+        </div>
+        <p id="zgong-value-label">nach 20 Minuten</p>
+      </div>
+      <hr class="menu-divider">
+
+      <!-- ═══════════════════════════════════════════════════
+           SEKTION 4: DISPLAY-OPTIONEN
+           ═══════════════════════════════════════════════════ -->
+      <label class="flicker-toggle">
+        <input type="checkbox" id="timer-dim-checkbox">
+        <span>Timeranzeige abdunkeln <span style="font-style:normal">🕐</span></span>
+      </label>
+      <p class="menu-hint" style="margin-top:4px">Timer tritt nach ein paar Sekunden zurück. Antippen hellt ihn kurz auf.</p>
+      <hr class="menu-divider">
+      <h2>Display abdunkeln</h2>
+      <p class="menu-hint">Dunkelt das Display während der Session ab. Antippen hellt es wieder auf.</p>
+      <div id="dim-section">
+        <div class="dim-slider-row">
+          <span class="dim-end-label">Aus</span>
+          <input type="range" id="dim-slider" min="0" max="95" value="85" step="5">
+          <span class="dim-end-label">Sehr dunkel</span>
+        </div>
+        <p id="dim-level-label">Stark</p>
+      </div>
+      <hr class="menu-divider">
+
+      <!-- ═══════════════════════════════════════════════════
+           SEKTION 5: HINTERGRÜNDE
+           Reihenfolge: Farben → Berge → Meer → Buddha
+           ═══════════════════════════════════════════════════ -->
+      <h2>Hintergrund</h2>
+      <p class="menu-hint">Hintergrund wählen</p>
+      <div id="bg-color-picker">
+
+        <!-- Farbhintergründe (zuerst) -->
+        <button class="bg-swatch" data-bg="praxisgruen">
+          <span class="bg-swatch-color" style="background:#7ed957"></span>
+          <span class="bg-swatch-label">Grün</span>
+        </button>
+        <button class="bg-swatch" data-bg="schwarz">
+          <span class="bg-swatch-color" style="background:#000"></span>
+          <span class="bg-swatch-label">Schwarz</span>
+        </button>
+        <button class="bg-swatch" data-bg="sehr-dunkel">
+          <span class="bg-swatch-color" style="background:#111"></span>
+          <span class="bg-swatch-label">Dunkel</span>
+        </button>
+        <button class="bg-swatch" data-bg="dunkelgrau">
+          <span class="bg-swatch-color" style="background:#222"></span>
+          <span class="bg-swatch-label">Grau</span>
+        </button>
+        <button class="bg-swatch" data-bg="dunkelblau">
+          <span class="bg-swatch-color" style="background:#0a1828"></span>
+          <span class="bg-swatch-label">Blau</span>
+        </button>
+        <button class="bg-swatch" data-bg="dunkelgruen">
+          <span class="bg-swatch-color" style="background:#0d3510"></span>
+          <span class="bg-swatch-label">Nacht</span>
+        </button>
+        <button class="bg-swatch" data-bg="warmes-gelb">
+          <span class="bg-swatch-color" style="background:#c8a400"></span>
+          <span class="bg-swatch-label">Gelb</span>
+        </button>
+
+        <!-- Immersive Hintergründe (nach den Farben) -->
+        <button class="bg-swatch" data-bg="berg">
+          <span class="bg-swatch-color" style="background:url('berglandschaft_0.1.jpg') center/cover"></span>
+          <span class="bg-swatch-label">Erwachen</span>
+        </button>
+        <button class="bg-swatch" data-bg="meer">
+          <span class="bg-swatch-color" style="background:url('meer_0.2.jpg') center/cover"></span>
+          <span class="bg-swatch-label">Abendrot</span>
+        </button>
+        <button class="bg-swatch" data-bg="buddha">
+          <span class="bg-swatch-color" style="background:url('background.jpg') center/cover"></span>
+          <span class="bg-swatch-label">Buddha</span>
+        </button>
+
+      </div>
+      <div id="flicker-section">
+        <hr class="menu-divider">
+        <label class="flicker-toggle">
+          <input type="checkbox" id="flicker-checkbox">
+          <span>Lebendige Flamme <span style="font-style:normal">🕯️</span></span>
+        </label>
+      </div>
+      <hr class="menu-divider">
+      <button id="update-btn" onclick="checkForUpdate()" class="update-btn">🔄 Auf Update prüfen</button>
+      <div id="update-status"></div>
+      <div id="app-version"></div>
+      <div id="app-imprint">© Tinnituspraxis Seedorf · Ahrensburg</div>
+    </div>
+  </div>
+
+  <!-- Schallwelle (Farbmodus) -->
+  <div class="welle" id="w0"></div>
+
+  <!-- Flammen-Schein (sanftes Pulsieren um das Teelicht) -->
+  <div id="flame-glow"></div>
+
+  <!-- Flammen-Flackern (kleines Element direkt auf der Kerzenflamme) -->
+  <div id="flame-flicker"></div>
+
+  <!-- Immersiv-Tap-Layer: fängt Taps in Berg- und Meeresmodus ab -->
+  <div id="berg-tap-layer"></div>
+
+  <!-- Meer-Sonnenuntergang -->
+  <div id="meer-overlay" aria-hidden="true"></div>
+  <div id="meer-sun-wrap" aria-hidden="true"><div id="meer-aura"></div><div id="meer-sun"></div></div>
+  <div id="meer-sun-reflection" aria-hidden="true"></div>
+  <div id="meer-water-color" aria-hidden="true"></div>
+
+  <!-- Start/Stop-Button
+       TODO Phase 4 (DSIGN): Neues modernes Design ersetzen – aktuell noch MediApp-Gong-Style -->
+  <div id="gong-container">
+    <div id="gong-cord-left" class="cord"></div>
+    <div id="gong-cord-right" class="cord"></div>
+    <div id="gong" title="Tippen zum Starten">
+      <span id="gong-label">START</span>
+    </div>
+  </div>
+
+  <!-- Hauptbereich -->
+  <main>
+
+    <!-- Timer + Slider -->
+    <div id="timer-area">
+      <div id="timer-row">
+        <div id="timer-spacer"></div>
+        <div id="timer-display">
+          <span id="timer-text">40:00</span>
+        </div>
+        <div id="zgong-display" class="hidden">
+          <span id="zgong-time">--:--</span>
+        </div>
+      </div>
+      <div id="controls">
+        <div class="slider-row">
+          <button class="adj-btn" id="minus-btn">−</button>
+          <input type="range" id="duration-slider" min="1" max="90" value="40">
+          <button class="adj-btn" id="plus-btn">+</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Navigation -->
+  <nav id="bottom-nav">
+    <button class="nav-btn" id="nav-audio" title="Klänge &amp; Einstellungen">
+      <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </nav>
+
+  <script src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js');
+    }
+  </script>
+</body>
+</html>

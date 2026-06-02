@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Ohreninsel – Layout-Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gruen:      #7ed957;
+      --gruen-soft: rgba(126, 217, 87, 0.55);
+      --w04: rgba(255,255,255,0.04);
+      --w06: rgba(255,255,255,0.06);
+      --w08: rgba(255,255,255,0.08);
+      --w12: rgba(255,255,255,0.12);
+      --w40: rgba(255,255,255,0.40);
+      --w55: rgba(255,255,255,0.55);
+      --fade: 1.6s;
+
+      /* Sonnen-Theme (wird pro Hintergrund überschrieben) */
+      --sun:       126, 217, 87;   /* RGB der Aura/Sonne */
+      --sun-rim:   rgba(126,217,87,0.55);
+    }
+
+    /* Themes je Hintergrund – nur Farbe der "Sonne" ändert sich */
+    body.theme-meer  { --sun: 255, 138, 92;  --sun-rim: rgba(255,138,92,0.6); }  /* Abendsonne */
+    body.theme-berg  { --sun: 255, 226, 150; --sun-rim: rgba(255,226,150,0.65); } /* Mittagssonne */
+    body.theme-blau  { --sun: 130, 180, 255; --sun-rim: rgba(130,180,255,0.5); }
+    body.theme-nacht { --sun: 126, 217, 87;  --sun-rim: rgba(126,217,87,0.55); }
+
+    html, body {
+      height: 100%;
+      background: #000;
+      font-family: 'Inter', system-ui, sans-serif;
+      color: #fff;
+      overflow: hidden;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── Hintergrund ──────────────────────────────────────── */
+    #bg {
+      position: fixed; inset: 0; z-index: 0;
+      background: #0b1a0b;
+      transition: background 0.7s ease;
+    }
+    #bg.bg-blau    { background: #080e18; }
+    #bg.bg-grau    { background: #141414; }
+    #bg.bg-nacht   { background: #0d3510; }
+    #bg.bg-schwarz { background: #000; }
+    #bg.bg-berg    { background: url('../berglandschaft_0.1.jpg') center/cover no-repeat; }
+    #bg.bg-meer    { background: url('../meer_0.2.jpg') center/cover no-repeat; }
+
+    /* Sanfte Abdunklung unten für Lesbarkeit der Bedienelemente */
+    #bg-shade {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background: linear-gradient(to bottom, transparent 45%, rgba(0,0,0,0.35) 100%);
+    }
+
+    /* ─── App-Wrapper ──────────────────────────────────────── */
+    #app {
+      position: relative; z-index: 1;
+      max-width: 420px;
+      height: 100dvh;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── Header ───────────────────────────────────────────── */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 24px 0;
+      flex-shrink: 0;
+    }
+    .app-title {
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 3.5px;
+      text-transform: uppercase;
+      color: var(--w40);
+    }
+    #menu-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--w40);
+      padding: 8px; margin: -8px;
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    #menu-btn span {
+      display: block; width: 19px; height: 1.5px;
+      background: currentColor; border-radius: 2px;
+    }
+
+    /* ─── Button-Zone (füllt den ganzen Screen) ────────────── */
+    /* Der Button wird relativ zur vollen Stage-Höhe positioniert und
+       bleibt dadurch fix – egal ob unten der Slider auf-/zuklappt. */
+    #stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      /* Button sitzt deutlich über der Mitte – weg vom Horizont */
+      padding-bottom: 17vh;
+      position: relative;
+    }
+
+    #start-btn {
+      width: 128px; height: 128px;
+      border-radius: 50%;
+      background: var(--w06);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      border: 1px solid var(--w12);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.6s, background 0.6s, transform 0.25s;
+      user-select: none;
+      position: relative;
+    }
+    #start-btn:active { transform: scale(0.97); }
+
+    /* Glow-Layer hinter dem Button – animiert NUR opacity (GPU, kein Ruckeln) */
+    #start-btn::before {
+      content: "";
+      position: absolute;
+      inset: -40px;
+      border-radius: 50%;
+      background: radial-gradient(circle,
+        rgba(var(--sun), 0.30) 0%,
+        rgba(var(--sun), 0.12) 38%,
+        rgba(var(--sun), 0) 70%);
+      opacity: 0;
+      transition: opacity 0.8s ease;
+      pointer-events: none;
+      z-index: -1;
+    }
+    body.running #start-btn::before {
+      opacity: 1;
+      animation: breathe 4s ease-in-out infinite;
+    }
+    @keyframes breathe {
+      0%, 100% { opacity: 0.45; }
+      50%      { opacity: 1; }
+    }
+
+    /* Play/Pause-Symbol via CSS */
+    .glyph {
+      position: relative;
+      width: 30px; height: 34px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    /* Play-Dreieck */
+    .glyph::before {
+      content: "";
+      width: 0; height: 0;
+      border-style: solid;
+      border-width: 15px 0 15px 26px;
+      border-color: transparent transparent transparent rgba(255,255,255,0.75);
+      margin-left: 5px;
+      transition: opacity 0.3s;
+    }
+    /* Pause-Balken (zwei Pseudo-Elemente nicht möglich, daher Spans) */
+    .glyph .bar {
+      position: absolute;
+      width: 7px; height: 30px;
+      background: rgb(var(--sun));
+      border-radius: 2px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .glyph .bar.l { transform: translateX(-7px); }
+    .glyph .bar.r { transform: translateX(7px); }
+
+    body.running .glyph::before { opacity: 0; }
+    body.running .glyph .bar    { opacity: 1; }
+
+    /* Aktiver Zustand: Rand + sanfter Innenschein in Sonnenfarbe */
+    body.running #start-btn {
+      border-color: var(--sun-rim);
+      background: rgba(var(--sun), 0.08);
+      box-shadow: inset 0 0 24px rgba(var(--sun), 0.07);
+    }
+
+    /* Status-Wort unter dem Button, sehr dezent */
+    #status-word {
+      margin-top: 22px;
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--w40);
+      transition: color 0.5s;
+    }
+    body.running #status-word { color: var(--sun-rim); }
+
+    /* ─── Unterer Block (absolut → beeinflusst Button nicht) ── */
+    #lower {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      padding: 0 20px calc(20px + env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      transition: opacity var(--fade) ease;
+    }
+    body.running.idle #lower { opacity: 0; pointer-events: none; }
+
+    /* ─── Sound-Kacheln ────────────────────────────────────── */
+    #sound-row {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 4px 2px;
+      -webkit-overflow-scrolling: touch;
+      mask-image: linear-gradient(to right, transparent 0, #000 14px, #000 calc(100% - 14px), transparent 100%);
+    }
+    #sound-row::-webkit-scrollbar { display: none; }
+
+    .sound-tile {
+      flex-shrink: 0;
+      width: 60px; height: 60px;
+      background: var(--w06);
+      border: 1px solid var(--w08);
+      border-radius: 16px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 4px;
+      cursor: pointer;
+      transition: background 0.25s, border-color 0.25s, box-shadow 0.25s, transform 0.15s;
+      user-select: none;
+    }
+    .sound-tile:active { transform: scale(0.93); }
+    .sound-tile i {
+      font-size: 22px; line-height: 1;
+      color: rgba(255,255,255,0.62);
+      transition: color 0.25s;
+    }
+    .sound-tile.active i { color: var(--gruen); }
+    .sound-tile.none-tile.active i { color: var(--w55); }
+    .sound-tile .tile-label {
+      font-size: 9px; font-weight: 400;
+      letter-spacing: 0.3px;
+      color: var(--w40);
+      white-space: nowrap;
+      transition: color 0.25s;
+    }
+    .sound-tile.active {
+      background: rgba(126,217,87,0.10);
+      border-color: var(--gruen-soft);
+      box-shadow: 0 0 18px rgba(126,217,87,0.10);
+    }
+    .sound-tile.active .tile-icon  { filter: grayscale(0); }
+    .sound-tile.active .tile-label { color: var(--gruen); }
+
+    .sound-tile.none-tile.active {
+      background: var(--w08);
+      border-color: var(--w40);
+      box-shadow: none;
+    }
+    .sound-tile.none-tile.active .tile-label { color: var(--w55); }
+
+    /* ─── Timer ────────────────────────────────────────────── */
+    #timer-section { display: flex; flex-direction: column; gap: 14px; }
+
+    #timer-chips { display: flex; gap: 8px; }
+    .chip {
+      flex: 1;
+      padding: 9px 0;
+      background: var(--w06);
+      border: 1px solid var(--w08);
+      border-radius: 22px;
+      font-family: inherit;
+      font-size: 12px; font-weight: 400;
+      letter-spacing: 0.3px;
+      color: var(--w55);
+      cursor: pointer; text-align: center;
+      transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.15s;
+      user-select: none;
+    }
+    .chip:active { transform: scale(0.95); }
+    .chip.active {
+      background: rgba(126,217,87,0.12);
+      border-color: var(--gruen-soft);
+      color: var(--gruen);
+    }
+
+    #slider-row {
+      display: flex; align-items: center; gap: 14px;
+      max-height: 60px;
+      overflow: hidden;
+      transition: max-height 0.4s ease, opacity 0.35s ease;
+    }
+    #slider-row.collapsed { max-height: 0; opacity: 0; pointer-events: none; }
+
+    #timer-display {
+      font-size: 30px; font-weight: 200;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.78);
+      min-width: 96px; text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    input[type=range] {
+      flex: 1; -webkit-appearance: none; appearance: none;
+      height: 2px; background: var(--w12);
+      border-radius: 2px; outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 15px; height: 15px;
+      border-radius: 50%; background: var(--gruen);
+      cursor: pointer; box-shadow: 0 0 10px rgba(126,217,87,0.5);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 15px; height: 15px;
+      border-radius: 50%; background: var(--gruen); cursor: pointer; border: none;
+    }
+
+    /* ─── Menü-Sheet ───────────────────────────────────────── */
+    #menu-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(2px);
+      z-index: 50; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    #menu-overlay.open { opacity: 1; pointer-events: all; }
+
+    #menu-sheet {
+      position: fixed; bottom: 0; left: 50%;
+      transform: translateX(-50%) translateY(100%);
+      width: 100%; max-width: 420px;
+      background: #0e160e;
+      border-top: 1px solid var(--w12);
+      border-radius: 24px 24px 0 0;
+      padding: 14px 24px 40px;
+      z-index: 51;
+      transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
+      max-height: 78vh; overflow-y: auto;
+    }
+    #menu-sheet.open { transform: translateX(-50%) translateY(0); }
+
+    .sheet-handle {
+      width: 38px; height: 4px; background: var(--w12);
+      border-radius: 2px; margin: 0 auto 24px;
+    }
+    .sheet-section { margin-bottom: 28px; }
+    .sheet-title {
+      font-size: 10px; font-weight: 500; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--w40);
+      margin-bottom: 14px;
+    }
+    #bg-swatches { display: flex; flex-wrap: wrap; gap: 12px; }
+    .bg-swatch {
+      width: 52px;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      cursor: pointer; background: none; border: none;
+    }
+    .swatch-color {
+      width: 44px; height: 44px; border-radius: 12px;
+      border: 2px solid var(--w12);
+      transition: border-color 0.2s;
+    }
+    .bg-swatch.active .swatch-color { border-color: var(--gruen); }
+    .swatch-label { font-size: 10px; color: var(--w40); }
+
+    .dim-slider { width: 100%; }
+
+    /* ─── Demo-Leiste (nur Mockup) ─────────────────────────── */
+    #demo-bar {
+      position: fixed; top: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(8px);
+      padding: 6px 12px;
+      display: flex; gap: 6px; flex-wrap: wrap;
+      justify-content: center; align-items: center;
+      z-index: 99; font-size: 10px;
+    }
+    #demo-bar span { color: rgba(255,255,255,0.35); }
+    #demo-bar button {
+      padding: 3px 10px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--w12);
+      border-radius: 11px;
+      color: var(--w55); cursor: pointer; font-size: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="bg"></div>
+  <div id="bg-shade"></div>
+
+  <div id="app">
+
+    <header>
+      <div class="app-title">Ohreninsel</div>
+      <button id="menu-btn" aria-label="Menü">
+        <span></span><span></span><span></span>
+      </button>
+    </header>
+
+    <!-- Großer Button-Bereich -->
+    <div id="stage">
+      <button id="start-btn" aria-label="Start / Stopp">
+        <span class="glyph">
+          <span class="bar l"></span>
+          <span class="bar r"></span>
+        </span>
+      </button>
+      <div id="status-word">Start</div>
+    </div>
+
+    <!-- Bedienelemente unten -->
+    <div id="lower">
+
+      <div id="sound-row">
+        <button class="sound-tile" data-sound="meer">
+          <i class="ph ph-waves"></i><span class="tile-label">Meer</span>
+        </button>
+        <button class="sound-tile" data-sound="wald">
+          <i class="ph ph-tree-evergreen"></i><span class="tile-label">Wald</span>
+        </button>
+        <button class="sound-tile" data-sound="voegel">
+          <i class="ph ph-bird"></i><span class="tile-label">Vögel</span>
+        </button>
+        <button class="sound-tile" data-sound="regen">
+          <i class="ph ph-cloud-rain"></i><span class="tile-label">Regen</span>
+        </button>
+        <button class="sound-tile" data-sound="cafe">
+          <i class="ph ph-coffee"></i><span class="tile-label">Café</span>
+        </button>
+        <button class="sound-tile" data-sound="hafen">
+          <i class="ph ph-anchor-simple"></i><span class="tile-label">Hafen</span>
+        </button>
+        <button class="sound-tile none-tile active" data-sound="none">
+          <i class="ph ph-speaker-slash"></i><span class="tile-label">Kein Ton</span>
+        </button>
+      </div>
+
+      <div id="timer-section">
+        <div id="timer-chips">
+          <button class="chip active" data-min="0">Aus</button>
+          <button class="chip" data-min="20">20 Min</button>
+          <button class="chip" data-min="40">40 Min</button>
+          <button class="chip" data-min="60">60 Min</button>
+        </div>
+        <div id="slider-row" class="collapsed">
+          <input type="range" id="duration-slider" min="1" max="90" value="40">
+          <span id="timer-display">40:00</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Demo-Leiste -->
+  <div id="demo-bar">
+    <span>BG:</span>
+    <button onclick="setBg('')">Grün</button>
+    <button onclick="setBg('bg-blau')">Blau</button>
+    <button onclick="setBg('bg-grau')">Grau</button>
+    <button onclick="setBg('bg-nacht')">Nacht</button>
+    <button onclick="setBg('bg-schwarz')">Schwarz</button>
+    <button onclick="setBg('bg-berg')">Berg</button>
+    <button onclick="setBg('bg-meer')">Meer</button>
+  </div>
+
+  <!-- Menü-Sheet -->
+  <div id="menu-overlay"></div>
+  <div id="menu-sheet">
+    <div class="sheet-handle"></div>
+
+    <div class="sheet-section">
+      <div class="sheet-title">Hintergrund</div>
+      <div id="bg-swatches">
+        <button class="bg-swatch active" data-bg="">
+          <div class="swatch-color" style="background:#0b1a0b"></div><span class="swatch-label">Grün</span>
+        </button>
+        <button class="bg-swatch" data-bg="bg-blau">
+          <div class="swatch-color" style="background:#080e18"></div><span class="swatch-label">Blau</span>
+        </button>
+        <button class="bg-swatch" data-bg="bg-grau">
+          <div class="swatch-color" style="background:#141414"></div><span class="swatch-label">Grau</span>
+        </button>
+        <button class="bg-swatch" data-bg="bg-nacht">
+          <div class="swatch-color" style="background:#0d3510"></div><span class="swatch-label">Nacht</span>
+        </button>
+        <button class="bg-swatch" data-bg="bg-schwarz">
+          <div class="swatch-color" style="background:#000"></div><span class="swatch-label">Schwarz</span>
+        </button>
+        <button class="bg-swatch" data-bg="bg-berg">
+          <div class="swatch-color" style="background:url('../berglandschaft_0.1.jpg') center/cover"></div><span class="swatch-label">Berg</span>
+        </button>
+        <button class="bg-swatch" data-bg="bg-meer">
+          <div class="swatch-color" style="background:url('../meer_0.2.jpg') center/cover"></div><span class="swatch-label">Meer</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="sheet-section">
+      <div class="sheet-title">Display abdunkeln</div>
+      <input type="range" class="dim-slider" min="0" max="95" value="0">
+    </div>
+  </div>
+
+<script>
+  const body      = document.body;
+  const startBtn  = document.getElementById('start-btn');
+  const statusW   = document.getElementById('status-word');
+  const slider    = document.getElementById('duration-slider');
+  const timerDisp = document.getElementById('timer-display');
+  const sliderRow = document.getElementById('slider-row');
+
+  let isRunning  = false;
+  let elemHidden = false;
+  let autoFade   = null;
+
+  // ── Start/Stop ──────────────────────────────────────────────
+  startBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    isRunning = !isRunning;
+    body.classList.toggle('running', isRunning);
+    statusW.textContent = isRunning ? 'Läuft' : 'Start';
+
+    if (isRunning) {
+      elemHidden = false;
+      body.classList.remove('idle');
+      autoFade = setTimeout(() => { elemHidden = true; body.classList.add('idle'); }, 4000);
+    } else {
+      clearTimeout(autoFade);
+      body.classList.remove('idle');
+      elemHidden = false;
+    }
+  });
+
+  // ── Tippen auf Hintergrund = Bedienelemente toggeln ─────────
+  document.getElementById('app').addEventListener('click', (e) => {
+    if (!isRunning) return;
+    if (e.target.closest('button, input, label')) return;
+    clearTimeout(autoFade);
+    elemHidden = !elemHidden;
+    body.classList.toggle('idle', elemHidden);
+  });
+
+  // ── Sound-Kacheln ───────────────────────────────────────────
+  document.querySelectorAll('.sound-tile').forEach(tile => {
+    tile.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.querySelectorAll('.sound-tile').forEach(t => t.classList.remove('active'));
+      tile.classList.add('active');
+    });
+  });
+
+  // ── Timer-Chips ─────────────────────────────────────────────
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      const min = parseInt(chip.dataset.min);
+      if (min === 0) {
+        sliderRow.classList.add('collapsed');
+      } else {
+        slider.value = min;
+        updateDisplay(min);
+        sliderRow.classList.remove('collapsed');
+      }
+    });
+  });
+
+  // ── Slider ──────────────────────────────────────────────────
+  slider.addEventListener('input', () => updateDisplay(parseInt(slider.value)));
+  function updateDisplay(min) {
+    const h = Math.floor(min / 60), m = min % 60;
+    timerDisp.textContent = h > 0
+      ? `${h}:${String(m).padStart(2,'0')}:00`
+      : `${String(m).padStart(2,'0')}:00`;
+  }
+
+  // ── Hintergrund + passendes Sonnen-Theme ───────────────────
+  const bg = document.getElementById('bg');
+
+  // Welcher Hintergrund bekommt welche Sonnenfarbe?
+  const sunTheme = {
+    'bg-meer':  'theme-meer',   // warme Abendsonne
+    'bg-berg':  'theme-berg',   // helle Mittagssonne
+    'bg-blau':  'theme-blau',   // kühles Blau
+    'bg-nacht': 'theme-nacht',  // Praxis-Grün
+  };
+
+  function setBg(cls) {
+    bg.className = cls;
+    document.querySelectorAll('.bg-swatch').forEach(s =>
+      s.classList.toggle('active', s.dataset.bg === cls));
+
+    // Alle Theme-Klassen entfernen, dann passende setzen (Default = Grün)
+    body.classList.remove('theme-meer','theme-berg','theme-blau','theme-nacht');
+    if (sunTheme[cls]) body.classList.add(sunTheme[cls]);
+  }
+
+  // ── Menü ────────────────────────────────────────────────────
+  const menuBtn = document.getElementById('menu-btn');
+  const mOver   = document.getElementById('menu-overlay');
+  const mSheet  = document.getElementById('menu-sheet');
+  menuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    mOver.classList.add('open'); mSheet.classList.add('open');
+  });
+  mOver.addEventListener('click', () => {
+    mOver.classList.remove('open'); mSheet.classList.remove('open');
+  });
+  document.querySelectorAll('.bg-swatch').forEach(s =>
+    s.addEventListener('click', () => setBg(s.dataset.bg)));
+</script>
+</body>
+</html>

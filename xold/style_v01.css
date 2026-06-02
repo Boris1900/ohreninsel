@@ -1,0 +1,885 @@
+html {
+  min-height: 100%;
+  background-color: #1a1a1a;
+  color-scheme: dark;
+  overscroll-behavior: none;
+}
+
+/* Hintergrundbild: position:fixed, Höhe per JS auf window.screen.height fixiert.
+   Dadurch bleibt der Hintergrund stabil wenn Android-Statusbar kurz erscheint. */
+#app-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 0;
+  background: url('background.jpg') center center / cover no-repeat #1a1a1a;
+}
+
+/* Berg-Sonnenaufgang: Nacht-Overlay über dem Hintergrundbild */
+#berg-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #000d18;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+  display: none;
+  transition: opacity 1.2s ease;
+}
+
+#berg-stars {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  display: none;
+}
+
+#berg-tap-layer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+#meer-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  display: none;
+  transition: opacity 1.2s ease;
+}
+
+/* Container schneidet die Sonne an der Horizontlinie ab (Unterkante = Horizont) */
+#meer-sun-wrap {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  z-index: 1;
+  display: none;
+  overflow: hidden;
+}
+
+/* Aura: großer weicher Lichthof hinter der Sonne, wächst beim Untergang */
+#meer-aura {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  filter: blur(30px);
+  transition: bottom 1s linear, width 1s linear, height 1s linear;
+}
+
+/* Sonne: ein rundes Element, der Radial-Gradient erzeugt Ball + Glühen selbst */
+#meer-sun {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  filter: blur(2px);
+  transition: bottom 1s linear;
+}
+
+/* Wasserfarb-Layer: warm orange → dunkles Weinrot unterhalb des Horizonts */
+#meer-water-color {
+  position: fixed;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  z-index: 2;
+  display: none;
+}
+
+/* Lichtstreifen auf dem Wasser unterhalb des Horizonts */
+#meer-sun-reflection {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1;
+  display: none;
+  width: 90px;
+  filter: blur(8px);
+  transform: translateX(-50%);
+}
+
+.berg-star {
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Georgia', serif;
+  background-color: #1a1a1a;
+  color: #fff;
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  user-select: none;
+}
+
+/* Buddha-Lächeln: liegt knapp über app-bg, unter dem Overlay */
+#bg-smile {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 0;
+  background: url('background_laecheln_v0.4.jpg') center center / cover no-repeat;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+  pointer-events: none;
+}
+
+/* Buddha-Aura: goldener Heiligenschein, liegt unter dem Overlay (wird mitgedimmt) */
+#buddha-aura {
+  position: fixed;
+  left: var(--aura-x, 28%);
+  top: var(--aura-y, 59%);
+  width: var(--aura-size, 180px);
+  height: var(--aura-size, 180px);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    transparent               0%,
+    transparent              40%,
+    rgba(255, 230, 80, 0.09) 45%,
+    rgba(255, 220, 70, 0.40) 50%,
+    rgba(255, 210, 60, 0.69) 55%,
+    rgba(255, 200, 50, 0.63) 60%,
+    rgba(255, 185, 35, 0.29) 68%,
+    rgba(255, 170, 25, 0.09) 77%,
+    transparent              88%);
+  -webkit-mask-image: linear-gradient(to bottom,
+    black             0%,
+    black            58%,
+    rgba(0,0,0,0.20) 78%,
+    transparent      92%);
+  mask-image: linear-gradient(to bottom,
+    black             0%,
+    black            58%,
+    rgba(0,0,0,0.20) 78%,
+    transparent      92%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 49;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out;
+}
+
+/* Flammen-Schein: liegt zwischen Hintergrund und Inhalt, pulsiert sanft */
+#flame-glow {
+  position: fixed;
+  left: var(--flame-x, 50%);
+  top: var(--flame-y, 50%);
+  width: var(--flame-size, 240px);
+  height: var(--flame-size, 240px);
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(255, 190, 100, var(--flame-a1, 0.48)) 0%,
+    rgba(255, 160, 70, var(--flame-a2, 0.26)) 35%,
+    rgba(255, 130, 50, 0.0) 70%);
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: screen;
+  animation: flame-pulse 6.5s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+@keyframes flame-pulse {
+  0%   { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+  18%  { opacity: 0.72; transform: translate(-50%, -50%) scale(1.05); }
+  37%  { opacity: 0.50; transform: translate(-50%, -50%) scale(0.98); }
+  56%  { opacity: 0.68; transform: translate(-50%, -50%) scale(1.03); }
+  74%  { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+  88%  { opacity: 0.65; transform: translate(-50%, -50%) scale(1.02); }
+  100% { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Flackernde Kerzenflamme – kleines Element direkt über der Flamme im Bild */
+.flicker-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(212,168,83,0.75);
+  font-size: 0.85rem;
+  font-style: italic;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+}
+.flicker-toggle input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #d4a853;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+#flame-flicker.hidden { display: none; }
+
+/* Ankerpunkt = Fuß der Flamme, Größe 0 */
+#flame-flicker {
+  position: fixed;
+  left: var(--flame-x, 50%);
+  top: var(--flame-y, 50%);
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Flamme wächst von unten nach oben – Fuß bleibt fix */
+#flame-flicker::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 14px;
+  height: 30px;
+  transform-origin: bottom center;
+  background: radial-gradient(ellipse at 50% 85%,
+    rgba(255,245,180,1.00)  0%,
+    rgba(255,190, 60, 0.95) 30%,
+    rgba(255,110, 10, 0.60) 62%,
+    transparent            100%);
+  border-radius: 50% 50% 30% 30%;
+  filter: blur(1px);
+  animation:
+    flicker-move 1.8s ease-in-out infinite alternate,
+    flicker-fade 2.3s ease-in-out infinite alternate;
+  will-change: transform, opacity;
+}
+
+@keyframes flicker-move {
+  0%   { transform: translateX(-50%) rotate(-1.5deg) scaleY(0.95); }
+  18%  { transform: translateX(-50%) rotate( 1.0deg) scaleY(1.04); }
+  36%  { transform: translateX(-50%) rotate(-1.0deg) scaleY(0.97); }
+  54%  { transform: translateX(-50%) rotate( 1.5deg) scaleY(1.05); }
+  72%  { transform: translateX(-50%) rotate(-0.5deg) scaleY(0.94); }
+  100% { transform: translateX(-50%) rotate( 1.0deg) scaleY(1.02); }
+}
+
+@keyframes flicker-fade {
+  0%   { opacity: 0.60; }
+  25%  { opacity: 1.00; }
+  55%  { opacity: 0.65; }
+  80%  { opacity: 0.95; }
+  100% { opacity: 0.70; }
+}
+
+/* Dimm-Overlay */
+#overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 50;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition-property: opacity;
+  transition-timing-function: ease;
+  transition-duration: 3s;
+}
+
+/* Audio-Menü */
+#audio-menu {
+  position: fixed;
+  top: -15px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding-top: 15px;
+  background: rgba(0,0,0,0.85);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#audio-menu.hidden { display: none; }
+
+.menu-content,
+.menu-content button,
+.menu-content input,
+.menu-content label {
+  font-family: 'Georgia', serif;
+}
+
+.menu-close-x {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 1.2rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+}
+.menu-close-x:hover { color: rgba(255,255,255,0.85); }
+
+.menu-content {
+  position: relative;
+  background: linear-gradient(180deg, #2a3a2a, #1a2a1a);
+  border: 1px solid rgba(180,120,50,0.35);
+  border-radius: 16px;
+  padding: 32px 28px;
+  width: 85%;
+  max-width: 360px;
+  max-height: 88vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.menu-content h2 {
+  color: #d4a853;
+  font-size: 1.15rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.menu-hint {
+  color: rgba(255,255,255,0.55);
+  font-size: 0.85rem;
+  font-style: italic;
+  margin-top: -6px;
+}
+
+/* Einheitlicher Button-Stil */
+.menu-btn,
+.upload-btn,
+.demo-btn {
+  display: block;
+  background: rgba(180,120,50,0.18);
+  border: 1px solid rgba(180,120,50,0.45);
+  color: #d4a853;
+  padding: 12px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  transition: background 0.2s, border-color 0.2s;
+}
+.menu-btn:active,
+.upload-btn:active,
+.demo-btn:active {
+  background: rgba(180,120,50,0.32);
+  border-color: rgba(180,120,50,0.7);
+}
+.demo-btn.selected {
+  background: rgba(180,120,50,0.45);
+  border-color: rgba(212,168,83,0.9);
+  color: #f4d488;
+  box-shadow: inset 0 1px 4px rgba(0,0,0,0.4);
+}
+.update-btn {
+  display: block;
+  width: 100%;
+  background: rgba(180,120,50,0.12);
+  border: 1px solid rgba(180,120,50,0.35);
+  color: #c49a45;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-family: 'Georgia', serif;
+  margin-top: 4px;
+}
+.update-btn:disabled { opacity: 0.5; }
+#update-status {
+  text-align: center;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.55);
+  min-height: 18px;
+  margin: 6px 0 4px;
+}
+#app-version {
+  text-align: center;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.28);
+  margin-top: 14px;
+  letter-spacing: 0.5px;
+}
+#app-imprint {
+  text-align: center;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.28);
+  margin-top: 4px;
+  letter-spacing: 0.3px;
+}
+.upload-btn input { display: none; }
+
+#current-audio-name {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.82rem;
+  font-style: italic;
+  margin-top: -4px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.45);
+  padding: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.menu-divider {
+  border: none;
+  border-top: 1px solid rgba(180,120,50,0.15);
+  margin: 8px 0 4px;
+}
+
+.dim-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dim-end-label {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.45);
+  white-space: nowrap;
+  flex-shrink: 0;
+  letter-spacing: 0.05em;
+}
+
+.dim-slider-row input[type="range"] {
+  flex: 1;
+}
+
+#dim-level-label {
+  text-align: center;
+  font-size: 0.85rem;
+  color: rgba(212,168,83,0.75);
+  font-style: italic;
+  margin-top: 10px;
+  letter-spacing: 0.05em;
+}
+
+/* Hauptbereich */
+main {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Gong – eigenes fixed-Element, z-index steuerbar für Zwischen-Gong-Swing */
+/* ═══════════════════════════════════════════════════
+   START/STOP-BUTTON — Ohreninsel
+   Dezenter Kreis mit sanften Klangwellen.
+   Kein Gong-Bild. Wellen pulsieren wenn Timer läuft.
+   ═══════════════════════════════════════════════════ */
+
+#gong-container {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.cord { display: none; }
+
+/* Container behält seine Höhe für Layout-Berechnung (positionTimerArea),
+   ist aber selbst unsichtbar */
+#gong {
+  position: relative;
+  height: var(--gong-height, min(360px, 40dvh));
+  width: var(--gong-width, min(312px, 34.7dvh));
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  filter: none;
+}
+
+/* ── Der sichtbare Kreis-Button ── */
+#gong-label {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  /* Kreis-Form */
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+
+  /* Glasmorphism – passt auf alle Hintergründe */
+  background: rgba(255,255,255,0.09);
+  border: 1.5px solid rgba(255,255,255,0.28);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+
+  /* Text */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.92);
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  font-weight: 400;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.4);
+
+  transition: background 0.3s, box-shadow 0.3s;
+}
+
+/* Leichtes Aufleuchten wenn aktiv/laufend */
+body.running #gong-label {
+  background: rgba(126,217,87,0.13);
+  border-color: rgba(126,217,87,0.45);
+  box-shadow: 0 4px 28px rgba(126,217,87,0.15);
+}
+
+/* ── Klang-Wellen: zwei Ringe, pulsieren im Lauf ── */
+#gong-label::before,
+#gong-label::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: 1px solid rgba(255,255,255,0.22);
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Wellen nur wenn Timer läuft */
+body.running #gong-label::before {
+  animation: ohren-welle 3s ease-out infinite;
+}
+body.running #gong-label::after {
+  animation: ohren-welle 3s ease-out infinite;
+  animation-delay: 1.5s;
+}
+
+@keyframes ohren-welle {
+  0%   { transform: translate(-50%, -50%) scale(1);    opacity: 0.5; }
+  60%  { opacity: 0.18; }
+  100% { transform: translate(-50%, -50%) scale(2.4);  opacity: 0; }
+}
+
+/* Timer-Area: wird per JS zwischen Gong-Unterkante und Buddha-Kopf positioniert */
+#timer-area {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 4px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+#timer-display {
+  text-align: center;
+  pointer-events: none;
+}
+#timer-text {
+  font-size: 4.2rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #fff;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.7);
+}
+
+body.ios #timer-text .digit {
+  display: inline-block;
+  width: 0.70em;
+  text-align: center;
+  font-variant-numeric: lining-nums tabular-nums;
+  vertical-align: top;
+  font-family: 'Merriweather', Georgia, serif;
+  font-weight: 700;
+}
+
+body.ios #timer-text .colon {
+  display: inline-block;
+  width: 0.40em;
+  text-align: center;
+}
+
+/* Zwischen-Gong-Timer iOS: gleiche Fixbreiten-Logik */
+body.ios #zgong-time .digit {
+  display: inline-block;
+  width: 0.70em;
+  text-align: center;
+  font-variant-numeric: lining-nums tabular-nums;
+  vertical-align: top;
+}
+
+body.ios #zgong-time .colon {
+  display: inline-block;
+  width: 0.38em;
+  text-align: center;
+}
+
+/* Controls – direkt unter dem Timer, fadet bei Meditation aus */
+#controls {
+  width: 85%;
+  max-width: 380px;
+  padding: 0 8px;
+  pointer-events: auto;
+  margin-top: 4px;
+  transition: opacity 0.6s ease;
+}
+
+.control-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.control-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  color: rgba(255,255,255,0.85);
+}
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.adj-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  font-size: 1.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.adj-btn:active { background: rgba(255,255,255,0.3); }
+
+input[type="range"] {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 6px;
+  background: linear-gradient(90deg, #e8a020 var(--progress, 43%), rgba(255,255,255,0.4) var(--progress, 43%));
+  border-radius: 3px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #f8d070, #e8a020);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  cursor: pointer;
+}
+
+
+/* Navigation */
+#bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(64px + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  z-index: 10;
+  transition: opacity 1.2s ease;
+}
+
+/* Während Meditation: Nav-Streifen sanft ausblenden */
+body.running #bottom-nav {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.4);
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s;
+}
+.nav-btn svg {
+  width: 28px;
+  height: 28px;
+}
+.nav-btn.active { color: rgba(255,255,255,0.9); }
+.nav-btn:active { color: #d4a853; }
+
+/* Läuft: Slider fadet aus, Timer-Position bleibt unverändert */
+body.running #controls {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Zwischen-Gong: 3-Spalten-Grid damit Haupttimer immer mittig bleibt */
+#timer-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: baseline;
+  width: 100%;
+}
+
+/* Zwischen-Gong Anzeige rechts neben dem Haupttimer */
+#zgong-display {
+  display: inline-block;
+  position: relative;
+  margin-left: 16px;
+}
+#zgong-display.hidden { display: none; }
+
+#zgong-time {
+  display: block;
+  font-family: 'Georgia', serif;
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: rgba(255,220,140,0.85);
+  letter-spacing: 0.04em;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.6);
+  white-space: nowrap;
+}
+
+/* Zwischen-Gong Menü: Slider-Sektion */
+#zgong-slider-section {
+  display: flex;
+  flex-direction: column;
+}
+#zgong-slider-section.hidden { display: none; }
+
+#zgong-value-label {
+  text-align: center;
+  font-size: 0.85rem;
+  color: rgba(212,168,83,0.75);
+  font-style: italic;
+  margin-top: 10px;
+  letter-spacing: 0.05em;
+}
+
+/* Schallwelle beim Antippen (Farbmodus) – jetzt in Praxis-Grün */
+.welle {
+  position: fixed;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  box-shadow: 0 0 14px 5px rgba(126, 217, 87, 0.22);
+  filter: blur(4px);
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes welle-aus {
+  0%   { transform: translate(-50%, -50%) scale(1);    opacity: 0.38; }
+  50%  { opacity: 0.15; }
+  100% { transform: translate(-50%, -50%) scale(1.7);  opacity: 0; }
+}
+
+.welle.aktiv { animation: welle-aus 3.8s ease-out forwards; }
+
+/* Hintergrundfarbe-Picker */
+#bg-color-picker {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 74px;        /* feste Reihenhöhe – alle Kästchen exakt gleich groß */
+  align-items: start;          /* Inhalt oben verankert, auch bei 2-zeiligem Label */
+  gap: 8px;
+}
+
+.bg-swatch {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 6px 4px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bg-swatch-color {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  /* Kräftiger Rahmen: sonst verschmelzen dunkle Kästchen mit dem Hintergrund
+     und wirken kleiner als helle (Grasgrün, Gelb) */
+  border: 1px solid rgba(255,255,255,0.55);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.4);
+  display: block;
+  flex-shrink: 0;
+}
+
+.bg-swatch-label {
+  font-size: 0.58rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.03em;
+  text-align: center;
+  line-height: 1.15;
+  font-family: 'Georgia', serif;
+  width: 100%;           /* immer volle Kachelbreite – Text zentriert sich daran */
+  display: block;
+}
+
+.bg-swatch.selected {
+  border-color: rgba(212,168,83,0.85);
+}
+
+.bg-swatch.selected .bg-swatch-label {
+  color: #d4a853;
+}

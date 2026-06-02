@@ -1,0 +1,16 @@
+# WAV-Originale und Reaper-Dateien (zu groß / nicht nötig für App)
+Sounds/Ambient Sounds Original/
+02-Audio/Media/
+02-Audio/Backups/
+*.reapeaks
+*.rpp
+*.rpp-bak
+
+# Node / Build
+node_modules/
+android/
+dist/
+
+# System
+.DS_Store
+Thumbs.db

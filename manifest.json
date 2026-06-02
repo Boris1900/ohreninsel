@@ -1,0 +1,18 @@
+{
+  "name": "Ohreninsel",
+  "short_name": "Ohreninsel",
+  "description": "Ambient-Klänge für Tinnitus-Betroffene",
+  "start_url": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#1a1a1a",
+  "theme_color": "#1a1a1a",
+  "icons": [
+    {
+      "src": "icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

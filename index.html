@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <style>html,body{background:#000}</style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>Ohreninsel</title>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ohreninsel">
+  <link rel="apple-touch-icon" href="icon-1024.png">
+  <meta name="theme-color" content="#000000">
+  <meta name="color-scheme" content="dark">
+  <!-- Fonts + Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Splash Screen -->
+  <div id="splash">
+    <div id="splash-inner">
+      <img src="ohr3.png" id="splash-icon" alt="">
+      <div id="splash-title">Ohreninsel</div>
+      <div id="splash-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="bg"></div>
+  <div id="bg-shade"></div>
+  <div id="dim-overlay"></div>
+
+  <div id="app">
+
+    <header>
+      <div class="app-title-wrap">
+        <span class="app-title">Ohreninsel</span>
+        <img src="ohr3.png" class="header-ear" alt="">
+      </div>
+      <button id="menu-btn" aria-label="Menü">
+        <span></span><span></span><span></span>
+      </button>
+    </header>
+
+    <!-- Großer Start-Button -->
+    <div id="stage">
+      <div id="btn-area">
+        <button id="start-btn" aria-label="Start / Stopp">
+          <span class="glyph">
+            <span class="bar l"></span>
+            <span class="bar r"></span>
+          </span>
+        </button>
+        <div id="status-word">Start</div>
+        <div id="medi-timer"></div>
+      </div>
+    </div>
+
+    <!-- Bedienelemente unten -->
+    <div id="lower">
+
+      <div id="sound-row">
+        <button class="sound-tile" data-sound="wellen" data-file="Sounds/Wellen Nordsee_0.1.mp3">
+          <span class="tile-x">✕</span>
+          <i class="ph ph-waves"></i><span class="tile-label">Wellen</span>
+        </button>
+        <button class="sound-tile" data-sound="rauschen" data-file="Sounds/Rauschen Nordsee_0.1.mp3">
+          <span class="tile-x">✕</span>
+          <i class="ph ph-wind"></i><span class="tile-label">Rauschen</span>
+        </button>
+        <button class="sound-tile" data-sound="voegel" data-file="Sounds/Vögel im Wald_0.1.mp3">
+          <span class="tile-x">✕</span>
+          <i class="ph ph-bird"></i><span class="tile-label">Vögel</span>
+        </button>
+        <button class="sound-tile" data-sound="bach" data-file="Sounds/Bachplätschern_0.1.mp3">
+          <span class="tile-x">✕</span>
+          <i class="ph ph-drop"></i><span class="tile-label">Bach</span>
+        </button>
+        <button class="sound-tile" data-sound="regen" data-file="Sounds/Regen und Gewitter_0.1.mp3">
+          <span class="tile-x">✕</span>
+          <i class="ph ph-cloud-rain"></i><span class="tile-label">Regen</span>
+        </button>
+        <button class="sound-tile" data-sound="cafe" data-file="Sounds/Straßencafe_0.1.mp3">
+          <span class="tile-x">✕</span>
+          <i class="ph ph-coffee"></i><span class="tile-label">Café</span>
+        </button>
+      </div>
+
+      <div id="timer-section">
+        <div id="timer-chips">
+          <button class="chip active" data-min="0">Aus</button>
+          <button class="chip" data-min="20">20 Min</button>
+          <button class="chip" data-min="40">40 Min</button>
+          <button class="chip" data-min="60">60 Min</button>
+        </div>
+
+        <!-- Modus-Auswahl: erscheint wenn Timer aktiv + Sound gewählt -->
+        <div id="mode-row" class="collapsed">
+          <button class="mode-chip active" data-mode="einschlafen">Einschlafen</button>
+          <button class="mode-chip" data-mode="meditieren">Meditieren</button>
+        </div>
+
+        <!-- Gong-Optionen: erscheint nur im Meditieren-Modus -->
+        <div id="gong-section" class="collapsed">
+          <label class="gong-label" for="gong-check">
+            <span class="gong-label-text">Gong</span>
+            <span class="gong-toggle">
+              <input type="checkbox" id="gong-check" class="gong-check-input">
+              <span class="gong-track">
+                <span class="gong-thumb"></span>
+              </span>
+            </span>
+          </label>
+          <div id="gong-schalen">
+            <button class="gong-tile active" data-file="Sounds/Klangschale Morgenstern.mp3">Morgenstern</button>
+            <button class="gong-tile" data-file="Sounds/Klangschale Mittagspause.mp3">Mittagspause</button>
+            <button class="gong-tile" data-file="Sounds/Klangschale Abendrot.mp3">Abendrot</button>
+          </div>
+        </div>
+
+        <div id="slider-row" class="collapsed">
+          <input type="range" id="duration-slider" min="1" max="90" value="40">
+          <span id="timer-display">40:00</span>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Menü -->
+  <div id="menu-overlay"></div>
+  <div id="menu-sheet">
+    <div class="sheet-handle"></div>
+
+    <div class="sheet-section">
+      <div class="sheet-title">Hintergrund</div>
+      <div id="bg-swatches">
+        <button class="bg-swatch active" data-bg="">
+          <div class="swatch-color" style="background:#0b1a0b"></div>
+          <span class="swatch-label">Grün</span>
+        </button>
+        <button class="bg-swatch" data-bg="bg-blau">
+          <div class="swatch-color" style="background:#080e18"></div>
+          <span class="swatch-label">Blau</span>
+        </button>
+        <button class="bg-swatch" data-bg="bg-grau">
+          <div class="swatch-color" style="background:#141414"></div>
+          <span class="swatch-label">Grau</span>
+        </button>
+        <button class="bg-swatch" data-bg="bg-nacht">
+          <div class="swatch-color" style="background:#0d3510"></div>
+          <span class="swatch-label">Nacht</span>
+        </button>
+        <button class="bg-swatch" data-bg="bg-schwarz">
+          <div class="swatch-color" style="background:#000"></div>
+          <span class="swatch-label">Schwarz</span>
+        </button>
+        <button class="bg-swatch" data-bg="bg-berg">
+          <div class="swatch-color" style="background:url(berglandschaft_0.1.jpg) center/cover"></div>
+          <span class="swatch-label">Berg</span>
+        </button>
+        <button class="bg-swatch" data-bg="bg-meer">
+          <div class="swatch-color" style="background:url(meer_0.2.jpg) center/cover"></div>
+          <span class="swatch-label">Meer</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="sheet-section">
+      <div class="sheet-title">Display abdunkeln</div>
+      <input type="range" class="dim-slider" id="dim-slider" min="0" max="95" value="80">
+    </div>
+
+    <div class="sheet-section">
+      <div class="sheet-title">Modi</div>
+      <div class="mode-info">
+        <div class="mode-info-item">
+          <span class="mode-info-name">Ambient</span>
+          <span class="mode-info-desc">Kein Timer – Klang läuft bis du stoppst.</span>
+        </div>
+        <div class="mode-info-item">
+          <span class="mode-info-name">Einschlafen</span>
+          <span class="mode-info-desc">Timer läuft, Klang blendet am Ende sanft und gleichmäßig aus.</span>
+        </div>
+        <div class="mode-info-item">
+          <span class="mode-info-name">Meditieren</span>
+          <span class="mode-info-desc">Timer mit optionalem Gong zum Start und Ende.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

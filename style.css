@@ -1,0 +1,669 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gruen:      #7ed957;
+  --gruen-soft: rgba(126, 217, 87, 0.55);
+  --w04: rgba(255,255,255,0.04);
+  --w06: rgba(255,255,255,0.06);
+  --w08: rgba(255,255,255,0.08);
+  --w12: rgba(255,255,255,0.12);
+  --w40: rgba(255,255,255,0.40);
+  --w55: rgba(255,255,255,0.55);
+  --fade: 1.6s;
+
+  --sun:     126, 217, 87;
+  --sun-rim: rgba(126,217,87,0.55);
+}
+
+body.theme-meer  { --sun: 255, 138, 92;  --sun-rim: rgba(255,138,92,0.6); }
+body.theme-berg  { --sun: 255, 226, 150; --sun-rim: rgba(255,226,150,0.65); }
+body.theme-blau  { --sun: 130, 180, 255; --sun-rim: rgba(130,180,255,0.5); }
+body.theme-nacht { --sun: 126, 217, 87;  --sun-rim: rgba(126,217,87,0.55); }
+
+html, body {
+  height: 100%;
+  background: #000;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #fff;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+/* ─── Hintergrund ─────────────────────────────────────────── */
+#bg {
+  position: fixed; inset: 0; z-index: 0;
+  background: #0b1a0b;
+  transition: background 0.7s ease;
+}
+#bg.bg-blau    { background: #080e18; }
+#bg.bg-grau    { background: #141414; }
+#bg.bg-nacht   { background: #0d3510; }
+#bg.bg-schwarz { background: #000; }
+#bg.bg-berg    { background: url('berglandschaft_0.1.jpg') center/cover no-repeat; }
+#bg.bg-meer    { background: url('meer_0.2.jpg') center/cover no-repeat; }
+
+#bg-shade {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: linear-gradient(to bottom, transparent 45%, rgba(0,0,0,0.35) 100%);
+}
+
+/* ─── Display abdunkeln ───────────────────────────────────── */
+#dim-overlay {
+  position: fixed; inset: 0; z-index: 4;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+/* ─── App-Wrapper ─────────────────────────────────────────── */
+#app {
+  position: relative; z-index: 3;
+  max-width: 420px;
+  height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Header ──────────────────────────────────────────────── */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 0;
+  flex-shrink: 0;
+}
+.app-title-wrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+}
+.app-title {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+  color: var(--w40);
+  line-height: 1;
+}
+.header-ear {
+  height: 1.6em;
+  font-size: 12px;
+  width: auto;
+  opacity: 0.85;
+  margin-bottom: -3px;
+}
+#menu-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--w40);
+  padding: 8px; margin: -8px;
+  display: flex; flex-direction: column; gap: 5px;
+}
+#menu-btn span {
+  display: block; width: 19px; height: 1.5px;
+  background: currentColor; border-radius: 2px;
+}
+
+/* ─── Stage (Button-Zone) ─────────────────────────────────── */
+#stage {
+  flex: 1;
+  position: relative;
+}
+
+#btn-area {
+  position: absolute;
+  top: 38%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#start-btn {
+  width: 128px; height: 128px;
+  border-radius: 50%;
+  background: var(--w06);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid var(--w12);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color 0.6s, background 0.6s, transform 0.25s;
+  user-select: none;
+  position: relative;
+}
+#start-btn:active { transform: scale(0.97); }
+
+#start-btn::before {
+  content: "";
+  position: absolute;
+  inset: -40px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(var(--sun), 0.30) 0%,
+    rgba(var(--sun), 0.12) 38%,
+    rgba(var(--sun), 0) 70%);
+  /* Opacity vollständig per JS gesteuert via --glow-opacity */
+  opacity: var(--glow-opacity, 0);
+  transition: opacity var(--glow-transition, 0ms);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Play/Pause-Symbol */
+.glyph {
+  position: relative;
+  width: 30px; height: 34px;
+  display: flex; align-items: center; justify-content: center;
+}
+.glyph::before {
+  content: "";
+  width: 0; height: 0;
+  border-style: solid;
+  border-width: 15px 0 15px 26px;
+  border-color: transparent transparent transparent rgba(255,255,255,0.75);
+  margin-left: 5px;
+  transition: opacity 0.3s;
+}
+.glyph .bar {
+  position: absolute;
+  width: 7px; height: 30px;
+  background: rgb(var(--sun));
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.glyph .bar.l { transform: translateX(-7px); }
+.glyph .bar.r { transform: translateX(7px); }
+
+body.running .glyph::before { opacity: 0; }
+body.running .glyph .bar    { opacity: 1; }
+
+body.running #start-btn {
+  border-color: var(--sun-rim);
+  background: rgba(var(--sun), 0.08);
+  box-shadow: inset 0 0 24px rgba(var(--sun), 0.07);
+}
+
+#status-word {
+  margin-top: 22px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--w40);
+  transition: color 0.5s;
+}
+body.running #status-word { color: var(--sun-rim); }
+
+/* ─── Unterer Block ───────────────────────────────────────── */
+#lower {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  padding: 0 20px calc(16px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: opacity var(--fade) ease;
+}
+body.running.idle #lower { opacity: 0; pointer-events: none; }
+
+/* Meditieren läuft: #lower immer weg, unabhängig von idle */
+body.medi-active #lower {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+
+/* ─── Sound-Kacheln ───────────────────────────────────────── */
+#sound-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Negatives Margin bricht aus dem #lower-Padding raus,
+     inneres Padding stellt den Abstand wieder her –
+     so startet die Maske vom echten Bildschirmrand */
+  margin: 0 -20px;
+  padding: 4px 20px;
+  -webkit-overflow-scrolling: touch;
+  mask-image: linear-gradient(to right, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
+}
+#sound-row::-webkit-scrollbar { display: none; }
+
+.sound-tile {
+  flex-shrink: 0;
+  width: 54px; height: 54px;
+  position: relative;
+  background: var(--w06);
+  border: 1px solid var(--w08);
+  border-radius: 16px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 4px;
+  cursor: pointer;
+  transition: background 0.25s, border-color 0.25s, box-shadow 0.25s, transform 0.15s;
+  user-select: none;
+}
+.sound-tile:active { transform: scale(0.93); }
+.sound-tile i {
+  font-size: 22px; line-height: 1;
+  color: rgba(255,255,255,0.62);
+  transition: color 0.25s;
+}
+.sound-tile .tile-label {
+  font-size: 9px; font-weight: 400;
+  letter-spacing: 0.3px;
+  color: var(--w40);
+  white-space: nowrap;
+  transition: color 0.25s;
+}
+.sound-tile.active {
+  background: rgba(126,217,87,0.10);
+  border-color: var(--gruen-soft);
+  box-shadow: 0 0 18px rgba(126,217,87,0.10);
+}
+.sound-tile.active i      { color: var(--gruen); }
+.sound-tile.active .tile-label { color: var(--gruen); }
+
+.sound-tile.none-tile.active {
+  background: var(--w08);
+  border-color: var(--w40);
+  box-shadow: none;
+}
+.sound-tile.none-tile.active i          { color: var(--w55); }
+.sound-tile.none-tile.active .tile-label { color: var(--w55); }
+
+/* ─── Timer ───────────────────────────────────────────────── */
+#timer-section { display: flex; flex-direction: column; gap: 10px; }
+
+#timer-chips { display: flex; gap: 8px; }
+.chip {
+  flex: 1;
+  padding: 7px 0;
+  background: var(--w06);
+  border: 1px solid var(--w08);
+  border-radius: 22px;
+  font-family: inherit;
+  font-size: 12px; font-weight: 400;
+  letter-spacing: 0.3px;
+  color: var(--w55);
+  cursor: pointer; text-align: center;
+  transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.15s;
+  user-select: none;
+}
+.chip:active { transform: scale(0.95); }
+.chip.active {
+  background: rgba(126,217,87,0.12);
+  border-color: var(--gruen-soft);
+  color: var(--gruen);
+}
+
+#slider-row {
+  display: flex; align-items: center; gap: 14px;
+  max-height: 60px;
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.35s ease;
+}
+#slider-row.collapsed { max-height: 0; opacity: 0; pointer-events: none; }
+
+#timer-display {
+  font-size: 30px; font-weight: 200;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.78);
+  min-width: 96px; text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+input[type=range] {
+  flex: 1; -webkit-appearance: none; appearance: none;
+  height: 2px; background: var(--w12);
+  border-radius: 2px; outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 15px; height: 15px;
+  border-radius: 50%; background: var(--gruen);
+  cursor: pointer; box-shadow: 0 0 10px rgba(126,217,87,0.5);
+}
+input[type=range]::-moz-range-thumb {
+  width: 15px; height: 15px;
+  border-radius: 50%; background: var(--gruen);
+  cursor: pointer; border: none;
+}
+
+/* ─── Menü-Sheet ──────────────────────────────────────────── */
+#menu-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(2px);
+  z-index: 50; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+#menu-overlay.open { opacity: 1; pointer-events: all; }
+
+#menu-sheet {
+  position: fixed; bottom: 0; left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%; max-width: 420px;
+  background: #0e160e;
+  border-top: 1px solid var(--w12);
+  border-radius: 24px 24px 0 0;
+  padding: 14px 24px 40px;
+  z-index: 51;
+  transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
+  max-height: 78vh; overflow-y: auto;
+}
+#menu-sheet.open { transform: translateX(-50%) translateY(0); }
+
+.sheet-handle {
+  width: 38px; height: 4px; background: var(--w12);
+  border-radius: 2px; margin: 0 auto 24px;
+}
+.sheet-section { margin-bottom: 28px; }
+.sheet-title {
+  font-size: 10px; font-weight: 500; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--w40);
+  margin-bottom: 14px;
+}
+#bg-swatches { display: flex; flex-wrap: wrap; gap: 12px; }
+.bg-swatch {
+  width: 52px;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  cursor: pointer; background: none; border: none;
+}
+.swatch-color {
+  width: 44px; height: 44px; border-radius: 12px;
+  border: 2px solid var(--w12);
+  transition: border-color 0.2s;
+}
+.bg-swatch.active .swatch-color { border-color: var(--gruen); }
+.swatch-label { font-size: 10px; color: var(--w40); }
+
+.dim-slider { width: 100%; }
+
+/* ─── Splash Screen ──────────────────────────────────────── */
+#splash {
+  position: fixed; inset: 0; z-index: 200;
+  background: #0b1a0b;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.9s ease;
+}
+#splash.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+#splash-inner {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 20px;
+  user-select: none;
+}
+#splash-icon {
+  width: 100px;
+  height: auto;
+  animation: splash-pulse 2.4s ease-in-out infinite;
+}
+@keyframes splash-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.07); }
+}
+#splash-title {
+  font-size: 15px;
+  font-weight: 300;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.75);
+}
+#splash-dots {
+  display: flex; gap: 8px;
+  margin-top: 4px;
+}
+#splash-dots span {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #7ed957;
+  opacity: 0.25;
+  animation: splash-dot 1.4s ease-in-out infinite;
+}
+#splash-dots span:nth-child(2) { animation-delay: 0.22s; }
+#splash-dots span:nth-child(3) { animation-delay: 0.44s; }
+@keyframes splash-dot {
+  0%, 100% { opacity: 0.25; }
+  50%       { opacity: 1; }
+}
+
+/* ─── Modus-Chips ────────────────────────────────────────── */
+#mode-row {
+  display: flex;
+  gap: 8px;
+  max-height: 60px;
+  overflow: hidden;
+  transition: max-height 0.35s ease, opacity 0.3s ease;
+}
+#mode-row.collapsed { max-height: 0; opacity: 0; pointer-events: none; }
+
+.mode-chip {
+  flex: 1;
+  padding: 7px 0;
+  background: var(--w06);
+  border: 1px solid var(--w08);
+  border-radius: 22px;
+  font-family: inherit;
+  font-size: 12px; font-weight: 400;
+  letter-spacing: 0.3px;
+  color: var(--w55);
+  cursor: pointer; text-align: center;
+  transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.15s;
+  user-select: none;
+}
+.mode-chip:active { transform: scale(0.95); }
+.mode-chip.active {
+  background: rgba(126,217,87,0.12);
+  border-color: var(--gruen-soft);
+  color: var(--gruen);
+}
+
+/* ─── Gong-Sektion ───────────────────────────────────────── */
+#gong-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow: hidden;
+  transition: max-height 0.35s ease, opacity 0.3s ease;
+}
+#gong-section.collapsed { max-height: 0; opacity: 0; pointer-events: none; }
+
+/* Gong + Abdunkeln nebeneinander in einer Zeile */
+.gong-row {
+  display: flex;
+  gap: 20px;
+}
+.gong-row .gong-label {
+  flex: 1;
+}
+
+
+.gong-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  padding: 2px 0;
+}
+.gong-label-text {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  color: var(--w55);
+}
+
+/* Custom Toggle Switch */
+.gong-toggle { flex-shrink: 0; }
+.gong-check-input { display: none; }
+.gong-track {
+  display: block;
+  width: 38px; height: 22px;
+  border-radius: 11px;
+  background: var(--w12);
+  border: 1px solid var(--w12);
+  position: relative;
+  transition: background 0.25s, border-color 0.25s;
+}
+.gong-thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--w40);
+  transition: transform 0.25s, background 0.25s;
+}
+.gong-check-input:checked + .gong-track {
+  background: rgba(126,217,87,0.20);
+  border-color: var(--gruen-soft);
+}
+.gong-check-input:checked + .gong-track .gong-thumb {
+  transform: translateX(16px);
+  background: var(--gruen);
+}
+
+/* Klangschalen-Auswahl – immer sichtbar, blass wenn Gong aus */
+#gong-schalen {
+  display: flex;
+  gap: 8px;
+}
+#gong-schalen .gong-tile {
+  opacity: 0.28;
+  pointer-events: none;
+  transition: opacity 0.3s ease, background 0.2s, border-color 0.2s, color 0.2s;
+}
+#gong-section.gong-active #gong-schalen .gong-tile {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gong-tile {
+  flex: 1;
+  padding: 7px 4px;
+  border-radius: 18px;
+  background: var(--w06);
+  border: 1px solid var(--w08);
+  font-family: inherit;
+  font-size: 11px; font-weight: 400;
+  letter-spacing: 0.2px;
+  color: var(--w40);
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+  user-select: none;
+  white-space: nowrap;
+}
+.gong-tile:active { transform: scale(0.95); }
+.gong-tile.active {
+  background: rgba(126,217,87,0.10);
+  border-color: var(--gruen-soft);
+  color: var(--gruen);
+}
+
+/* ─── Sound-Kachel: × zum Abwählen ───────────────────────── */
+.tile-x {
+  position: absolute;
+  top: 4px; right: 6px;
+  font-size: 8px;
+  line-height: 1;
+  color: var(--gruen);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  font-style: normal;
+}
+.sound-tile.active .tile-x { opacity: 0.65; }
+
+/* ─── Menü: Modi-Erklärung ────────────────────────────────── */
+.mode-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mode-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mode-info-name {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gruen);
+  letter-spacing: 0.3px;
+}
+.mode-info-desc {
+  font-size: 11px;
+  color: var(--w40);
+  line-height: 1.5;
+}
+
+/* ─── Meditieren-Timer-Anzeige ───────────────────────────── */
+#medi-timer {
+  margin-top: 20px;
+  min-height: 56px;
+  font-size: 40px;
+  font-weight: 200;
+  letter-spacing: 2px;
+  color: rgba(255,255,255,0.82);
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+body.running.medi-mode #medi-timer {
+  opacity: 1;
+}
+body.running.idle.medi-mode #medi-timer {
+  opacity: 0.12;
+  transition: opacity 1.6s ease;
+}
+
+/* Auto-Dim läuft jetzt über #dim-overlay z-index 4 + JS */
+
+/* ─── Berg-Theme: Play-Button kaum sichtbar, nach Start komplett weg ── */
+body.theme-berg #start-btn {
+  background: rgba(255,255,255,0.02);
+  border-color: rgba(255,255,255,0.06);
+  backdrop-filter: blur(3px) saturate(102%);
+  -webkit-backdrop-filter: blur(3px) saturate(102%);
+}
+body.theme-berg.running #start-btn {
+  background: rgba(var(--sun), 0.02);
+  border-color: rgba(var(--sun), 0.12);
+  box-shadow: none;
+}
+/* Nach Start: Button + Label komplett ausblenden */
+body.running.idle.theme-berg #start-btn {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1.5s ease;
+}
+body.running.idle.theme-berg #status-word {
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+
+/* ─── Weicher Stop-Übergang ───────────────────────────────── */
+/* body.stopping überschreibt body.running – Button faded sanft zurück */
+body.stopping #start-btn {
+  border-color: var(--w12);
+  background: var(--w06);
+  box-shadow: none;
+  transition: border-color 1.5s ease, background 1.5s ease,
+              box-shadow 1.5s ease, transform 0.25s;
+}
+body.stopping .glyph .bar {
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+body.stopping .glyph::before {
+  opacity: 1;
+  transition: opacity 1s ease;
+}
