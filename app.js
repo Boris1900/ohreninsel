@@ -1,5 +1,5 @@
 // Version
-const APP_VERSION = 'v0.7.5';
+const APP_VERSION = 'v0.8.0';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
@@ -29,10 +29,6 @@ const sliderRow  = document.getElementById('slider-row');
 const dimSlider  = document.getElementById('dim-slider');
 const dimOverlay = document.getElementById('dim-overlay');
 const bgEl       = document.getElementById('bg');
-const modeRow    = document.getElementById('mode-row');
-const gongSection = document.getElementById('gong-section');
-const gongSchalen = document.getElementById('gong-schalen');
-const gongCheck  = document.getElementById('gong-check');
 
 // ── UI-State ──────────────────────────────────────────────────────────────────
 let isRunning       = false;
@@ -116,33 +112,6 @@ function getSelectedGongFile() {
   return tile ? tile.dataset.file : null;
 }
 
-function getMode() {
-  const chipMin = parseInt(document.querySelector('.chip.active')?.dataset.min || 0);
-  if (chipMin === 0) return 'ambient';
-  const activeMode = document.querySelector('.mode-chip.active');
-  return activeMode?.dataset.mode || 'einschlafen';
-}
-
-// ── Modus-Sichtbarkeit aktualisieren ─────────────────────────────────────────
-function updateModeVisibility() {
-  const chipMin = parseInt(document.querySelector('.chip.active')?.dataset.min || 0);
-  const hasTimer = chipMin > 0;
-  const hasSound = !!getSelectedFile();
-  const mediChip = document.querySelector('.mode-chip[data-mode="meditieren"]');
-
-  if (!hasTimer) {
-    modeRow.classList.add('collapsed');
-    gongSection.classList.add('collapsed');
-    return;
-  }
-
-  modeRow.classList.remove('collapsed');
-
-  const currentMode = document.querySelector('.mode-chip.active')?.dataset.mode;
-  // Gong-Sektion nur bei Meditieren
-  gongSection.classList.toggle('collapsed', currentMode !== 'meditieren');
-  body.classList.toggle('medi-selected', currentMode === 'meditieren');
-}
 
 // ── Datei laden, dekodieren + cachen ─────────────────────────────────────────
 async function loadFile(filePath) {
@@ -203,21 +172,36 @@ function runScheduler() {
   schedulerTimer = setTimeout(runScheduler, 250);
 }
 
+// ── EIN persistenter AudioContext (iOS-tauglich) ──────────────────────────────
+// iOS limitiert die Zahl der AudioContexts und bindet Audio an User-Gesten.
+// Darum genau EINEN Context erstellen, bei Gesten aufwärmen und NIE schließen.
+function ensureCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// Bei jeder Berührung den Context aufwärmen (resume läuft so in der Geste)
+document.addEventListener('pointerdown', () => { ensureCtx(); }, { passive: true });
+
 // ── Audio starten ─────────────────────────────────────────────────────────────
 async function startAudio(filePath, fadeInDur = FADE_IN) {
-  audioCtx   = new (window.AudioContext || window.webkitAudioContext)();
-  masterGain = audioCtx.createGain();
-  masterGain.gain.value = 0;
-  masterGain.connect(audioCtx.destination);
+  const ctx = ensureCtx();
+  if (ctx.state === 'suspended') { try { await ctx.resume(); } catch (_) {} }
 
-  if (audioCtx.state === 'suspended') await audioCtx.resume();
+  // Neuer Track-Gain im bestehenden Context (kein neuer Context!)
+  masterGain = ctx.createGain();
+  masterGain.gain.value = 0;
+  masterGain.connect(ctx.destination);
 
   decodedBuffer = decodedCache.get(filePath);
 
   isAudioActive = true;
-  nextSrcStart  = audioCtx.currentTime;
+  nextSrcStart  = ctx.currentTime;
 
-  const t = audioCtx.currentTime;
+  const t = ctx.currentTime;
   masterGain.gain.cancelScheduledValues(t);
   masterGain.gain.setValueAtTime(0, t);
   masterGain.gain.linearRampToValueAtTime(1, t + fadeInDur);
@@ -293,10 +277,9 @@ function stopAudio(withFade = true) {
   isAudioActive = false;
   clearTimeout(schedulerTimer);
 
-  const ctx   = audioCtx;
+  const ctx   = audioCtx;          // persistent – NICHT schließen, NICHT auf null
   const gain  = masterGain;
   const nodes = activeNodes.splice(0);
-  audioCtx    = null;
   masterGain  = null;
   activeNodes = [];
 
@@ -305,7 +288,7 @@ function stopAudio(withFade = true) {
       try { source.stop(); } catch (_) {}
       try { g.disconnect(); } catch (_) {}
     });
-    try { ctx.close(); } catch (_) {}
+    try { if (gain) gain.disconnect(); } catch (_) {}
   }
 
   if (withFade && gain && ctx) {
@@ -351,23 +334,15 @@ function doStop(withAudioFade = true) {
 }
 
 // ── Start / Stop Button ───────────────────────────────────────────────────────
-startBtn.addEventListener('click', async (e) => {
-  e.stopPropagation();
-
-  if (isRunning) {
-    doStop(true);
-    return;
-  }
-
+// ── Session starten (zentral für Hauptseite + Meditieren) ────────────────────
+// mode: 'ambient' (endlos) | 'einschlafen' (Timer + Ausblenden) | 'meditieren' (Gong)
+async function startSession({ mode, filePath, minutes, gongFile }) {
   clearTimeout(stopVisualTimer);
   body.classList.remove('stopping');
 
-  const filePath = getSelectedFile();
-  const mode     = getMode();
-  const gongOn   = mode === 'meditieren' && gongCheck.checked;
-  const gongFile = gongOn ? getSelectedGongFile() : null;
+  const gongOn = mode === 'meditieren' && !!gongFile;
 
-  // Alle benötigten Dateien vorab laden
+  // Benötigte Dateien vorab laden
   const loadQueue = [];
   if (filePath && !decodedCache.has(filePath)) loadQueue.push(filePath);
   if (gongFile && !decodedCache.has(gongFile)) loadQueue.push(gongFile);
@@ -397,13 +372,12 @@ startBtn.addEventListener('click', async (e) => {
   statusW.textContent = 'Läuft';
   startGlow();
 
-  // Audio starten
+  // Audio starten (bei "Nur Gong" läuft kein Dauerklang)
   if (filePath) {
-    const fadeIn = (gongOn && gongFile) ? GONG_FADEIN : FADE_IN;
+    const fadeIn = gongOn ? GONG_FADEIN : FADE_IN;
     await startAudio(filePath, fadeIn);
   }
-  // Start-Gong
-  if (gongOn && gongFile) playGong(gongFile);
+  if (gongOn) playGong(gongFile);
 
   const dimDelay = mode === 'meditieren' ? 3000 : 1500;
   autoFade = setTimeout(() => {
@@ -412,19 +386,13 @@ startBtn.addEventListener('click', async (e) => {
     applyAutoDim();
   }, dimDelay);
 
-  // Timer-Logik
-  const chipMin   = parseInt(document.querySelector('.chip.active')?.dataset.min || 0);
-  const minutes   = chipMin > 0 ? parseInt(slider.value) : 0;
-  const totalMs  = minutes * 60 * 1000;
+  const totalMs   = minutes * 60 * 1000;
   const totalSecs = minutes * 60;
 
-  // Meditieren-Modus: Countdown + #lower ausblenden
   if (mode === 'meditieren' && minutes > 0) {
-    body.classList.add('medi-active');
-    body.classList.add('medi-mode');
+    body.classList.add('medi-active', 'medi-mode');
     startCountdown(totalMs);
   }
-  // Einschlafen-Modus: kleinen Timer-Display runterzählen lassen
   if (mode === 'einschlafen' && minutes > 0) {
     startSmallCountdown(totalMs);
   }
@@ -443,15 +411,11 @@ startBtn.addEventListener('click', async (e) => {
         masterGain.gain.linearRampToValueAtTime(0, now + fadeSecs);
       }, fadeStartMs);
 
-      timerTimeout = setTimeout(() => {
-        if (!isRunning) return;
-        doStop(false);
-      }, totalMs);
+      timerTimeout = setTimeout(() => { if (isRunning) doStop(false); }, totalMs);
 
-    } else {
-      // Meditieren
-      if (gongOn && gongFile) {
-        // End-Gong: Gong schlägt an, parallel Ambient über MEDI_END_FADE Sekunden ausblenden
+    } else if (mode === 'meditieren') {
+      if (gongOn) {
+        // End-Gong: Gong schlägt an, parallel Ambient ausblenden
         timerTimeout = setTimeout(() => {
           if (!isRunning) return;
           playGong(gongFile);
@@ -464,7 +428,6 @@ startBtn.addEventListener('click', async (e) => {
           setTimeout(() => { if (isRunning) doStop(false); }, MEDI_END_FADE * 1000 + 200);
         }, totalMs);
       } else {
-        // Kein Gong: letzte MEDI_END_FADE Sekunden sanft ausblenden
         if (totalMs > MEDI_END_FADE * 1000) {
           endFadeTimer = setTimeout(() => {
             if (!isRunning || !masterGain || !audioCtx) return;
@@ -474,13 +437,21 @@ startBtn.addEventListener('click', async (e) => {
             masterGain.gain.linearRampToValueAtTime(0, now + MEDI_END_FADE);
           }, totalMs - MEDI_END_FADE * 1000);
         }
-        timerTimeout = setTimeout(() => {
-          if (!isRunning) return;
-          doStop(false);
-        }, totalMs);
+        timerTimeout = setTimeout(() => { if (isRunning) doStop(false); }, totalMs);
       }
     }
   }
+}
+
+// ── Großer Play-Button: Hauptseite (Ambient / Einschlafen) ───────────────────
+startBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  if (isRunning) { doStop(true); return; }
+  const filePath = getSelectedFile();
+  const chipMin  = parseInt(document.querySelector('.chip.active')?.dataset.min || 0);
+  const minutes  = chipMin > 0 ? parseInt(slider.value) : 0;
+  const mode     = minutes > 0 ? 'einschlafen' : 'ambient';
+  startSession({ mode, filePath, minutes, gongFile: null });
 });
 
 // ── Tap auf Hintergrund = Bedienelemente ein-/ausblenden (Toggle) ────────────
@@ -530,25 +501,21 @@ async function initApp() {
 }
 initApp();
 
-// ── Sound-Kacheln (abwählbar per zweitem Tap) ─────────────────────────────────
+// ── Sound-Kacheln (immer genau eine aktiv – kein Abwählen mehr) ──────────────
 document.querySelectorAll('.sound-tile').forEach(tile => {
   tile.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (tile.classList.contains('active')) {
-      tile.classList.remove('active');
-    } else {
-      document.querySelectorAll('.sound-tile').forEach(t => t.classList.remove('active'));
-      tile.classList.add('active');
-      const autoBg = soundBgMap[tile.dataset.sound];
-      if (autoBg) setBg(autoBg);
-      const ci = carouselItems.findIndex(item => item.key === tile.dataset.sound);
-      if (ci !== -1) { carouselIdx = ci; localStorage.setItem('ohreninsel-carousel', ci); }
-    }
-    updateModeVisibility();
+    if (tile.classList.contains('active')) return; // schon aktiv → nichts tun
+    document.querySelectorAll('.sound-tile').forEach(t => t.classList.remove('active'));
+    tile.classList.add('active');
+    const autoBg = soundBgMap[tile.dataset.sound];
+    if (autoBg) setBg(autoBg);
+    const ci = carouselItems.findIndex(item => item.key === tile.dataset.sound);
+    if (ci !== -1) { carouselIdx = ci; localStorage.setItem('ohreninsel-carousel', ci); }
   });
 });
 
-// ── Timer-Chips ───────────────────────────────────────────────────────────────
+// ── Einschlaf-Timer-Chips ─────────────────────────────────────────────────────
 document.querySelectorAll('.chip').forEach(chip => {
   chip.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -562,26 +529,10 @@ document.querySelectorAll('.chip').forEach(chip => {
       updateDisplay(min);
       sliderRow.classList.remove('collapsed');
     }
-    updateModeVisibility();
   });
 });
 
-// ── Modus-Chips ───────────────────────────────────────────────────────────────
-document.querySelectorAll('.mode-chip').forEach(chip => {
-  chip.addEventListener('click', (e) => {
-    e.stopPropagation();
-    document.querySelectorAll('.mode-chip').forEach(c => c.classList.remove('active'));
-    chip.classList.add('active');
-    updateModeVisibility();
-  });
-});
-
-// ── Gong-Checkbox ─────────────────────────────────────────────────────────────
-gongCheck.addEventListener('change', () => {
-  gongSection.classList.toggle('gong-active', gongCheck.checked);
-});
-
-// ── Gong-Klangschalen ─────────────────────────────────────────────────────────
+// ── Gong-Klangschalen (im Meditieren-Panel) ──────────────────────────────────
 document.querySelectorAll('.gong-tile').forEach(tile => {
   tile.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -750,7 +701,6 @@ function switchToSound(soundKey, direction = 0) {
     if (direction !== 0) slideBg(bg, direction);
     else setBg(bg);
   }
-  updateModeVisibility();
   if (isRunning && isAudioActive) {
     const newFile = tile.dataset.file;
     if (newFile) switchAudio(newFile);
@@ -844,6 +794,68 @@ async function applyUpdate() {
   } catch (e) {}
   window.location.href = window.location.pathname + '?v=' + Date.now();
 }
+
+// ── Meditieren-Panel ──────────────────────────────────────────────────────────
+const mediEntry     = document.getElementById('medi-entry');
+const mediOverlay   = document.getElementById('medi-overlay');
+const mediSheet     = document.getElementById('medi-sheet');
+const mediSlider    = document.getElementById('medi-duration-slider');
+const mediTimerDisp = document.getElementById('medi-timer-display');
+const mediStartBtn  = document.getElementById('medi-start-btn');
+let mediSilent = false;
+
+function updateMediDisplay(min) {
+  const h = Math.floor(min / 60), m = min % 60;
+  mediTimerDisp.textContent = h > 0
+    ? `${h}:${String(m).padStart(2, '0')}:00`
+    : `${String(m).padStart(2, '0')}:00`;
+}
+
+function openMediPanel()  { mediOverlay.classList.add('open');    mediSheet.classList.add('open'); }
+function closeMediPanel() { mediOverlay.classList.remove('open'); mediSheet.classList.remove('open'); }
+
+mediEntry.addEventListener('click', (e) => { e.stopPropagation(); openMediPanel(); });
+mediOverlay.addEventListener('click', closeMediPanel);
+
+// Dauer-Chips
+document.querySelectorAll('.medi-chip').forEach(chip => {
+  chip.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.querySelectorAll('.medi-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const min = parseInt(chip.dataset.min);
+    mediSlider.value = min;
+    updateMediDisplay(min);
+  });
+});
+
+// Dauer-Slider (Feintuning, hält die Chips synchron)
+mediSlider.addEventListener('input', () => {
+  const val = parseInt(mediSlider.value);
+  updateMediDisplay(val);
+  document.querySelectorAll('.medi-chip').forEach(c =>
+    c.classList.toggle('active', parseInt(c.dataset.min) === val));
+});
+
+// Klang / Nur Gong
+document.querySelectorAll('.medi-toggle').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.querySelectorAll('.medi-toggle').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    mediSilent = btn.dataset.silent === 'true';
+  });
+});
+
+// Meditation starten
+mediStartBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  closeMediPanel();
+  const filePath = mediSilent ? '' : getSelectedFile();
+  const minutes  = parseInt(mediSlider.value);
+  const gongFile = getSelectedGongFile();
+  startSession({ mode: 'meditieren', filePath, minutes, gongFile });
+});
 
 if (window.location.search) {
   history.replaceState(null, '', window.location.pathname);

@@ -776,3 +776,108 @@ body.stopping .glyph::before {
   opacity: 1;
   transition: opacity 1s ease;
 }
+
+/* ─── Section-Label (Einschlaf-Timer, Dauer, Klang, Gong) ────── */
+.section-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--w40);
+  margin-bottom: 6px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+}
+
+/* ─── Meditieren-Einstieg (dezent, unter den Timer-Chips) ────── */
+#medi-entry {
+  align-self: center;
+  display: flex; align-items: center; gap: 7px;
+  background: none; border: none;
+  color: var(--w55);
+  font-family: inherit; font-size: 12px; font-weight: 400;
+  letter-spacing: 1px;
+  cursor: pointer;
+  padding: 4px 14px;
+  margin-top: 2px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+  transition: color 0.2s;
+  user-select: none;
+}
+#medi-entry i { font-size: 16px; }
+#medi-entry:active { color: var(--gruen); }
+
+/* ─── Meditieren-Panel ──────────────────────────────────────── */
+#medi-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 50; opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+#medi-overlay.open { opacity: 1; pointer-events: all; }
+
+#medi-sheet {
+  position: fixed; bottom: 0; left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%; max-width: 420px;
+  background: #0e160e;
+  border-top: 1px solid var(--w12);
+  border-radius: 24px 24px 0 0;
+  padding: 14px 24px 40px;
+  z-index: 51;
+  transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
+  max-height: 82vh; overflow-y: auto;
+}
+#medi-sheet.open { transform: translateX(-50%) translateY(0); }
+
+.medi-block { margin-bottom: 22px; }
+
+#medi-chips, #medi-sound-toggle { display: flex; gap: 8px; }
+
+.medi-chip, .medi-toggle {
+  flex: 1;
+  padding: 9px 0;
+  background: var(--w06);
+  border: 1px solid var(--w08);
+  border-radius: 22px;
+  font-family: inherit;
+  font-size: 12px; font-weight: 400;
+  letter-spacing: 0.3px;
+  color: var(--w55);
+  cursor: pointer; text-align: center;
+  transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.15s;
+  user-select: none;
+}
+.medi-chip:active, .medi-toggle:active { transform: scale(0.95); }
+.medi-chip.active, .medi-toggle.active {
+  background: rgba(126,217,87,0.12);
+  border-color: var(--gruen-soft);
+  color: var(--gruen);
+}
+
+#medi-slider-row {
+  display: flex; align-items: center; gap: 14px;
+  margin-top: 12px;
+}
+#medi-timer-display {
+  font-size: 22px; font-weight: 200;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.78);
+  min-width: 78px; text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+#medi-start-btn {
+  width: 100%;
+  padding: 14px 0;
+  background: rgba(126,217,87,0.14);
+  border: 1px solid var(--gruen-soft);
+  border-radius: 26px;
+  font-family: inherit;
+  font-size: 14px; font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--gruen);
+  cursor: pointer; text-align: center;
+  transition: background 0.2s, transform 0.15s;
+}
+#medi-start-btn:active { transform: scale(0.97); background: rgba(126,217,87,0.22); }

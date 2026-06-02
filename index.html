@@ -69,37 +69,24 @@
     <div id="lower">
 
       <div id="sound-row">
-        <button class="sound-tile" data-sound="wellen" data-file="Sounds/Wellen Nordsee_0.1.mp3">
-          <span class="tile-x">✕</span>
-          <i class="ph ph-waves"></i><span class="tile-label">Wellen</span>
+        <button class="sound-tile" data-sound="wellen" data-file="Sounds/Wellen Nordsee_0.1.mp3">          <i class="ph ph-waves"></i><span class="tile-label">Wellen</span>
         </button>
-        <button class="sound-tile" data-sound="rauschen" data-file="Sounds/Rauschen Nordsee_0.1.mp3">
-          <span class="tile-x">✕</span>
-          <i class="ph ph-wind"></i><span class="tile-label">Rauschen</span>
+        <button class="sound-tile" data-sound="rauschen" data-file="Sounds/Rauschen Nordsee_0.1.mp3">          <i class="ph ph-wind"></i><span class="tile-label">Rauschen</span>
         </button>
-        <button class="sound-tile" data-sound="voegel" data-file="Sounds/Vögel im Wald_0.1.mp3">
-          <span class="tile-x">✕</span>
-          <i class="ph ph-bird"></i><span class="tile-label">Vögel</span>
+        <button class="sound-tile" data-sound="voegel" data-file="Sounds/Vögel im Wald_0.1.mp3">          <i class="ph ph-bird"></i><span class="tile-label">Vögel</span>
         </button>
-        <button class="sound-tile" data-sound="bach" data-file="Sounds/Bachplätschern_0.1.mp3">
-          <span class="tile-x">✕</span>
-          <i class="ph ph-drop"></i><span class="tile-label">Bach</span>
+        <button class="sound-tile" data-sound="bach" data-file="Sounds/Bachplätschern_0.1.mp3">          <i class="ph ph-drop"></i><span class="tile-label">Bach</span>
         </button>
-        <button class="sound-tile" data-sound="regen" data-file="Sounds/Regen und Gewitter_0.1.mp3">
-          <span class="tile-x">✕</span>
-          <i class="ph ph-cloud-rain"></i><span class="tile-label">Regen</span>
+        <button class="sound-tile" data-sound="regen" data-file="Sounds/Regen und Gewitter_0.1.mp3">          <i class="ph ph-cloud-rain"></i><span class="tile-label">Regen</span>
         </button>
-        <button class="sound-tile" data-sound="cafe" data-file="Sounds/Straßencafe_0.1.mp3">
-          <span class="tile-x">✕</span>
-          <i class="ph ph-coffee"></i><span class="tile-label">Café</span>
+        <button class="sound-tile" data-sound="cafe" data-file="Sounds/Straßencafe_0.1.mp3">          <i class="ph ph-coffee"></i><span class="tile-label">Café</span>
         </button>
-        <button class="sound-tile" data-sound="berg" data-file="Sounds/Berg_0.1.mp3">
-          <span class="tile-x">✕</span>
-          <i class="ph ph-mountains"></i><span class="tile-label">Berg</span>
+        <button class="sound-tile" data-sound="berg" data-file="Sounds/Berg_0.1.mp3">          <i class="ph ph-mountains"></i><span class="tile-label">Berg</span>
         </button>
       </div>
 
       <div id="timer-section">
+        <div class="section-label">Einschlaf-Timer</div>
         <div id="timer-chips">
           <button class="chip active" data-min="0">Aus</button>
           <button class="chip" data-min="20">20 Min</button>
@@ -107,35 +94,16 @@
           <button class="chip" data-min="60">60 Min</button>
         </div>
 
-        <!-- Modus-Auswahl: erscheint wenn Timer aktiv + Sound gewählt -->
-        <div id="mode-row" class="collapsed">
-          <button class="mode-chip active" data-mode="einschlafen">Einschlafen</button>
-          <button class="mode-chip" data-mode="meditieren">Meditieren</button>
-        </div>
-
-        <!-- Gong-Optionen: erscheint nur im Meditieren-Modus -->
-        <div id="gong-section" class="collapsed">
-          <label class="gong-label" for="gong-check">
-            <span class="gong-label-text">Gong</span>
-            <span class="gong-toggle">
-              <input type="checkbox" id="gong-check" class="gong-check-input">
-              <span class="gong-track">
-                <span class="gong-thumb"></span>
-              </span>
-            </span>
-          </label>
-          <div id="gong-schalen">
-            <button class="gong-tile active" data-file="Sounds/Klangschale Morgenstern.mp3">Morgenstern</button>
-            <button class="gong-tile" data-file="Sounds/Klangschale Mittagspause.mp3">Mittagspause</button>
-            <button class="gong-tile" data-file="Sounds/Klangschale Abendrot.mp3">Abendrot</button>
-          </div>
-        </div>
-
         <div id="slider-row" class="collapsed">
           <input type="range" id="duration-slider" min="1" max="90" value="40">
           <span id="timer-display">40:00</span>
         </div>
       </div>
+
+      <!-- Meditieren-Einstieg: dezent, öffnet das Meditieren-Panel -->
+      <button id="medi-entry">
+        <i class="ph ph-flower-lotus"></i><span>Meditieren</span>
+      </button>
 
     </div>
 
@@ -230,6 +198,45 @@
     </div>
 
     <div id="menu-version"></div>
+  </div>
+
+  <!-- Meditieren-Panel -->
+  <div id="medi-overlay"></div>
+  <div id="medi-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Meditieren</div>
+
+    <div class="medi-block">
+      <div class="section-label">Dauer</div>
+      <div id="medi-chips">
+        <button class="medi-chip" data-min="10">10 Min</button>
+        <button class="medi-chip active" data-min="20">20 Min</button>
+        <button class="medi-chip" data-min="30">30 Min</button>
+      </div>
+      <div id="medi-slider-row">
+        <input type="range" id="medi-duration-slider" min="1" max="90" value="20">
+        <span id="medi-timer-display">20:00</span>
+      </div>
+    </div>
+
+    <div class="medi-block">
+      <div class="section-label">Klang</div>
+      <div id="medi-sound-toggle">
+        <button class="medi-toggle active" data-silent="false">Mit Klang</button>
+        <button class="medi-toggle" data-silent="true">Nur Gong</button>
+      </div>
+    </div>
+
+    <div class="medi-block">
+      <div class="section-label">Gong</div>
+      <div id="gong-schalen">
+        <button class="gong-tile active" data-file="Sounds/Klangschale Morgenstern.mp3">Morgenstern</button>
+        <button class="gong-tile" data-file="Sounds/Klangschale Mittagspause.mp3">Mittagspause</button>
+        <button class="gong-tile" data-file="Sounds/Klangschale Abendrot.mp3">Abendrot</button>
+      </div>
+    </div>
+
+    <button id="medi-start-btn">Meditation starten</button>
   </div>
 
   <script src="app.js"></script>
