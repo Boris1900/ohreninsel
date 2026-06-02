@@ -601,7 +601,13 @@ const sunTheme = {
   'bg-blau':      'theme-blau',
   'bg-nacht':     'theme-nacht',
   'bg-nacht-meer':'theme-nacht',
+  'bg-wald':      'theme-wald',
+  'bg-bach':      'theme-bach',
+  'bg-regen':     'theme-regen',
+  'bg-cafe':      'theme-cafe',
 };
+
+const photoBgs = new Set(['bg-meer','bg-berg','bg-nacht-meer','bg-wald','bg-bach','bg-regen','bg-cafe']);
 
 const soundBgMap = {
   wellen:   'bg-meer',
@@ -616,7 +622,8 @@ function setBg(cls) {
   bgEl.className = cls;
   document.querySelectorAll('.bg-swatch').forEach(s =>
     s.classList.toggle('active', s.dataset.bg === cls));
-  body.classList.remove('theme-meer', 'theme-berg', 'theme-blau', 'theme-nacht');
+  body.classList.remove('theme-meer','theme-berg','theme-blau','theme-nacht','theme-wald','theme-bach','theme-regen','theme-cafe');
+  body.classList.toggle('theme-photo', photoBgs.has(cls));
   if (sunTheme[cls]) body.classList.add(sunTheme[cls]);
 }
 

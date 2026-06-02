@@ -282,6 +282,33 @@ body.medi-active #lower {
 .sound-tile.none-tile.active i          { color: var(--w55); }
 .sound-tile.none-tile.active .tile-label { color: var(--w55); }
 
+/* ─── Foto-Hintergründe: Kacheln als Glas ──────────── */
+body.theme-photo .sound-tile {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.15);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+body.theme-photo .sound-tile.active {
+  background: rgba(255,255,255,0.09);
+  border-color: rgba(255,255,255,0.38);
+  box-shadow: 0 0 14px rgba(255,255,255,0.06);
+}
+body.theme-meer  .sound-tile { border-color: rgba(80,210,240,0.22); }
+body.theme-meer  .sound-tile.active { border-color: rgba(80,210,240,0.55); }
+body.theme-nacht .sound-tile { border-color: rgba(120,170,255,0.22); }
+body.theme-nacht .sound-tile.active { border-color: rgba(120,170,255,0.55); }
+body.theme-berg  .sound-tile { border-color: rgba(255,210,100,0.22); }
+body.theme-berg  .sound-tile.active { border-color: rgba(255,210,100,0.55); }
+body.theme-wald  .sound-tile { border-color: rgba(100,220,120,0.22); }
+body.theme-wald  .sound-tile.active { border-color: rgba(100,220,120,0.55); }
+body.theme-bach  .sound-tile { border-color: rgba(100,210,200,0.22); }
+body.theme-bach  .sound-tile.active { border-color: rgba(100,210,200,0.55); }
+body.theme-regen .sound-tile { border-color: rgba(220,180,100,0.25); }
+body.theme-regen .sound-tile.active { border-color: rgba(220,180,100,0.58); }
+body.theme-cafe  .sound-tile { border-color: rgba(255,170,60,0.25); }
+body.theme-cafe  .sound-tile.active { border-color: rgba(255,170,60,0.58); }
+
 /* ─── Timer ───────────────────────────────────────────────── */
 #timer-section { display: flex; flex-direction: column; gap: 10px; }
 
