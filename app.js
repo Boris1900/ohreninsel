@@ -272,9 +272,12 @@ function startSmallCountdown(totalMs) {
   function tick() {
     const remaining = Math.max(0, totalMs - (Date.now() - startTime));
     const secs = Math.ceil(remaining / 1000);
+    const h = Math.floor(secs / 3600);
     const m = Math.floor((secs % 3600) / 60);
     const s = secs % 60;
-    timerDisp.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    timerDisp.textContent = h > 0
+      ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+      : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   }
   tick();
   countdownInterval = setInterval(tick, 500);
@@ -509,9 +512,10 @@ async function initApp() {
   const splash  = document.getElementById('splash');
   const minWait = new Promise(r => setTimeout(r, 3000));
   await Promise.all([preloadAllSounds(), minWait]);
-  // Wellen als Standard-Preset vorauswählen
-  const wellenTile = document.querySelector('.sound-tile[data-sound="wellen"]');
-  if (wellenTile) wellenTile.classList.add('active');
+  // Vögel + Wald als Standard-Preset
+  const voegelTile = document.querySelector('.sound-tile[data-sound="voegel"]');
+  if (voegelTile) voegelTile.classList.add('active');
+  setBg('bg-wald');
   splash.classList.add('fade-out');
   setTimeout(() => splash.remove(), 1000);
 }
