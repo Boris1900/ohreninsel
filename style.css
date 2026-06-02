@@ -41,8 +41,13 @@ html, body {
 #bg.bg-grau    { background: #141414; }
 #bg.bg-nacht   { background: #0d3510; }
 #bg.bg-schwarz { background: #000; }
-#bg.bg-berg    { background: url('berglandschaft_0.1.jpg') center/cover no-repeat; }
-#bg.bg-meer    { background: url('meer_0.2.jpg') center/cover no-repeat; }
+#bg.bg-berg       { background: url('berglandschaft_0.1.jpg') center/cover no-repeat; }
+#bg.bg-meer       { background: url('meer_0.2.jpg') center/cover no-repeat; }
+#bg.bg-nacht-meer { background: url('nacht_meer_0.1.jpg') center/cover no-repeat; }
+#bg.bg-wald       { background: url('wald_0.1.jpg') center/cover no-repeat; }
+#bg.bg-bach       { background: url('bach_0.1.jpg') center/cover no-repeat; }
+#bg.bg-regen      { background: url('regen_0.1.jpg') center/cover no-repeat; }
+#bg.bg-cafe       { background: url('cafe_0.1.jpg') center/cover no-repeat; }
 
 #bg-shade {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;

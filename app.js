@@ -526,6 +526,8 @@ document.querySelectorAll('.sound-tile').forEach(tile => {
     } else {
       document.querySelectorAll('.sound-tile').forEach(t => t.classList.remove('active'));
       tile.classList.add('active');
+      const autoBg = soundBgMap[tile.dataset.sound];
+      if (autoBg) setBg(autoBg);
     }
     updateModeVisibility();
   });
@@ -594,10 +596,20 @@ dimSlider.addEventListener('input', () => {
 
 // ── Hintergrund + Sonnen-Theme ────────────────────────────────────────────────
 const sunTheme = {
-  'bg-meer':  'theme-meer',
-  'bg-berg':  'theme-berg',
-  'bg-blau':  'theme-blau',
-  'bg-nacht': 'theme-nacht',
+  'bg-meer':      'theme-meer',
+  'bg-berg':      'theme-berg',
+  'bg-blau':      'theme-blau',
+  'bg-nacht':     'theme-nacht',
+  'bg-nacht-meer':'theme-nacht',
+};
+
+const soundBgMap = {
+  wellen:   'bg-meer',
+  rauschen: 'bg-nacht-meer',
+  voegel:   'bg-wald',
+  bach:     'bg-bach',
+  regen:    'bg-regen',
+  cafe:     'bg-cafe',
 };
 
 function setBg(cls) {
