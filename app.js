@@ -1,8 +1,8 @@
 // Version
-const APP_VERSION = 'v0.5';
+const APP_VERSION = 'v0.7.2';
 document.addEventListener('DOMContentLoaded', () => {
-  const el = document.getElementById('app-version');
-  if (el) el.textContent = APP_VERSION;
+  const mv = document.getElementById('menu-version');
+  if (mv) mv.textContent = APP_VERSION;
 });
 
 // ── Service Worker ────────────────────────────────────────────────────────────
@@ -37,6 +37,7 @@ const gongCheck  = document.getElementById('gong-check');
 // ── UI-State ──────────────────────────────────────────────────────────────────
 let isRunning       = false;
 let elemHidden      = false;
+let carouselIdx     = 2; // Startposition: Vögel (wird durch localStorage überschrieben)
 let autoFade        = null;
 let stopVisualTimer = null;
 let glowRafId       = null;
@@ -484,6 +485,7 @@ startBtn.addEventListener('click', async (e) => {
 
 // ── Tap auf Hintergrund = Bedienelemente ein-/ausblenden (Toggle) ────────────
 document.getElementById('app').addEventListener('click', (e) => {
+  if (didSwipe) { didSwipe = false; return; }
   if (!isRunning) return;
   if (e.target.closest('button, input, label')) return;
   clearTimeout(autoFade);
@@ -516,10 +518,13 @@ async function initApp() {
   const splash  = document.getElementById('splash');
   const minWait = new Promise(r => setTimeout(r, 3000));
   await Promise.all([preloadAllSounds(), minWait]);
-  // Vögel + Wald als Standard-Preset
-  const voegelTile = document.querySelector('.sound-tile[data-sound="voegel"]');
-  if (voegelTile) voegelTile.classList.add('active');
-  setBg('bg-wald');
+  // Letzten Stand aus localStorage wiederherstellen (Standard: Vögel/Wald)
+  const saved = parseInt(localStorage.getItem('ohreninsel-carousel') ?? '2');
+  carouselIdx = (saved >= 0 && saved < carouselItems.length) ? saved : 2;
+  const startItem = carouselItems[carouselIdx];
+  const startTile = document.querySelector(`.sound-tile[data-sound="${startItem.key}"]`);
+  if (startTile) startTile.classList.add('active');
+  setBg(startItem.bg);
   splash.classList.add('fade-out');
   setTimeout(() => splash.remove(), 1000);
 }
@@ -536,6 +541,8 @@ document.querySelectorAll('.sound-tile').forEach(tile => {
       tile.classList.add('active');
       const autoBg = soundBgMap[tile.dataset.sound];
       if (autoBg) setBg(autoBg);
+      const ci = carouselItems.findIndex(item => item.key === tile.dataset.sound);
+      if (ci !== -1) { carouselIdx = ci; localStorage.setItem('ohreninsel-carousel', ci); }
     }
     updateModeVisibility();
   });
@@ -602,6 +609,58 @@ dimSlider.addEventListener('input', () => {
   }
 });
 
+// ── Hintergrund-Slide-Transition ──────────────────────────────────────────────
+const bgSlideEl = document.getElementById('bg-slide');
+let bgSliding = false;
+
+const bgStyleMap = {
+  'bg-meer':       "url('meer_0.2.jpg') center/cover no-repeat",
+  'bg-berg':       "url('berglandschaft_0.1.jpg') center/cover no-repeat",
+  'bg-nacht-meer': "url('nacht_meer_0.1.jpg') center/cover no-repeat",
+  'bg-wald':       "url('wald_0.1.jpg') center/cover no-repeat",
+  'bg-bach':       "url('bach_0.1.jpg') center/cover no-repeat",
+  'bg-regen':      "url('regen_0.1.jpg') center/cover no-repeat",
+  'bg-cafe':       "url('cafe_0.1.jpg') center/cover no-repeat",
+  'bg-blau':       '#080e18',
+  'bg-grau':       '#141414',
+  'bg-nacht':      '#0d3510',
+  'bg-schwarz':    '#000',
+  '':              '#0b1a0b',
+};
+
+function slideBg(newCls, direction) {
+  if (bgSliding) { setBg(newCls); return; }
+  bgSliding = true;
+
+  const enterFrom = direction < 0 ? '100%' : '-100%';
+  const exitTo    = direction < 0 ? '-100%' : '100%';
+
+  bgSlideEl.style.background  = bgStyleMap[newCls] || '#0b1a0b';
+  bgSlideEl.style.transition  = 'none';
+  bgSlideEl.style.transform   = `translateX(${enterFrom})`;
+  bgEl.style.transition       = 'none';
+  bgEl.style.transform        = 'translateX(0)';
+
+  bgSlideEl.offsetHeight; // reflow
+
+  const ease = 'cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.38s';
+  bgSlideEl.style.transition = `transform ${ease}`;
+  bgEl.style.transition      = `transform ${ease}`;
+  bgSlideEl.style.transform  = 'translateX(0)';
+  bgEl.style.transform       = `translateX(${exitTo})`;
+
+  setTimeout(() => {
+    bgEl.style.transition = 'none';   // kein background-Übergang beim Snap
+    bgEl.style.transform  = '';       // zurück auf Position 0 (unsichtbar hinter bg-slide)
+    setBg(newCls);                    // Klasse wechseln – sofort, kein Flash
+    bgEl.offsetHeight;                // reflow erzwingen
+    bgEl.style.transition = '';       // normale CSS-Transition wiederherstellen
+    bgSlideEl.style.transition = 'none';
+    bgSlideEl.style.transform  = 'translateX(100%)';
+    bgSliding = false;
+  }, 420);
+}
+
 // ── Hintergrund + Sonnen-Theme ────────────────────────────────────────────────
 const sunTheme = {
   'bg-meer':      'theme-meer',
@@ -624,6 +683,7 @@ const soundBgMap = {
   bach:     'bg-bach',
   regen:    'bg-regen',
   cafe:     'bg-cafe',
+  berg:     'bg-berg',
 };
 
 function setBg(cls) {
@@ -653,3 +713,87 @@ mOver.addEventListener('click', () => {
   mOver.classList.remove('open');
   mSheet.classList.remove('open');
 });
+
+// ── Swipe-Navigation (Sound + Hintergrund wechseln) ──────────────────────────
+// touch-action: pan-y auf #stage (CSS) gibt horizontale Gesten an JS ab –
+// funktioniert auf Android WebView und iOS Safari PWA ohne preventDefault-Hack.
+
+// Berg hat noch keinen Sound – erscheint im Karussell, ändert nur den Hintergrund
+const carouselItems = [
+  { key: 'wellen',   bg: 'bg-meer' },
+  { key: 'rauschen', bg: 'bg-nacht-meer' },
+  { key: 'voegel',   bg: 'bg-wald' },
+  { key: 'bach',     bg: 'bg-bach' },
+  { key: 'regen',    bg: 'bg-regen' },
+  { key: 'cafe',     bg: 'bg-cafe' },
+  { key: 'berg',     bg: 'bg-berg' },
+];
+
+let swipeStartX = null;
+let swipeStartY = null;
+let didSwipe    = false;
+
+async function switchAudio(newFilePath) {
+  stopAudio(true);
+  if (!decodedCache.has(newFilePath)) await loadFile(newFilePath);
+  if (!isRunning) return;
+  await startAudio(newFilePath, STOP_FADE_OUT);
+}
+
+function switchToSound(soundKey, direction = 0) {
+  const tile = document.querySelector(`.sound-tile[data-sound="${soundKey}"]`);
+  if (!tile) return;
+  document.querySelectorAll('.sound-tile').forEach(t => t.classList.remove('active'));
+  tile.classList.add('active');
+  const bg = soundBgMap[soundKey];
+  if (bg) {
+    if (direction !== 0) slideBg(bg, direction);
+    else setBg(bg);
+  }
+  updateModeVisibility();
+  if (isRunning && isAudioActive) {
+    const newFile = tile.dataset.file;
+    if (newFile) switchAudio(newFile);
+  }
+}
+
+function switchToCarousel(idx, direction = 0) {
+  const item = carouselItems[idx];
+  carouselIdx = idx;
+  localStorage.setItem('ohreninsel-carousel', idx);
+  const tile = document.querySelector(`.sound-tile[data-sound="${item.key}"]`);
+  if (tile) {
+    switchToSound(item.key, direction);
+  } else {
+    // Berg: nur Hintergrund wechseln, aktiven Sound-Tile behalten
+    if (direction !== 0) slideBg(item.bg, direction);
+    else setBg(item.bg);
+  }
+}
+
+const stageEl = document.getElementById('stage');
+
+stageEl.addEventListener('pointerdown', (e) => {
+  if (!e.isPrimary) return;
+  const lower = document.getElementById('lower');
+  if (lower && e.clientY >= lower.getBoundingClientRect().top - 10) return;
+  swipeStartX = e.clientX;
+  swipeStartY = e.clientY;
+  didSwipe = false;
+});
+
+stageEl.addEventListener('pointerup', (e) => {
+  if (!e.isPrimary || swipeStartX === null) return;
+  const dx = e.clientX - swipeStartX;
+  const dy = e.clientY - swipeStartY;
+  swipeStartX = null;
+  if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+  didSwipe = true;
+  const direction = dx < 0 ? -1 : 1;
+  const next = dx < 0
+    ? (carouselIdx + 1) % carouselItems.length
+    : (carouselIdx - 1 + carouselItems.length) % carouselItems.length;
+  switchToCarousel(next, direction);
+});
+
+stageEl.addEventListener('pointercancel', () => { swipeStartX = null; });

@@ -35,6 +35,7 @@
   </div>
 
   <div id="bg"></div>
+  <div id="bg-slide"></div>
   <div id="bg-shade"></div>
   <div id="dim-overlay"></div>
 
@@ -44,7 +45,6 @@
       <div class="app-title-wrap">
         <span class="app-title">Ohreninsel</span>
         <img src="ohr3.png" class="header-ear" alt="">
-        <span id="app-version"></span>
       </div>
       <button id="menu-btn" aria-label="Menü">
         <span></span><span></span><span></span>
@@ -92,6 +92,10 @@
         <button class="sound-tile" data-sound="cafe" data-file="Sounds/Straßencafe_0.1.mp3">
           <span class="tile-x">✕</span>
           <i class="ph ph-coffee"></i><span class="tile-label">Café</span>
+        </button>
+        <button class="sound-tile" data-sound="berg" data-file="Sounds/Berg_0.1.mp3">
+          <span class="tile-x">✕</span>
+          <i class="ph ph-mountains"></i><span class="tile-label">Berg</span>
         </button>
       </div>
 
@@ -218,6 +222,8 @@
         </div>
       </div>
     </div>
+
+    <div id="menu-version"></div>
   </div>
 
   <script src="app.js"></script>

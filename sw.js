@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ohreninsel-v1.0';
+const CACHE_NAME = 'ohreninsel-v0.7.2';
 
 const CACHE_FILES = [
   './',
@@ -18,6 +18,7 @@ const CACHE_FILES = [
   './bach_0.1.jpg',
   './regen_0.1.jpg',
   './cafe_0.1.jpg',
+  './ohr3.png',
   './Sounds/Klangschale Morgenstern.mp3',
   './Sounds/Klangschale Mittagspause.mp3',
   './Sounds/Klangschale Abendrot.mp3',
