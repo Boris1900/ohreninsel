@@ -10,6 +10,8 @@ Sounds/Ambient Sounds Original/
 node_modules/
 android/
 dist/
+www/
+*.apk
 
 # System
 .DS_Store
