@@ -1,5 +1,5 @@
 // Version
-const APP_VERSION = 'v0.8.0';
+const APP_VERSION = 'v0.8.1';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
@@ -502,16 +502,14 @@ async function initApp() {
 initApp();
 
 // ── Sound-Kacheln (immer genau eine aktiv – kein Abwählen mehr) ──────────────
+// Tippen verhält sich wie Swipen: Hintergrund wechselt und – falls Audio läuft –
+// wird per Crossfade auf den neuen Klang umgeblendet (switchToCarousel).
 document.querySelectorAll('.sound-tile').forEach(tile => {
   tile.addEventListener('click', (e) => {
     e.stopPropagation();
     if (tile.classList.contains('active')) return; // schon aktiv → nichts tun
-    document.querySelectorAll('.sound-tile').forEach(t => t.classList.remove('active'));
-    tile.classList.add('active');
-    const autoBg = soundBgMap[tile.dataset.sound];
-    if (autoBg) setBg(autoBg);
     const ci = carouselItems.findIndex(item => item.key === tile.dataset.sound);
-    if (ci !== -1) { carouselIdx = ci; localStorage.setItem('ohreninsel-carousel', ci); }
+    if (ci !== -1) switchToCarousel(ci, 0);
   });
 });
 
@@ -802,7 +800,7 @@ const mediSheet     = document.getElementById('medi-sheet');
 const mediSlider    = document.getElementById('medi-duration-slider');
 const mediTimerDisp = document.getElementById('medi-timer-display');
 const mediStartBtn  = document.getElementById('medi-start-btn');
-let mediSilent = false;
+let mediKlang = 'klang-gong'; // 'klang' (nur Klang) | 'klang-gong' | 'gong' (nur Gong)
 
 function updateMediDisplay(min) {
   const h = Math.floor(min / 60), m = min % 60;
@@ -837,13 +835,15 @@ mediSlider.addEventListener('input', () => {
     c.classList.toggle('active', parseInt(c.dataset.min) === val));
 });
 
-// Klang / Nur Gong
+// Klang-Variante: Nur Klang / Klang + Gong / Nur Gong
 document.querySelectorAll('.medi-toggle').forEach(btn => {
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
     document.querySelectorAll('.medi-toggle').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    mediSilent = btn.dataset.silent === 'true';
+    mediKlang = btn.dataset.medi;
+    // Gong-Schalen nur wählbar, wenn Gong dabei ist
+    mediSheet.classList.toggle('no-gong', mediKlang === 'klang');
   });
 });
 
@@ -851,9 +851,9 @@ document.querySelectorAll('.medi-toggle').forEach(btn => {
 mediStartBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   closeMediPanel();
-  const filePath = mediSilent ? '' : getSelectedFile();
+  const filePath = mediKlang === 'gong'  ? '' : getSelectedFile();
+  const gongFile = mediKlang === 'klang' ? null : getSelectedGongFile();
   const minutes  = parseInt(mediSlider.value);
-  const gongFile = getSelectedGongFile();
   startSession({ mode: 'meditieren', filePath, minutes, gongFile });
 });
 

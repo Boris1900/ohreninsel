@@ -647,19 +647,20 @@ input[type=range]::-moz-range-thumb {
   background: var(--gruen);
 }
 
-/* Klangschalen-Auswahl – immer sichtbar, blass wenn Gong aus */
+/* Klangschalen-Auswahl im Meditieren-Panel – wählbar, außer bei "Nur Klang" */
 #gong-schalen {
   display: flex;
   gap: 8px;
 }
 #gong-schalen .gong-tile {
-  opacity: 0.28;
-  pointer-events: none;
-  transition: opacity 0.3s ease, background 0.2s, border-color 0.2s, color 0.2s;
-}
-#gong-section.gong-active #gong-schalen .gong-tile {
   opacity: 1;
   pointer-events: auto;
+  transition: opacity 0.3s ease, background 0.2s, border-color 0.2s, color 0.2s;
+}
+/* "Nur Klang" (kein Gong): Schalen blass + nicht wählbar */
+#medi-sheet.no-gong #gong-schalen .gong-tile {
+  opacity: 0.28;
+  pointer-events: none;
 }
 
 .gong-tile {
