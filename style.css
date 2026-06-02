@@ -417,6 +417,43 @@ input[type=range]::-moz-range-thumb {
 
 .dim-slider { width: 100%; }
 
+/* ─── Menü: Hinweistext ──────────────────────────────────── */
+.sheet-hint {
+  font-size: 11px;
+  color: var(--w40);
+  margin-top: 6px;
+  letter-spacing: 0.2px;
+  line-height: 1.5;
+}
+
+/* ─── Menü: Update-Button ────────────────────────────────── */
+#update-btn {
+  width: 100%;
+  padding: 10px 0;
+  background: var(--w06);
+  border: 1px solid var(--w12);
+  border-radius: 22px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  color: var(--w55);
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s, color 0.2s;
+}
+#update-btn:active { background: var(--w12); }
+#update-btn:disabled { opacity: 0.5; cursor: default; }
+
+#update-status {
+  font-size: 11px;
+  color: var(--w55);
+  text-align: center;
+  margin-top: 8px;
+  min-height: 18px;
+  line-height: 1.5;
+}
+
 /* ─── Menü: Versionsnummer ───────────────────────────────── */
 #menu-version {
   font-size: 10px;

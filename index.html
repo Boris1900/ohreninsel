@@ -148,6 +148,7 @@
 
     <div class="sheet-section">
       <div class="sheet-title">Hintergrund</div>
+      <p class="sheet-hint">Jeder Sound passt zu jedem Hintergrund.</p>
       <div id="bg-swatches">
         <button class="bg-swatch active" data-bg="">
           <div class="swatch-color" style="background:#0b1a0b"></div>
@@ -221,6 +222,11 @@
           <span class="mode-info-desc">Timer mit optionalem Gong zum Start und Ende.</span>
         </div>
       </div>
+    </div>
+
+    <div class="sheet-section">
+      <button id="update-btn" onclick="checkForUpdate()">Auf Update prüfen</button>
+      <div id="update-status"></div>
     </div>
 
     <div id="menu-version"></div>

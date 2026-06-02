@@ -1,5 +1,5 @@
 // Version
-const APP_VERSION = 'v0.7.2';
+const APP_VERSION = 'v0.7.3';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
@@ -797,3 +797,54 @@ stageEl.addEventListener('pointerup', (e) => {
 });
 
 stageEl.addEventListener('pointercancel', () => { swipeStartX = null; });
+
+// ── Update-Check ──────────────────────────────────────────────────────────────
+async function checkForUpdate() {
+  const btn    = document.getElementById('update-btn');
+  const status = document.getElementById('update-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Prüfe...';
+  try {
+    const baseUrl = (window.Capacitor && window.Capacitor.isNativePlatform())
+      ? 'https://boris1900.github.io/ohreninsel/'
+      : '';
+    const res   = await fetch(baseUrl + 'app.js?t=' + Date.now(), { cache: 'no-store' });
+    const text  = await res.text();
+    const match = text.match(/const APP_VERSION\s*=\s*'([^']+)'/);
+    const latest = match ? match[1] : null;
+    if (!latest) throw new Error('Version nicht lesbar');
+    if (latest === APP_VERSION) {
+      status.textContent = '✅ Du hast die aktuelle Version.';
+    } else if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+      const apkUrl = `https://github.com/Boris1900/ohreninsel/releases/download/${latest}/Ohreninsel-${latest}.apk`;
+      status.innerHTML = `🆕 Update verfügbar! <button onclick="window.open('${apkUrl}','_system')" style="margin-left:6px;padding:4px 10px;border-radius:8px;border:none;background:rgba(126,217,87,0.8);color:#000;font-size:11px;font-weight:600;cursor:pointer;">APK laden</button>`;
+    } else {
+      status.innerHTML = `🆕 Update verfügbar! <button onclick="applyUpdate()" style="margin-left:6px;padding:4px 10px;border-radius:8px;border:none;background:rgba(126,217,87,0.8);color:#000;font-size:11px;font-weight:600;cursor:pointer;">Jetzt laden</button>`;
+    }
+  } catch (e) {
+    status.textContent = '⚠️ Prüfung fehlgeschlagen.';
+  }
+  btn.textContent = 'Auf Update prüfen';
+  btn.disabled = false;
+}
+
+async function applyUpdate() {
+  const status = document.getElementById('update-status');
+  status.textContent = '⏳ Wird geladen...';
+  try {
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => caches.delete(k)));
+  } catch (e) {}
+  try {
+    await Promise.all([
+      fetch('index.html', { cache: 'reload' }),
+      fetch('app.js',     { cache: 'reload' }),
+      fetch('style.css',  { cache: 'reload' }),
+    ]);
+  } catch (e) {}
+  window.location.href = window.location.pathname + '?v=' + Date.now();
+}
+
+if (window.location.search) {
+  history.replaceState(null, '', window.location.pathname);
+}
