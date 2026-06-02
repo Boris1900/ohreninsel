@@ -23,6 +23,9 @@ Copy-Item "$src\berglandschaft_0.1.jpg"        $www -Force
 Copy-Item "$src\meer_0.2.jpg"                  $www -Force
 Copy-Item "$src\gong.png"                      $www -Force
 Copy-Item "$src\gong_ohne_halter.png"          $www -Force
+Copy-Item "$src\ohr.png"                       $www -Force
+Copy-Item "$src\ohr2.png"                      $www -Force
+Copy-Item "$src\ohr3.png"                      $www -Force
 Copy-Item "$src\icons\*"                       "$www\icons\" -Force
 
 # Nur mp3 aus Sounds/ – keine Unterordner kopieren
