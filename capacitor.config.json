@@ -1,5 +1,8 @@
 {
   "appId": "de.tinnituspraxis.klangbegleiter",
   "appName": "Ohreninsel",
-  "webDir": "www"
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#0b1a0b"
+  }
 }
