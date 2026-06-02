@@ -1,5 +1,9 @@
 // Version
-const APP_VERSION = 'v0.3';
+const APP_VERSION = 'v0.5';
+document.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('app-version');
+  if (el) el.textContent = APP_VERSION;
+});
 
 // ── Service Worker ────────────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {

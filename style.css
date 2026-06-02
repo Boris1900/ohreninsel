@@ -15,10 +15,14 @@
   --sun-rim: rgba(126,217,87,0.55);
 }
 
-body.theme-meer  { --sun: 255, 138, 92;  --sun-rim: rgba(255,138,92,0.6); }
+body.theme-meer  { --sun: 80,  200, 240;  --sun-rim: rgba(80,200,240,0.6); }
 body.theme-berg  { --sun: 255, 226, 150; --sun-rim: rgba(255,226,150,0.65); }
 body.theme-blau  { --sun: 130, 180, 255; --sun-rim: rgba(130,180,255,0.5); }
-body.theme-nacht { --sun: 126, 217, 87;  --sun-rim: rgba(126,217,87,0.55); }
+body.theme-nacht { --sun: 120, 170, 255; --sun-rim: rgba(120,170,255,0.55); }
+body.theme-wald  { --sun: 100, 210, 120; --sun-rim: rgba(100,210,120,0.6); }
+body.theme-bach  { --sun: 80,  200, 200; --sun-rim: rgba(80,200,200,0.6); }
+body.theme-regen { --sun: 200, 160, 100; --sun-rim: rgba(200,160,100,0.6); }
+body.theme-cafe  { --sun: 255, 160,  60; --sun-rim: rgba(255,160,60,0.6); }
 
 html, body {
   height: 100%;
@@ -94,6 +98,14 @@ header {
   color: var(--w40);
   line-height: 1;
 }
+#app-version {
+  font-size: 9px;
+  color: rgba(255,255,255,0.30);
+  letter-spacing: 0.5px;
+  margin-left: 4px;
+  align-self: flex-end;
+  margin-bottom: 1px;
+}
 .header-ear {
   height: 1.6em;
   font-size: 12px;
@@ -132,7 +144,7 @@ header {
   width: 128px; height: 128px;
   border-radius: 50%;
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.25);
+  border: 1px solid var(--sun-rim);
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: border-color 0.6s, background 0.6s, transform 0.25s;
@@ -212,8 +224,8 @@ body.running #status-word { color: var(--sun-rim); }
   flex-direction: column;
   gap: 14px;
   transition: opacity var(--fade) ease;
-  background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.20) 60%, transparent 100%);
-  padding-top: 40px;
+  background: linear-gradient(to top, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.15) 65%, transparent 100%);
+  padding-top: 20px;
 }
 body.running.idle #lower { opacity: 0; pointer-events: none; }
 
@@ -244,7 +256,7 @@ body.medi-active #lower {
   flex-shrink: 0;
   width: 54px; height: 54px;
   position: relative;
-  background: transparent;
+  background: rgba(0,0,0,0.22);
   border: 1px solid rgba(255,255,255,0.18);
   border-radius: 16px;
   display: flex; flex-direction: column;
