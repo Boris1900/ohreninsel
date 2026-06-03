@@ -1,12 +1,13 @@
 // Version
-const APP_VERSION = 'v0.8.2';
+const APP_VERSION = 'v0.8.3';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
 });
 
-// ── Service Worker ────────────────────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
+// ── Service Worker (nicht auf localhost – sonst stört der Cache beim Entwickeln) ─
+const isLocalDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+if ('serviceWorker' in navigator && !isLocalDev) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
@@ -487,7 +488,7 @@ async function preloadAllSounds() {
 
 async function initApp() {
   const splash  = document.getElementById('splash');
-  const minWait = new Promise(r => setTimeout(r, 3000));
+  const minWait = new Promise(r => setTimeout(r, 2500));
   await Promise.all([preloadAllSounds(), minWait]);
   // Letzten Stand aus localStorage wiederherstellen (Standard: Vögel/Wald)
   const saved = parseInt(localStorage.getItem('ohreninsel-carousel') ?? '2');
