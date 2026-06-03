@@ -1,7 +1,7 @@
 # TinnitusMediApp – Projektdokumentation
 
 **Arbeitstitel:** TinnitusMediApp | **Produktname:** Ohreninsel
-**Stand:** v0.8.1 (Bedienpanel-Umbau, Meditieren-Panel, iOS-Audio-Fix – 03.06.2026)
+**Stand:** v0.8.3 (Splashscreen, neues Icon, iOS-Test bestanden – 03.06.2026)
 
 **PWA live:** https://boris1900.github.io/ohreninsel/ (GitHub Pages, master-Branch)
 Für iPhone (Katharina): URL in Safari → Teilen → Zum Home-Bildschirm.
@@ -120,10 +120,16 @@ GitHub: `Boris1900/ohreninsel` · **PWA + APK immer zusammen aktuell halten.**
 
 ## Offene Punkte
 
-- **iOS-Test (Katharina):** ganzes v0.8-Bedienpanel + Meditieren + Audio-beim-Sliden auf echtem iPhone. Wichtigster offener Test.
-- **App-Icon:** aktuelles ist zu comichaft. 3 Prompt-Konzepte besprochen (Insel+Schallwellen / Ohr-Insel / Dämmerungs-Insel). Boris generiert ein Bild, dann via `make-icon.js` einbauen.
-- **Lead Magnet** (strategisches Hauptziel): App gegen E-Mail-Adresse.
+- **Lead Magnet** (strategisches Hauptziel): Landingpage + App gegen E-Mail-Adresse.
+  Eigener Projektordner bereits angelegt: `C:\Users\Boris\Projekte\OhreninselLanding\`
+  Dort weitermachen mit `/projekt-starten`.
 - Optional: eigene Subdomain statt github.io; typischerer Berg-Sound (aktuell Vogel/Wald-Aufnahme).
+
+## Erledigt (Meilensteine)
+
+- **iOS-Test (Katharina) bestanden** (v0.8.3): Bedienpanel, Meditieren, Audio beim Sliden/Tippen, neues Icon, Splash – alles läuft auf iPhone. Der persistente AudioContext löst den iOS-Slide-Sound-Bug.
+- App-Icon neu (Insel + Ohr-Sonne), iOS-randvoll ohne weißen Rand, Android randfüllend.
+- Splashscreen passend zur dunklen App (rundes Icon + weicher Schein).
 
 ---
 
