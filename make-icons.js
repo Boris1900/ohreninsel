@@ -4,7 +4,8 @@ const fs = require('fs');
 
 const src = path.join(__dirname, 'icon-1024.png');
 const resDir = path.join(__dirname, 'android', 'app', 'src', 'main', 'res');
-const bg = { r: 11, g: 26, b: 11 };
+// Hintergrundfarbe = Himmel-Türkis des Insel-Icons (Fallback, vom randfüllenden Motiv eh verdeckt)
+const bg = { r: 87, g: 203, b: 204 };
 
 const densities = [
   { name: 'mipmap-mdpi',    size: 48,  fgSize: 108 },
@@ -35,17 +36,11 @@ async function makeRound(size) {
     .toBuffer();
 }
 
+// Vordergrund randfüllend: das ganze Insel-Motiv füllt die adaptive-icon-Leinwand.
+// Android maskiert selbst zu Kreis/Squircle (wie iOS), das zentrale Motiv bleibt,
+// nur die äußeren Himmel/Wasser-Ränder werden je nach Launcher-Form beschnitten.
 async function makeForeground(fgSize) {
-  const innerSize = Math.round(fgSize * 0.66);
-  const inner = await sharp(src)
-    .resize(innerSize, innerSize, { fit: 'contain', background: { ...bg, alpha: 1 } })
-    .flatten({ background: bg })
-    .toBuffer();
-  return sharp({ create: { width: fgSize, height: fgSize, channels: 3, background: bg } })
-    .composite([{ input: inner, gravity: 'centre' }])
-    .flatten({ background: bg })
-    .png()
-    .toBuffer();
+  return makeSquare(fgSize);
 }
 
 async function run() {

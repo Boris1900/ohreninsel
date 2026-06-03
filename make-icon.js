@@ -1,19 +1,29 @@
 const sharp = require('sharp');
 const path = require('path');
 
-const src = path.join(__dirname, 'Icon_Insel_0.1.png');
+// Quelle: neues Insel-Icon (Palme + Ohr-Sonne)
+const src = path.join(__dirname, 'Icon_ohreninsel_Insel_0.3.png');
 const out = path.join(__dirname, 'icon-1024.png');
 
+// Das Quellbild hat einen weißen Rand + abgerundete Ecken eingebrannt.
+// Auf iOS würde das einen weißen Rand ums Icon erzeugen (iOS rundet selbst).
+// Darum die Ecken + Rand zentral wegschneiden → randvolles, opakes Quadrat.
+// iOS rundet dann sauber, kein weißer Rand. (Eck-Eindringtiefe gemessen: ~106px)
+const CROP = 114;
+
 async function run() {
+  const meta = await sharp(src).metadata();
   await sharp(src)
-    .resize(1024, 1024, {
-      fit: 'contain',
-      background: { r: 11, g: 26, b: 11, alpha: 1 }
+    .extract({
+      left: CROP, top: CROP,
+      width: meta.width - 2 * CROP,
+      height: meta.height - 2 * CROP
     })
-    .flatten({ background: { r: 11, g: 26, b: 11 } })
+    .resize(1024, 1024)
+    .removeAlpha()
     .png()
     .toFile(out);
-  console.log('icon-1024.png erstellt');
+  console.log('icon-1024.png erstellt (randvoll, ohne weißen Rand – iOS-tauglich)');
 }
 
 run().catch(err => console.error(err));
