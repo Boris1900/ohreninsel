@@ -38,13 +38,13 @@ html, body {
 /* ─── Hintergrund ─────────────────────────────────────────── */
 #bg {
   position: fixed; inset: 0; z-index: 0;
-  background: #0b1a0b;
+  background: #0a2535;
   transition: background 0.7s ease;
   will-change: transform;
 }
 #bg-slide {
   position: fixed; inset: 0; z-index: 0;
-  background: #0b1a0b;
+  background: #0a2535;
   pointer-events: none;
   transform: translateX(100%);
   will-change: transform;
@@ -503,7 +503,7 @@ input[type=range]::-moz-range-thumb {
 /* ─── Splash Screen ──────────────────────────────────────── */
 #splash {
   position: fixed; inset: 0; z-index: 200;
-  background: #0b1a0b;   /* dunkel wie die App – kein Stilbruch */
+  background: #0a2535;   /* Landingpage-Blau – konsistentes Design */
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   overflow: hidden;
