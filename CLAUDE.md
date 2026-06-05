@@ -1,7 +1,7 @@
 # TinnitusMediApp – Projektdokumentation
 
 **Arbeitstitel:** TinnitusMediApp | **Produktname:** Ohreninsel
-**Stand:** v0.8.7 (Weißer Statusbalken behoben, Blau-Design vollständig – 04.06.2026)
+**Stand:** v0.8.8 (Menü-Button sichtbarer, iPhone-Streifen unten behoben – 05.06.2026)
 
 **PWA live:** https://boris1900.github.io/ohreninsel/ (GitHub Pages, master-Branch)
 Für iPhone (Katharina): URL in Safari → Teilen → Zum Home-Bildschirm.
@@ -120,24 +120,6 @@ GitHub: `Boris1900/ohreninsel` · **PWA + APK immer zusammen aktuell halten.**
 
 ## Offene Punkte
 
-### 🔧 Bugs – Prio hoch (nächste Session zuerst angehen)
-
-**1. Menü-Button (drei Striche oben rechts) auf hellen Hintergründen unsichtbar**
-- Aktuell: `color: var(--w40)` (40% Weiß), 1.5px hoch, 19px breit → auf Wald/Bach kaum sichtbar.
-- Fix: größer (width 22px, height 2px), plus `text-shadow: 0 1px 3px rgba(0,0,0,0.7)`
-  wie bei den Sound-Labels. Alternativ dynamisch mit `--sun-rim` je Theme einfärben.
-  CSS: `#menu-btn`, `#menu-btn span` in style.css.
-
-**2. iPhone PWA: schmaler farbiger Rand unten (auch im Splash)**
-- Symptom: Unten am Bildschirm bleibt ein schmales Band in einer anderen Farbe sichtbar –
-  weder Splash noch App decken es ab. Nur iPhone, nicht Android.
-- Diagnose: `#app` hat `max-width: 420px` + `margin: 0 auto`. Die `body`-Hintergrundfarbe
-  (#0a2535) scheint durch die Home-Indicator-Zone durch. `#splash` hat `inset: 0` aber
-  iOS rendert unten noch eine Safe-Area-Zone außerhalb davon.
-- Fix-Ansatz: `body, html` und `#splash` auf exakt dieselbe Farbe wie der App-Hintergrund.
-  `#app` braucht ggf. `padding-bottom: env(safe-area-inset-bottom)`. Prüfen ob
-  `<meta name="viewport" content="viewport-fit=cover">` korrekt greift.
-
 ---
 
 - **Splash-Screen Feintuning** (04.06.2026): Sofort blaues Vollbild, dann sanftes Fade-in mit App-Icon + Ladepunkten, dann weiches Überblenden in die App. Kein harter Schnitt.
@@ -148,6 +130,7 @@ GitHub: `Boris1900/ohreninsel` · **PWA + APK immer zusammen aktuell halten.**
 
 ## Erledigt (Meilensteine)
 
+- **v0.8.8** (05.06.2026): Menü-Button vergrößert (22px/2px) + drop-shadow für Sichtbarkeit auf hellen Hintergründen. iPhone-Streifen unten: `body::after` mit safe-area-inset-bottom deckt die Home-Indicator-Zone mit dunkler Schicht ab.
 - **v0.8.7** (04.06.2026): Weißer Statusbalken behoben (theme-color + backgroundColor auf #0a2535). Gilt für PWA + APK.
 - **v0.8.6** (04.06.2026): Flash-Fix als eigenständige Version – grüner Zwischenbildschirm beim Start behoben.
 - **v0.8.5** (04.06.2026): App-Hintergrund + Splash auf Landingpage-Blau (#0a2535), bg-nacht auf Nachtblau, body-bg vereinheitlicht.
