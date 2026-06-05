@@ -1,5 +1,5 @@
 // Version
-const APP_VERSION = 'v0.9.2';
+const APP_VERSION = 'v0.9.3';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
@@ -682,8 +682,8 @@ mOver.addEventListener('click', () => {
   handle.addEventListener('pointerdown', (e) => {
     dragY0 = e.clientY;
     handle.setPointerCapture(e.pointerId);
-    // Transition kurz abschalten damit das Mitziehen butterweich ist
     mSheet.style.transition = 'none';
+    mSheet.style.overflowY  = 'hidden'; // Scroll waehrend Drag unterbinden
   });
 
   handle.addEventListener('pointermove', (e) => {
@@ -696,10 +696,10 @@ mOver.addEventListener('click', () => {
     if (dragY0 === null) return;
     const dy = e.clientY - dragY0;
     dragY0 = null;
-    mSheet.style.transition = '';      // CSS-Transition wieder an
-    mSheet.style.transform  = '';      // Position dem CSS ueberlassen
+    mSheet.style.transition = '';
+    mSheet.style.transform  = '';
+    mSheet.style.overflowY  = '';       // Scroll wieder freigeben
     if (dy > 60 || Math.abs(dy) < 12) {
-      // Genuegend weit gezogen ODER kurzer Tap → schliessen
       mOver.classList.remove('open');
       mSheet.classList.remove('open');
     }
@@ -709,6 +709,7 @@ mOver.addEventListener('click', () => {
     dragY0 = null;
     mSheet.style.transition = '';
     mSheet.style.transform  = '';
+    mSheet.style.overflowY  = '';
   });
 })();
 
@@ -879,6 +880,7 @@ mediOverlay.addEventListener('click', closeMediPanel);
     dragY0 = e.clientY;
     handle.setPointerCapture(e.pointerId);
     mediSheet.style.transition = 'none';
+    mediSheet.style.overflowY  = 'hidden';
   });
 
   handle.addEventListener('pointermove', (e) => {
@@ -893,6 +895,7 @@ mediOverlay.addEventListener('click', closeMediPanel);
     dragY0 = null;
     mediSheet.style.transition = '';
     mediSheet.style.transform  = '';
+    mediSheet.style.overflowY  = '';
     if (dy > 60 || Math.abs(dy) < 12) {
       closeMediPanel();
     }
@@ -902,6 +905,7 @@ mediOverlay.addEventListener('click', closeMediPanel);
     dragY0 = null;
     mediSheet.style.transition = '';
     mediSheet.style.transform  = '';
+    mediSheet.style.overflowY  = '';
   });
 })();
 
