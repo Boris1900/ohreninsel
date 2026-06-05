@@ -76,10 +76,14 @@ html, body {
 }
 
 /* ─── App-Wrapper ─────────────────────────────────────────── */
+/* position:fixed + top/bottom:0 statt height:100dvh –
+   garantiert exakt denselben Viewport wie der Splash-Screen.
+   100dvh ist auf iOS PWA manchmal minimal kleiner als die
+   physische Displayhöhe, was den Streifen am unteren Rand erzeugt. */
 #app {
-  position: relative; z-index: 3;
+  position: fixed; z-index: 3;
+  top: 0; bottom: 0; left: 0; right: 0;
   max-width: 420px;
-  height: 100dvh;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -123,14 +127,17 @@ header {
 }
 #menu-btn {
   background: none; border: none; cursor: pointer;
-  color: var(--w40);
+  color: rgba(255,255,255,0.82);
   padding: 8px; margin: -8px;
   display: flex; flex-direction: column; gap: 5px;
-  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.65));
 }
+/* box-shadow direkt auf den Strichen (nicht drop-shadow am Container –
+   das wirkt auf iOS zu schwach). Doppelter Schatten = klar lesbar
+   auf hellen Hintergründen wie Wald und Bach. */
 #menu-btn span {
   display: block; width: 22px; height: 2px;
   background: currentColor; border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.9), 0 0 3px rgba(0,0,0,0.7);
 }
 
 /* ─── Stage (Button-Zone) ─────────────────────────────────── */
@@ -787,16 +794,3 @@ body.stopping .glyph::before {
 }
 #medi-start-btn:active { transform: scale(0.97); background: rgba(126,217,87,0.22); }
 
-/* ─── iPhone Safe-Area unten: Home-Indicator-Zone abdecken ──── */
-/* Verhindert den schmalen andersfarbigen Streifen am unteren Rand
-   im iPhone-PWA-Modus. Deckt die safe-area-inset-bottom-Zone mit
-   der gleichen Dunkelschicht ab wie das untere Bedienfeld. */
-body::after {
-  content: '';
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: env(safe-area-inset-bottom, 0px);
-  background: rgba(0,0,0,0.72);
-  z-index: 2;
-  pointer-events: none;
-}
