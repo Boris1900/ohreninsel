@@ -26,7 +26,7 @@ body.theme-cafe  { --sun: 255, 160,  60; --sun-rim: rgba(255,160,60,0.6); }
 
 html, body {
   height: 100%;
-  background: #000;
+  background: #0a2535;
   font-family: 'Inter', system-ui, sans-serif;
   color: #fff;
   overflow: hidden;
@@ -51,7 +51,7 @@ html, body {
 }
 #bg.bg-blau    { background: #080e18; }
 #bg.bg-grau    { background: #141414; }
-#bg.bg-nacht   { background: #0d3510; }
+#bg.bg-nacht   { background: #071525; }
 #bg.bg-schwarz { background: #000; }
 #bg.bg-berg       { background: url('berglandschaft_0.1.jpg') center/cover no-repeat; }
 #bg.bg-meer       { background: url('meer_0.2.jpg') center/cover no-repeat; }
