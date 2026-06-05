@@ -1,7 +1,7 @@
 # TinnitusMediApp – Projektdokumentation
 
 **Arbeitstitel:** TinnitusMediApp | **Produktname:** Ohreninsel
-**Stand:** v0.9.1 (Sheet-Handle-Fix, Splash-FOUC, Encoding-Bugfix – 06.06.2026)
+**Stand:** v0.9.4 (Handle-Drag, Encoding, Splash-Fix – 06.06.2026)
 
 **PWA live:** https://boris1900.github.io/ohreninsel/ (GitHub Pages, master-Branch)
 Für iPhone (Katharina): URL in Safari → Teilen → Zum Home-Bildschirm.
@@ -130,7 +130,10 @@ GitHub: `Boris1900/ohreninsel` · **PWA + APK immer zusammen aktuell halten.**
 
 ## Erledigt (Meilensteine)
 
-- **v0.9.1** (06.06.2026): Sheet-Handle-CSS vereinfacht (padding/background-clip-Konflikt entfernt, `::before`-Trefferzone bleibt). Splash-FOUC-Schutz: `#splash`-Styles inline in `index.html`. Encoding-Mojibake in `checkForUpdate()`/`applyUpdate()` repariert (⏳ ✅ 🆕 ⚠️).
+- **v0.9.4** (06.06.2026): Handle-Drag: `overflowY = hidden` während Drag (overflow:auto des Sheets hat touch-action:none gewonnen). MainActivity.java: `getWindow().setBackgroundDrawable(#0a2535)` vor super.onCreate() – frühestmöglicher Eingriff gegen dunklen Startblitz. Minimaler System-Launcher-Blitz bleibt (außerhalb App-Kontrolle).
+- **v0.9.3** (06.06.2026): Handle-Drag-Fix (overflowY), Versions-Bug (build-android.ps1 vergessen) behoben.
+- **v0.9.2** (06.06.2026): touch-action:none auf .sheet-handle. styles.xml: windowSplashScreenBackground + postSplashScreenTheme.
+- **v0.9.1** (06.06.2026): Sheet-Handle-CSS vereinfacht. Splash-FOUC-Schutz inline. Encoding-Mojibake in checkForUpdate/applyUpdate repariert (⏳ ✅ 🆕 ⚠️).
 - **v0.9.0** (06.06.2026): Android-Startblitz: styles.xml `android:background=@null` → `android:windowBackground=@color/colorPrimary`. Swipe friert auf Android ein: `pointerup`/`pointercancel` auf `document`-Ebene (nicht nur `#stage`), außerdem `bgSlidingTarget` für korrekte Ziel-Bg bei schnellen Doppelwischen. Menü-Handle + Medi-Handle: Tap oder Wischen nach unten schließt das Sheet (Pointer-Capture, Drag-Tracking).
 - **v0.8.9** (06.06.2026): Menü-Button jetzt 82% Weiß + box-shadow direkt auf den Strichen (drop-shadow am Container wirkt auf iOS zu schwach). iPhone-Streifen: `#app` auf `position: fixed; top:0; bottom:0` umgestellt – exakt wie Splash. `height:100dvh` war auf iOS PWA manchmal minimal kürzer als die physische Displayhöhe, daher der sichtbare Streifen. Wirkungsloses `body::after` aus v0.8.8 entfernt.
 - **v0.8.8** (05.06.2026): Menü-Button vergrößert (22px/2px) + drop-shadow (zu schwach, in v0.8.9 korrigiert). iPhone-Streifen-Fix `body::after` (war hinter #app, wirkungslos – in v0.8.9 korrigiert).
