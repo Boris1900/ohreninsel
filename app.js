@@ -1,17 +1,17 @@
-// Version
-const APP_VERSION = 'v0.8.6';
+﻿// Version
+const APP_VERSION = 'v0.8.7';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
 });
 
-// ── Service Worker (nicht auf localhost – sonst stört der Cache beim Entwickeln) ─
+// â”€â”€ Service Worker (nicht auf localhost â€“ sonst stÃ¶rt der Cache beim Entwickeln) â”€
 const isLocalDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if ('serviceWorker' in navigator && !isLocalDev) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
-// ── Capacitor: Statusleiste transparent ──────────────────────────────────────
+// â”€â”€ Capacitor: Statusleiste transparent â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 window.addEventListener('load', () => {
   if (window.Capacitor && window.Capacitor.isNativePlatform()) {
     const { StatusBar } = window.Capacitor.Plugins;
@@ -20,7 +20,7 @@ window.addEventListener('load', () => {
   }
 });
 
-// ── DOM-Refs ──────────────────────────────────────────────────────────────────
+// â”€â”€ DOM-Refs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const body       = document.body;
 const startBtn   = document.getElementById('start-btn');
 const statusW    = document.getElementById('status-word');
@@ -31,20 +31,20 @@ const dimSlider  = document.getElementById('dim-slider');
 const dimOverlay = document.getElementById('dim-overlay');
 const bgEl       = document.getElementById('bg');
 
-// ── UI-State ──────────────────────────────────────────────────────────────────
+// â”€â”€ UI-State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let isRunning       = false;
 let elemHidden      = false;
-let carouselIdx     = 2; // Startposition: Vögel (wird durch localStorage überschrieben)
+let carouselIdx     = 2; // Startposition: VÃ¶gel (wird durch localStorage Ã¼berschrieben)
 let autoFade        = null;
 let stopVisualTimer = null;
 let glowRafId       = null;
 let glowPhase       = 0;
-let endFadeTimer    = null;   // für Einschlafen/Meditieren Fade-out
-let countdownInterval = null; // für Meditieren-Timer-Anzeige
-let mediActiveTimer = null;   // für verzögertes Einblenden von #lower nach Stop
-let autoDimActive   = false;  // Auto-Dim läuft gerade
+let endFadeTimer    = null;   // fÃ¼r Einschlafen/Meditieren Fade-out
+let countdownInterval = null; // fÃ¼r Meditieren-Timer-Anzeige
+let mediActiveTimer = null;   // fÃ¼r verzÃ¶gertes Einblenden von #lower nach Stop
+let autoDimActive   = false;  // Auto-Dim lÃ¤uft gerade
 
-// ── Glow-Animation (JS-gesteuert, kein CSS-Keyframe) ─────────────────────────
+// â”€â”€ Glow-Animation (JS-gesteuert, kein CSS-Keyframe) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function startGlow() {
   startBtn.style.setProperty('--glow-transition', '0ms');
   let lastTs = null;
@@ -69,7 +69,7 @@ function stopGlow() {
   });
 }
 
-// ── Auto-Dim ──────────────────────────────────────────────────────────────────
+// â”€â”€ Auto-Dim â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function applyAutoDim() {
   autoDimActive = true;
   dimOverlay.style.transition = 'opacity 2s ease';
@@ -82,14 +82,14 @@ function removeAutoDim() {
   dimOverlay.style.opacity = '0';
 }
 
-// ── Audio-Konstanten ──────────────────────────────────────────────────────────
+// â”€â”€ Audio-Konstanten â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const CF_DUR           = 4;    // Crossfade am Loop-Punkt (Sekunden)
 const FADE_IN          = 1;    // Einblenden beim normalen Start
 const STOP_FADE_OUT    = 1.5;  // Ausblenden bei manuellem Stop
 const GONG_FADEIN      = 3;    // Ambient Fade-in nach Start-Gong
 const MEDI_END_FADE    = 6;    // Meditieren: Ausblenden am Ende (Sekunden)
 
-// ── Audio-State ───────────────────────────────────────────────────────────────
+// â”€â”€ Audio-State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let audioCtx      = null;
 let masterGain    = null;
 let decodedBuffer = null;
@@ -102,7 +102,7 @@ let timerTimeout   = null;
 const decodedCache = new Map();
 const loadPromises = new Map();
 
-// ── Hilfsfunktionen ───────────────────────────────────────────────────────────
+// â”€â”€ Hilfsfunktionen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function getSelectedFile() {
   const tile = document.querySelector('.sound-tile.active');
   return tile ? (tile.dataset.file || '') : '';
@@ -114,7 +114,7 @@ function getSelectedGongFile() {
 }
 
 
-// ── Datei laden, dekodieren + cachen ─────────────────────────────────────────
+// â”€â”€ Datei laden, dekodieren + cachen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function loadFile(filePath) {
   if (decodedCache.has(filePath)) return;
   if (loadPromises.has(filePath)) return loadPromises.get(filePath);
@@ -134,7 +134,7 @@ async function loadFile(filePath) {
   return p;
 }
 
-// ── Crossfade-Scheduler ───────────────────────────────────────────────────────
+// â”€â”€ Crossfade-Scheduler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function scheduleSource() {
   const t0  = nextSrcStart;
   const dur = decodedBuffer.duration;
@@ -173,9 +173,9 @@ function runScheduler() {
   schedulerTimer = setTimeout(runScheduler, 250);
 }
 
-// ── EIN persistenter AudioContext (iOS-tauglich) ──────────────────────────────
+// â”€â”€ EIN persistenter AudioContext (iOS-tauglich) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // iOS limitiert die Zahl der AudioContexts und bindet Audio an User-Gesten.
-// Darum genau EINEN Context erstellen, bei Gesten aufwärmen und NIE schließen.
+// Darum genau EINEN Context erstellen, bei Gesten aufwÃ¤rmen und NIE schlieÃŸen.
 function ensureCtx() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -184,10 +184,10 @@ function ensureCtx() {
   return audioCtx;
 }
 
-// Bei jeder Berührung den Context aufwärmen (resume läuft so in der Geste)
+// Bei jeder BerÃ¼hrung den Context aufwÃ¤rmen (resume lÃ¤uft so in der Geste)
 document.addEventListener('pointerdown', () => { ensureCtx(); }, { passive: true });
 
-// ── Audio starten ─────────────────────────────────────────────────────────────
+// â”€â”€ Audio starten â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function startAudio(filePath, fadeInDur = FADE_IN) {
   const ctx = ensureCtx();
   if (ctx.state === 'suspended') { try { await ctx.resume(); } catch (_) {} }
@@ -210,12 +210,12 @@ async function startAudio(filePath, fadeInDur = FADE_IN) {
   runScheduler();
 }
 
-// ── Gong abspielen (eigener AudioContext – schwingt nach Stop weiter aus) ─────
+// â”€â”€ Gong abspielen (eigener AudioContext â€“ schwingt nach Stop weiter aus) â”€â”€â”€â”€â”€
 function playGong(filePath) {
   const buf = decodedCache.get(filePath);
   if (!buf) return;
 
-  // Eigener Kontext: unabhängig vom Ambient-Stop, räumt sich selbst auf
+  // Eigener Kontext: unabhÃ¤ngig vom Ambient-Stop, rÃ¤umt sich selbst auf
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   if (ctx.state === 'suspended') ctx.resume();
 
@@ -231,7 +231,7 @@ function playGong(filePath) {
   source.onended = () => { try { ctx.close(); } catch (_) {} };
 }
 
-// ── Meditieren-Countdown ──────────────────────────────────────────────────────
+// â”€â”€ Meditieren-Countdown â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function startCountdown(totalMs) {
   const el = document.getElementById('medi-timer');
   const startTime = Date.now();
@@ -256,7 +256,7 @@ function stopCountdown() {
   countdownInterval = null;
 }
 
-// Kleiner Timer rechts unten (für Einschlafen-Modus)
+// Kleiner Timer rechts unten (fÃ¼r Einschlafen-Modus)
 function startSmallCountdown(totalMs) {
   const startTime = Date.now();
   function tick() {
@@ -273,12 +273,12 @@ function startSmallCountdown(totalMs) {
   countdownInterval = setInterval(tick, 500);
 }
 
-// ── Audio stoppen ─────────────────────────────────────────────────────────────
+// â”€â”€ Audio stoppen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function stopAudio(withFade = true) {
   isAudioActive = false;
   clearTimeout(schedulerTimer);
 
-  const ctx   = audioCtx;          // persistent – NICHT schließen, NICHT auf null
+  const ctx   = audioCtx;          // persistent â€“ NICHT schlieÃŸen, NICHT auf null
   const gain  = masterGain;
   const nodes = activeNodes.splice(0);
   masterGain  = null;
@@ -303,7 +303,7 @@ function stopAudio(withFade = true) {
   }
 }
 
-// ── App stoppen (UI + Audio) ──────────────────────────────────────────────────
+// â”€â”€ App stoppen (UI + Audio) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function doStop(withAudioFade = true) {
   isRunning = false;
   clearTimeout(autoFade);
@@ -312,7 +312,7 @@ function doStop(withAudioFade = true) {
   clearTimeout(endFadeTimer);
   clearTimeout(mediActiveTimer);
   stopCountdown();
-  updateDisplay(parseInt(slider.value)); // kleinen Timer zurücksetzen
+  updateDisplay(parseInt(slider.value)); // kleinen Timer zurÃ¼cksetzen
   const wasMedi = body.classList.contains('medi-active');
   body.classList.remove('idle', 'medi-mode');
   body.classList.add('stopping');
@@ -334,8 +334,8 @@ function doStop(withAudioFade = true) {
   }, STOP_FADE_OUT * 1000 + 100);
 }
 
-// ── Start / Stop Button ───────────────────────────────────────────────────────
-// ── Session starten (zentral für Hauptseite + Meditieren) ────────────────────
+// â”€â”€ Start / Stop Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€ Session starten (zentral fÃ¼r Hauptseite + Meditieren) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // mode: 'ambient' (endlos) | 'einschlafen' (Timer + Ausblenden) | 'meditieren' (Gong)
 async function startSession({ mode, filePath, minutes, gongFile }) {
   clearTimeout(stopVisualTimer);
@@ -343,7 +343,7 @@ async function startSession({ mode, filePath, minutes, gongFile }) {
 
   const gongOn = mode === 'meditieren' && !!gongFile;
 
-  // Benötigte Dateien vorab laden
+  // BenÃ¶tigte Dateien vorab laden
   const loadQueue = [];
   if (filePath && !decodedCache.has(filePath)) loadQueue.push(filePath);
   if (gongFile && !decodedCache.has(gongFile)) loadQueue.push(gongFile);
@@ -351,7 +351,7 @@ async function startSession({ mode, filePath, minutes, gongFile }) {
   if (loadQueue.length > 0) {
     try {
       startBtn.disabled = true;
-      statusW.textContent = 'Lädt…';
+      statusW.textContent = 'LÃ¤dtâ€¦';
       await Promise.all(loadQueue.map(f => loadFile(f)));
       startBtn.disabled = false;
     } catch {
@@ -370,10 +370,10 @@ async function startSession({ mode, filePath, minutes, gongFile }) {
   elemHidden = false;
   autoDimActive = false;
   removeAutoDim();
-  statusW.textContent = 'Läuft';
+  statusW.textContent = 'LÃ¤uft';
   startGlow();
 
-  // Audio starten (bei "Nur Gong" läuft kein Dauerklang)
+  // Audio starten (bei "Nur Gong" lÃ¤uft kein Dauerklang)
   if (filePath) {
     const fadeIn = gongOn ? GONG_FADEIN : FADE_IN;
     await startAudio(filePath, fadeIn);
@@ -400,7 +400,7 @@ async function startSession({ mode, filePath, minutes, gongFile }) {
 
   if (minutes > 0) {
     if (mode === 'einschlafen') {
-      // Ausblenden über letztes Sechstel der Zeit, maximal 10 Minuten
+      // Ausblenden Ã¼ber letztes Sechstel der Zeit, maximal 10 Minuten
       const fadeSecs    = Math.min(totalSecs / 6, 600);
       const fadeStartMs = (totalSecs - fadeSecs) * 1000;
 
@@ -416,7 +416,7 @@ async function startSession({ mode, filePath, minutes, gongFile }) {
 
     } else if (mode === 'meditieren') {
       if (gongOn) {
-        // End-Gong: Gong schlägt an, parallel Ambient ausblenden
+        // End-Gong: Gong schlÃ¤gt an, parallel Ambient ausblenden
         timerTimeout = setTimeout(() => {
           if (!isRunning) return;
           playGong(gongFile);
@@ -444,7 +444,7 @@ async function startSession({ mode, filePath, minutes, gongFile }) {
   }
 }
 
-// ── Großer Play-Button: Hauptseite (Ambient / Einschlafen) ───────────────────
+// â”€â”€ GroÃŸer Play-Button: Hauptseite (Ambient / Einschlafen) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 startBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   if (isRunning) { doStop(true); return; }
@@ -455,7 +455,7 @@ startBtn.addEventListener('click', (e) => {
   startSession({ mode, filePath, minutes, gongFile: null });
 });
 
-// ── Tap auf Hintergrund = Bedienelemente ein-/ausblenden (Toggle) ────────────
+// â”€â”€ Tap auf Hintergrund = Bedienelemente ein-/ausblenden (Toggle) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.getElementById('app').addEventListener('click', (e) => {
   if (didSwipe) { didSwipe = false; return; }
   if (!isRunning) return;
@@ -475,7 +475,7 @@ document.getElementById('app').addEventListener('click', (e) => {
   }
 });
 
-// ── Alle Sounds + Gongs laden + Splash ausblenden ────────────────────────────
+// â”€â”€ Alle Sounds + Gongs laden + Splash ausblenden â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function preloadAllSounds() {
   const tiles = document.querySelectorAll('.sound-tile[data-file], .gong-tile[data-file]');
   const promises = [];
@@ -490,7 +490,7 @@ async function initApp() {
   const splash  = document.getElementById('splash');
   const minWait = new Promise(r => setTimeout(r, 2500));
   await Promise.all([preloadAllSounds(), minWait]);
-  // Letzten Stand aus localStorage wiederherstellen (Standard: Vögel/Wald)
+  // Letzten Stand aus localStorage wiederherstellen (Standard: VÃ¶gel/Wald)
   const saved = parseInt(localStorage.getItem('ohreninsel-carousel') ?? '2');
   carouselIdx = (saved >= 0 && saved < carouselItems.length) ? saved : 2;
   const startItem = carouselItems[carouselIdx];
@@ -502,19 +502,19 @@ async function initApp() {
 }
 initApp();
 
-// ── Sound-Kacheln (immer genau eine aktiv – kein Abwählen mehr) ──────────────
-// Tippen verhält sich wie Swipen: Hintergrund wechselt und – falls Audio läuft –
+// â”€â”€ Sound-Kacheln (immer genau eine aktiv â€“ kein AbwÃ¤hlen mehr) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Tippen verhÃ¤lt sich wie Swipen: Hintergrund wechselt und â€“ falls Audio lÃ¤uft â€“
 // wird per Crossfade auf den neuen Klang umgeblendet (switchToCarousel).
 document.querySelectorAll('.sound-tile').forEach(tile => {
   tile.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (tile.classList.contains('active')) return; // schon aktiv → nichts tun
+    if (tile.classList.contains('active')) return; // schon aktiv â†’ nichts tun
     const ci = carouselItems.findIndex(item => item.key === tile.dataset.sound);
     if (ci !== -1) switchToCarousel(ci, 0);
   });
 });
 
-// ── Einschlaf-Timer-Chips ─────────────────────────────────────────────────────
+// â”€â”€ Einschlaf-Timer-Chips â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.querySelectorAll('.chip').forEach(chip => {
   chip.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -531,7 +531,7 @@ document.querySelectorAll('.chip').forEach(chip => {
   });
 });
 
-// ── Gong-Klangschalen (im Meditieren-Panel) ──────────────────────────────────
+// â”€â”€ Gong-Klangschalen (im Meditieren-Panel) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 document.querySelectorAll('.gong-tile').forEach(tile => {
   tile.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -540,7 +540,7 @@ document.querySelectorAll('.gong-tile').forEach(tile => {
   });
 });
 
-// ── Dauer-Slider ──────────────────────────────────────────────────────────────
+// â”€â”€ Dauer-Slider â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 slider.addEventListener('input', () => updateDisplay(parseInt(slider.value)));
 
 function updateDisplay(min) {
@@ -550,7 +550,7 @@ function updateDisplay(min) {
     : `${String(m).padStart(2, '0')}:00`;
 }
 
-// ── Display abdunkeln ─────────────────────────────────────────────────────────
+// â”€â”€ Display abdunkeln â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 dimSlider.addEventListener('input', () => {
   const val = parseInt(dimSlider.value) / 100;
   if (!isRunning || autoDimActive) {
@@ -559,7 +559,7 @@ dimSlider.addEventListener('input', () => {
   }
 });
 
-// ── Hintergrund-Slide-Transition ──────────────────────────────────────────────
+// â”€â”€ Hintergrund-Slide-Transition â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const bgSlideEl = document.getElementById('bg-slide');
 let bgSliding = false;
 
@@ -600,9 +600,9 @@ function slideBg(newCls, direction) {
   bgEl.style.transform       = `translateX(${exitTo})`;
 
   setTimeout(() => {
-    bgEl.style.transition = 'none';   // kein background-Übergang beim Snap
-    bgEl.style.transform  = '';       // zurück auf Position 0 (unsichtbar hinter bg-slide)
-    setBg(newCls);                    // Klasse wechseln – sofort, kein Flash
+    bgEl.style.transition = 'none';   // kein background-Ãœbergang beim Snap
+    bgEl.style.transform  = '';       // zurÃ¼ck auf Position 0 (unsichtbar hinter bg-slide)
+    setBg(newCls);                    // Klasse wechseln â€“ sofort, kein Flash
     bgEl.offsetHeight;                // reflow erzwingen
     bgEl.style.transition = '';       // normale CSS-Transition wiederherstellen
     bgSlideEl.style.transition = 'none';
@@ -611,7 +611,7 @@ function slideBg(newCls, direction) {
   }, 420);
 }
 
-// ── Hintergrund + Sonnen-Theme ────────────────────────────────────────────────
+// â”€â”€ Hintergrund + Sonnen-Theme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const sunTheme = {
   'bg-meer':      'theme-meer',
   'bg-berg':      'theme-berg',
@@ -648,7 +648,7 @@ function setBg(cls) {
 document.querySelectorAll('.bg-swatch').forEach(s =>
   s.addEventListener('click', () => setBg(s.dataset.bg)));
 
-// ── Menü ──────────────────────────────────────────────────────────────────────
+// â”€â”€ MenÃ¼ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const menuBtn = document.getElementById('menu-btn');
 const mOver   = document.getElementById('menu-overlay');
 const mSheet  = document.getElementById('menu-sheet');
@@ -664,11 +664,11 @@ mOver.addEventListener('click', () => {
   mSheet.classList.remove('open');
 });
 
-// ── Swipe-Navigation (Sound + Hintergrund wechseln) ──────────────────────────
-// touch-action: pan-y auf #stage (CSS) gibt horizontale Gesten an JS ab –
+// â”€â”€ Swipe-Navigation (Sound + Hintergrund wechseln) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// touch-action: pan-y auf #stage (CSS) gibt horizontale Gesten an JS ab â€“
 // funktioniert auf Android WebView und iOS Safari PWA ohne preventDefault-Hack.
 
-// Berg hat noch keinen Sound – erscheint im Karussell, ändert nur den Hintergrund
+// Berg hat noch keinen Sound â€“ erscheint im Karussell, Ã¤ndert nur den Hintergrund
 const carouselItems = [
   { key: 'wellen',   bg: 'bg-meer' },
   { key: 'rauschen', bg: 'bg-nacht-meer' },
@@ -747,12 +747,12 @@ stageEl.addEventListener('pointerup', (e) => {
 
 stageEl.addEventListener('pointercancel', () => { swipeStartX = null; });
 
-// ── Update-Check ──────────────────────────────────────────────────────────────
+// â”€â”€ Update-Check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function checkForUpdate() {
   const btn    = document.getElementById('update-btn');
   const status = document.getElementById('update-status');
   btn.disabled = true;
-  btn.textContent = '⏳ Prüfe...';
+  btn.textContent = 'â³ PrÃ¼fe...';
   try {
     const baseUrl = (window.Capacitor && window.Capacitor.isNativePlatform())
       ? 'https://boris1900.github.io/ohreninsel/'
@@ -763,23 +763,23 @@ async function checkForUpdate() {
     const latest = match ? match[1] : null;
     if (!latest) throw new Error('Version nicht lesbar');
     if (latest === APP_VERSION) {
-      status.textContent = '✅ Du hast die aktuelle Version.';
+      status.textContent = 'âœ… Du hast die aktuelle Version.';
     } else if (window.Capacitor && window.Capacitor.isNativePlatform()) {
       const apkUrl = `https://github.com/Boris1900/ohreninsel/releases/download/${latest}/Ohreninsel-${latest}.apk`;
-      status.innerHTML = `🆕 Update verfügbar! <button onclick="window.open('${apkUrl}','_system')" style="margin-left:6px;padding:4px 10px;border-radius:8px;border:none;background:rgba(126,217,87,0.8);color:#000;font-size:11px;font-weight:600;cursor:pointer;">APK laden</button>`;
+      status.innerHTML = `ðŸ†• Update verfÃ¼gbar! <button onclick="window.open('${apkUrl}','_system')" style="margin-left:6px;padding:4px 10px;border-radius:8px;border:none;background:rgba(126,217,87,0.8);color:#000;font-size:11px;font-weight:600;cursor:pointer;">APK laden</button>`;
     } else {
-      status.innerHTML = `🆕 Update verfügbar! <button onclick="applyUpdate()" style="margin-left:6px;padding:4px 10px;border-radius:8px;border:none;background:rgba(126,217,87,0.8);color:#000;font-size:11px;font-weight:600;cursor:pointer;">Jetzt laden</button>`;
+      status.innerHTML = `ðŸ†• Update verfÃ¼gbar! <button onclick="applyUpdate()" style="margin-left:6px;padding:4px 10px;border-radius:8px;border:none;background:rgba(126,217,87,0.8);color:#000;font-size:11px;font-weight:600;cursor:pointer;">Jetzt laden</button>`;
     }
   } catch (e) {
-    status.textContent = '⚠️ Prüfung fehlgeschlagen.';
+    status.textContent = 'âš ï¸ PrÃ¼fung fehlgeschlagen.';
   }
-  btn.textContent = 'Auf Update prüfen';
+  btn.textContent = 'Auf Update prÃ¼fen';
   btn.disabled = false;
 }
 
 async function applyUpdate() {
   const status = document.getElementById('update-status');
-  status.textContent = '⏳ Wird geladen...';
+  status.textContent = 'â³ Wird geladen...';
   try {
     const keys = await caches.keys();
     await Promise.all(keys.map(k => caches.delete(k)));
@@ -794,7 +794,7 @@ async function applyUpdate() {
   window.location.href = window.location.pathname + '?v=' + Date.now();
 }
 
-// ── Meditieren-Panel ──────────────────────────────────────────────────────────
+// â”€â”€ Meditieren-Panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const mediEntry     = document.getElementById('medi-entry');
 const mediOverlay   = document.getElementById('medi-overlay');
 const mediSheet     = document.getElementById('medi-sheet');
@@ -828,7 +828,7 @@ document.querySelectorAll('.medi-chip').forEach(chip => {
   });
 });
 
-// Dauer-Slider (Feintuning, hält die Chips synchron)
+// Dauer-Slider (Feintuning, hÃ¤lt die Chips synchron)
 mediSlider.addEventListener('input', () => {
   const val = parseInt(mediSlider.value);
   updateMediDisplay(val);
@@ -843,7 +843,7 @@ document.querySelectorAll('.medi-toggle').forEach(btn => {
     document.querySelectorAll('.medi-toggle').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     mediKlang = btn.dataset.medi;
-    // Gong-Schalen nur wählbar, wenn Gong dabei ist
+    // Gong-Schalen nur wÃ¤hlbar, wenn Gong dabei ist
     mediSheet.classList.toggle('no-gong', mediKlang === 'klang');
   });
 });
@@ -861,3 +861,4 @@ mediStartBtn.addEventListener('click', (e) => {
 if (window.location.search) {
   history.replaceState(null, '', window.location.pathname);
 }
+

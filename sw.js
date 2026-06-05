@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ohreninsel-v0.8.6';
+﻿const CACHE_NAME = 'ohreninsel-v0.8.7';
 
 const CACHE_FILES = [
   './',
@@ -66,3 +66,4 @@ self.addEventListener('fetch', event => {
     })
   );
 });
+
