@@ -1,5 +1,5 @@
 ﻿// Version
-const APP_VERSION = 'v0.8.9';
+const APP_VERSION = 'v0.9.0';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
@@ -561,7 +561,8 @@ dimSlider.addEventListener('input', () => {
 
 // â”€â”€ Hintergrund-Slide-Transition â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const bgSlideEl = document.getElementById('bg-slide');
-let bgSliding = false;
+let bgSliding       = false;
+let bgSlidingTarget = null; // letzter Ziel-Hintergrund bei schnellen Wischfolgen
 
 const bgStyleMap = {
   'bg-meer':       "url('meer_0.2.jpg') center/cover no-repeat",
@@ -579,8 +580,16 @@ const bgStyleMap = {
 };
 
 function slideBg(newCls, direction) {
-  if (bgSliding) { setBg(newCls); return; }
-  bgSliding = true;
+  // Schnelles zweites Wischen waehrend Animation laeuft:
+  // Hintergrund sofort setzen, aber letztes Ziel merken –
+  // damit der laufende Timeout am Ende den richtigen Hintergrund einrastet.
+  if (bgSliding) {
+    bgSlidingTarget = newCls;
+    setBg(newCls);
+    return;
+  }
+  bgSliding       = true;
+  bgSlidingTarget = newCls;
 
   const enterFrom = direction < 0 ? '100%' : '-100%';
   const exitTo    = direction < 0 ? '-100%' : '100%';
@@ -600,14 +609,15 @@ function slideBg(newCls, direction) {
   bgEl.style.transform       = `translateX(${exitTo})`;
 
   setTimeout(() => {
-    bgEl.style.transition = 'none';   // kein background-Ãœbergang beim Snap
-    bgEl.style.transform  = '';       // zurÃ¼ck auf Position 0 (unsichtbar hinter bg-slide)
-    setBg(newCls);                    // Klasse wechseln â€“ sofort, kein Flash
-    bgEl.offsetHeight;                // reflow erzwingen
-    bgEl.style.transition = '';       // normale CSS-Transition wiederherstellen
+    bgEl.style.transition = 'none';
+    bgEl.style.transform  = '';
+    setBg(bgSlidingTarget);           // letztes Ziel, nicht das urspruengliche
+    bgEl.offsetHeight;
+    bgEl.style.transition = '';
     bgSlideEl.style.transition = 'none';
     bgSlideEl.style.transform  = 'translateX(100%)';
-    bgSliding = false;
+    bgSliding       = false;
+    bgSlidingTarget = null;
   }, 420);
 }
 
@@ -663,6 +673,44 @@ mOver.addEventListener('click', () => {
   mOver.classList.remove('open');
   mSheet.classList.remove('open');
 });
+
+// Sheet-Handle: Tap oder Wischen nach unten schliesst das Menue
+(function() {
+  const handle = mSheet.querySelector('.sheet-handle');
+  let dragY0 = null;
+
+  handle.addEventListener('pointerdown', (e) => {
+    dragY0 = e.clientY;
+    handle.setPointerCapture(e.pointerId);
+    // Transition kurz abschalten damit das Mitziehen butterweich ist
+    mSheet.style.transition = 'none';
+  });
+
+  handle.addEventListener('pointermove', (e) => {
+    if (dragY0 === null) return;
+    const dy = Math.max(0, e.clientY - dragY0);
+    mSheet.style.transform = `translateX(-50%) translateY(${dy}px)`;
+  });
+
+  handle.addEventListener('pointerup', (e) => {
+    if (dragY0 === null) return;
+    const dy = e.clientY - dragY0;
+    dragY0 = null;
+    mSheet.style.transition = '';      // CSS-Transition wieder an
+    mSheet.style.transform  = '';      // Position dem CSS ueberlassen
+    if (dy > 60 || Math.abs(dy) < 12) {
+      // Genuegend weit gezogen ODER kurzer Tap → schliessen
+      mOver.classList.remove('open');
+      mSheet.classList.remove('open');
+    }
+  });
+
+  handle.addEventListener('pointercancel', () => {
+    dragY0 = null;
+    mSheet.style.transition = '';
+    mSheet.style.transform  = '';
+  });
+})();
 
 // â”€â”€ Swipe-Navigation (Sound + Hintergrund wechseln) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // touch-action: pan-y auf #stage (CSS) gibt horizontale Gesten an JS ab â€“
@@ -722,6 +770,7 @@ function switchToCarousel(idx, direction = 0) {
 
 const stageEl = document.getElementById('stage');
 
+// pointerdown merkt sich Start nur wenn im Stage-Bereich (nicht im #lower-Panel)
 stageEl.addEventListener('pointerdown', (e) => {
   if (!e.isPrimary) return;
   const lower = document.getElementById('lower');
@@ -731,7 +780,9 @@ stageEl.addEventListener('pointerdown', (e) => {
   didSwipe = false;
 });
 
-stageEl.addEventListener('pointerup', (e) => {
+// pointerup auf document-Ebene – verhindert haengengebliebenen State wenn
+// der Finger auf Android ausserhalb von #stage losgelassen wird
+document.addEventListener('pointerup', (e) => {
   if (!e.isPrimary || swipeStartX === null) return;
   const dx = e.clientX - swipeStartX;
   const dy = e.clientY - swipeStartY;
@@ -745,7 +796,10 @@ stageEl.addEventListener('pointerup', (e) => {
   switchToCarousel(next, direction);
 });
 
-stageEl.addEventListener('pointercancel', () => { swipeStartX = null; });
+// pointercancel: Android-Gesten-System übernimmt → State bereinigen
+document.addEventListener('pointercancel', (e) => {
+  if (e.isPrimary) swipeStartX = null;
+});
 
 // â”€â”€ Update-Check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function checkForUpdate() {
@@ -815,6 +869,41 @@ function closeMediPanel() { mediOverlay.classList.remove('open'); mediSheet.clas
 
 mediEntry.addEventListener('click', (e) => { e.stopPropagation(); openMediPanel(); });
 mediOverlay.addEventListener('click', closeMediPanel);
+
+// Meditieren-Sheet-Handle: Tap oder Wischen nach unten schliesst das Panel
+(function() {
+  const handle = mediSheet.querySelector('.sheet-handle');
+  let dragY0 = null;
+
+  handle.addEventListener('pointerdown', (e) => {
+    dragY0 = e.clientY;
+    handle.setPointerCapture(e.pointerId);
+    mediSheet.style.transition = 'none';
+  });
+
+  handle.addEventListener('pointermove', (e) => {
+    if (dragY0 === null) return;
+    const dy = Math.max(0, e.clientY - dragY0);
+    mediSheet.style.transform = `translateX(-50%) translateY(${dy}px)`;
+  });
+
+  handle.addEventListener('pointerup', (e) => {
+    if (dragY0 === null) return;
+    const dy = e.clientY - dragY0;
+    dragY0 = null;
+    mediSheet.style.transition = '';
+    mediSheet.style.transform  = '';
+    if (dy > 60 || Math.abs(dy) < 12) {
+      closeMediPanel();
+    }
+  });
+
+  handle.addEventListener('pointercancel', () => {
+    dragY0 = null;
+    mediSheet.style.transition = '';
+    mediSheet.style.transform  = '';
+  });
+})();
 
 // Dauer-Chips
 document.querySelectorAll('.medi-chip').forEach(chip => {

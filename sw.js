@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'ohreninsel-v0.8.9';
+﻿const CACHE_NAME = 'ohreninsel-v0.9.0';
 
 const CACHE_FILES = [
   './',

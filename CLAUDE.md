@@ -1,7 +1,7 @@
 # TinnitusMediApp – Projektdokumentation
 
 **Arbeitstitel:** TinnitusMediApp | **Produktname:** Ohreninsel
-**Stand:** v0.8.9 (Menü-Button deutlich sichtbarer, iPhone-Streifen behoben – 06.06.2026)
+**Stand:** v0.9.0 (Android-Startblitz, Swipe-Freeze, Menü-Handle – 06.06.2026)
 
 **PWA live:** https://boris1900.github.io/ohreninsel/ (GitHub Pages, master-Branch)
 Für iPhone (Katharina): URL in Safari → Teilen → Zum Home-Bildschirm.
@@ -130,6 +130,7 @@ GitHub: `Boris1900/ohreninsel` · **PWA + APK immer zusammen aktuell halten.**
 
 ## Erledigt (Meilensteine)
 
+- **v0.9.0** (06.06.2026): Android-Startblitz: styles.xml `android:background=@null` → `android:windowBackground=@color/colorPrimary`. Swipe friert auf Android ein: `pointerup`/`pointercancel` auf `document`-Ebene (nicht nur `#stage`), außerdem `bgSlidingTarget` für korrekte Ziel-Bg bei schnellen Doppelwischen. Menü-Handle + Medi-Handle: Tap oder Wischen nach unten schließt das Sheet (Pointer-Capture, Drag-Tracking).
 - **v0.8.9** (06.06.2026): Menü-Button jetzt 82% Weiß + box-shadow direkt auf den Strichen (drop-shadow am Container wirkt auf iOS zu schwach). iPhone-Streifen: `#app` auf `position: fixed; top:0; bottom:0` umgestellt – exakt wie Splash. `height:100dvh` war auf iOS PWA manchmal minimal kürzer als die physische Displayhöhe, daher der sichtbare Streifen. Wirkungsloses `body::after` aus v0.8.8 entfernt.
 - **v0.8.8** (05.06.2026): Menü-Button vergrößert (22px/2px) + drop-shadow (zu schwach, in v0.8.9 korrigiert). iPhone-Streifen-Fix `body::after` (war hinter #app, wirkungslos – in v0.8.9 korrigiert).
 - **v0.8.7** (04.06.2026): Weißer Statusbalken behoben (theme-color + backgroundColor auf #0a2535). Gilt für PWA + APK.

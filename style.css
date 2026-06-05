@@ -436,10 +436,22 @@ input[type=range]::-moz-range-thumb {
 }
 #menu-sheet.open { transform: translateX(-50%) translateY(0); }
 
+/* Handle-Strich: padding vergroessert die unsichtbare Trefferzone.
+   background-clip:content-box sorgt dafuer, dass der Hintergrund
+   nur im 38×4px-Strich sichtbar bleibt, nicht im Padding-Bereich.
+   Negative top-margin und reduziertes bottom-margin gleichen das
+   extra Padding visuell wieder aus. */
 .sheet-handle {
-  width: 38px; height: 4px; background: var(--w12);
-  border-radius: 2px; margin: 0 auto 24px;
+  width: 38px; height: 4px;
+  background: var(--w12);
+  background-clip: content-box;
+  border-radius: 2px;
+  margin: -10px auto 14px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
 }
+.sheet-handle:active { background: var(--w40); background-clip: content-box; }
 .sheet-section { margin-bottom: 28px; }
 .sheet-title {
   font-size: 10px; font-weight: 500; letter-spacing: 2px;
