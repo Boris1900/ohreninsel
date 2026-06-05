@@ -1,7 +1,7 @@
 # TinnitusMediApp – Projektdokumentation
 
 **Arbeitstitel:** TinnitusMediApp | **Produktname:** Ohreninsel
-**Stand:** v0.9.0 (Android-Startblitz, Swipe-Freeze, Menü-Handle – 06.06.2026)
+**Stand:** v0.9.1 (Sheet-Handle-Fix, Splash-FOUC, Encoding-Bugfix – 06.06.2026)
 
 **PWA live:** https://boris1900.github.io/ohreninsel/ (GitHub Pages, master-Branch)
 Für iPhone (Katharina): URL in Safari → Teilen → Zum Home-Bildschirm.
@@ -118,99 +118,6 @@ GitHub: `Boris1900/ohreninsel` · **PWA + APK immer zusammen aktuell halten.**
 
 ---
 
-## ⚡ NÄCHSTE SESSION – SOFORT ERLEDIGEN (3 Bugs, v0.9.1)
-
-> Diese drei Punkte sind halbfertig aus v0.9.0. Direkt anfangen, kein Warmup.
-
----
-
-### Bug 1: Sheet-Handle visuell verschwunden
-
-**Symptom:** Der waagerechte Strich oben im Menü-Sheet (und Meditieren-Sheet) ist nach v0.9.0 komplett weg.
-
-**Ursache:** CSS-Änderung in `style.css` für `.sheet-handle`:
-- `background-clip: content-box` + `padding: 10px 20px` + `margin: -10px auto 14px` ergibt Rendering-Konflikt mit `overflow-y: auto` am Elternelement (`#menu-sheet`). Der negative Margin schiebt den Strich aus dem sichtbaren Bereich.
-
-**Fix:** `.sheet-handle` in `style.css` zurück auf das einfache Original, aber mit `cursor: pointer` und erweiterter Trefferzone per `::before`-Pseudo-Element:
-```css
-.sheet-handle {
-  width: 38px; height: 4px; background: var(--w12);
-  border-radius: 2px; margin: 0 auto 24px;
-  cursor: pointer;
-  position: relative;
-  transition: background 0.15s;
-}
-.sheet-handle::before {
-  content: '';
-  position: absolute;
-  inset: -12px -30px;   /* unsichtbare Trefferzone: 24px hoch, 98px breit */
-}
-.sheet-handle:active { background: var(--w40); }
-```
-
-**JS ist bereits korrekt** (v0.9.0): `pointerdown/move/up/cancel` auf dem Handle mit `setPointerCapture` + Drag-Tracking ist in `app.js` ab Zeile ~673 drin. Nur CSS reparieren.
-
-**Außerdem sicherstellen:** Overlay-Klick (Hintergrund antippen) schließt Menü weiterhin – das ist bereits so in `mOver.addEventListener('click', ...)`.
-
----
-
-### Bug 2: Kurzer dunkler Blitz beim App-Start (APK + PWA)
-
-**Symptom:** Beim Starten der App erscheint kurz ein dunkler (schwarzer) Moment bevor das `#0a2535`-Blau des Splash-Screens sichtbar wird.
-
-**Was bereits gemacht wurde:**
-- `capacitor.config.json`: `backgroundColor: "#0a2535"` ✓
-- `android/app/src/main/res/values/colors.xml`: `colorPrimary = #0a2535` ✓
-- `android/app/src/main/res/values/styles.xml`: `AppTheme.NoActionBarLaunch` hat `windowBackground = @color/colorPrimary` ✓ und `AppTheme.NoActionBar` hat jetzt `android:windowBackground = @color/colorPrimary` ✓ (war `@null`)
-- `index.html` hat inline `<style>html,body{background:#0a2535}</style>` ✓
-
-**Was noch fehlt / zu prüfen:**
-
-**A) `index.html` – Splash-Styles inline ergänzen**, damit der Splash korrekt positioniert ist BEVOR `style.css` geladen hat (FOUC-Schutz):
-```html
-<style>
-  html, body { background: #0a2535; }
-  #splash {
-    position: fixed; inset: 0; z-index: 200;
-    background: #0a2535;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    overflow: hidden;
-  }
-</style>
-```
-Das bestehende `<style>html,body{background:#0a2535}</style>` durch diese erweiterte Version ersetzen.
-
-**B) Für Capacitor/APK:** `styles.xml` – `AppTheme.NoActionBar` enthält jetzt `android:windowBackground = @color/colorPrimary`. Prüfen ob das `capacitor sync` überlebt (Datei ist in `.gitignore`, wird von sync NICHT überschrieben – sollte also persistieren).
-
----
-
-### Bug 3: Encoding-Fehler in der Update-Prüfen-Funktion
-
-**Symptom:** Nach Klick auf "Auf Update prüfen" erscheinen falsche Zeichen: `ü` wird als `Ã¼` angezeigt, Emojis als wirre Zeichenfolgen.
-
-**Ursache:** `app.js` enthält Sonderzeichen/Emojis als literal UTF-8-Bytes im Source-Code. Nach meinen Edits wird die Datei möglicherweise mit anderem Encoding-Kontext vom Browser interpretiert.
-
-**Fix:** In `app.js` alle non-ASCII-Strings in `checkForUpdate()` und `applyUpdate()` durch Unicode-Escape-Sequenzen ersetzen (encoding-unabhängig):
-
-| Aktuell (kaputt) | Ersetzen durch |
-|---|---|
-| `'â³ PrÃ¼fe...'` | `'⏳ Prüfe...'` |
-| `'âœ… Du hast die aktuelle Version.'` | `'✅ Du hast die aktuelle Version.'` |
-| `'ðŸ†• Update verfÃ¼gbar!'` | `'🆕 Update verfügbar!'` |
-| `'âš ï¸ PrÃ¼fung fehlgeschlagen.'` | `'⚠️ Prüfung fehlgeschlagen.'` |
-| `'â³ Wird geladen...'` | `'⏳ Wird geladen...'` |
-| `btn.textContent = 'Auf Update prÃ¼fen'` | `btn.textContent = 'Auf Update prüfen'` |
-
-Alle diese Strings liegen in `checkForUpdate()` und `applyUpdate()` – einfach alle mit Grep finden: `grep -n 'Ã¼\|â³\|âœ\|ðŸ' app.js`
-
----
-
-### Release-Plan für v0.9.1
-Nach allen drei Fixes: Version auf `v0.9.1` hochzählen (4 Stellen), PWA pushen, APK bauen, Release anlegen.
-
----
-
 ## Offene Punkte
 
 ---
@@ -223,6 +130,7 @@ Nach allen drei Fixes: Version auf `v0.9.1` hochzählen (4 Stellen), PWA pushen,
 
 ## Erledigt (Meilensteine)
 
+- **v0.9.1** (06.06.2026): Sheet-Handle-CSS vereinfacht (padding/background-clip-Konflikt entfernt, `::before`-Trefferzone bleibt). Splash-FOUC-Schutz: `#splash`-Styles inline in `index.html`. Encoding-Mojibake in `checkForUpdate()`/`applyUpdate()` repariert (⏳ ✅ 🆕 ⚠️).
 - **v0.9.0** (06.06.2026): Android-Startblitz: styles.xml `android:background=@null` → `android:windowBackground=@color/colorPrimary`. Swipe friert auf Android ein: `pointerup`/`pointercancel` auf `document`-Ebene (nicht nur `#stage`), außerdem `bgSlidingTarget` für korrekte Ziel-Bg bei schnellen Doppelwischen. Menü-Handle + Medi-Handle: Tap oder Wischen nach unten schließt das Sheet (Pointer-Capture, Drag-Tracking).
 - **v0.8.9** (06.06.2026): Menü-Button jetzt 82% Weiß + box-shadow direkt auf den Strichen (drop-shadow am Container wirkt auf iOS zu schwach). iPhone-Streifen: `#app` auf `position: fixed; top:0; bottom:0` umgestellt – exakt wie Splash. `height:100dvh` war auf iOS PWA manchmal minimal kürzer als die physische Displayhöhe, daher der sichtbare Streifen. Wirkungsloses `body::after` aus v0.8.8 entfernt.
 - **v0.8.8** (05.06.2026): Menü-Button vergrößert (22px/2px) + drop-shadow (zu schwach, in v0.8.9 korrigiert). iPhone-Streifen-Fix `body::after` (war hinter #app, wirkungslos – in v0.8.9 korrigiert).

@@ -1,5 +1,5 @@
-﻿// Version
-const APP_VERSION = 'v0.9.0';
+// Version
+const APP_VERSION = 'v0.9.1';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
@@ -806,7 +806,7 @@ async function checkForUpdate() {
   const btn    = document.getElementById('update-btn');
   const status = document.getElementById('update-status');
   btn.disabled = true;
-  btn.textContent = 'â³ PrÃ¼fe...';
+  btn.textContent = '⏳ Prüfe...';
   try {
     const baseUrl = (window.Capacitor && window.Capacitor.isNativePlatform())
       ? 'https://boris1900.github.io/ohreninsel/'
@@ -817,23 +817,23 @@ async function checkForUpdate() {
     const latest = match ? match[1] : null;
     if (!latest) throw new Error('Version nicht lesbar');
     if (latest === APP_VERSION) {
-      status.textContent = 'âœ… Du hast die aktuelle Version.';
+      status.textContent = '✅ Du hast die aktuelle Version.';
     } else if (window.Capacitor && window.Capacitor.isNativePlatform()) {
       const apkUrl = `https://github.com/Boris1900/ohreninsel/releases/download/${latest}/Ohreninsel-${latest}.apk`;
-      status.innerHTML = `ðŸ†• Update verfÃ¼gbar! <button onclick="window.open('${apkUrl}','_system')" style="margin-left:6px;padding:4px 10px;border-radius:8px;border:none;background:rgba(126,217,87,0.8);color:#000;font-size:11px;font-weight:600;cursor:pointer;">APK laden</button>`;
+      status.innerHTML = `🆕 Update verfügbar! <button onclick="window.open('${apkUrl}','_system')" style="margin-left:6px;padding:4px 10px;border-radius:8px;border:none;background:rgba(126,217,87,0.8);color:#000;font-size:11px;font-weight:600;cursor:pointer;">APK laden</button>`;
     } else {
-      status.innerHTML = `ðŸ†• Update verfÃ¼gbar! <button onclick="applyUpdate()" style="margin-left:6px;padding:4px 10px;border-radius:8px;border:none;background:rgba(126,217,87,0.8);color:#000;font-size:11px;font-weight:600;cursor:pointer;">Jetzt laden</button>`;
+      status.innerHTML = `🆕 Update verfügbar! <button onclick="applyUpdate()" style="margin-left:6px;padding:4px 10px;border-radius:8px;border:none;background:rgba(126,217,87,0.8);color:#000;font-size:11px;font-weight:600;cursor:pointer;">Jetzt laden</button>`;
     }
   } catch (e) {
-    status.textContent = 'âš ï¸ PrÃ¼fung fehlgeschlagen.';
+    status.textContent = '⚠️ Prüfung fehlgeschlagen.';
   }
-  btn.textContent = 'Auf Update prÃ¼fen';
+  btn.textContent = 'Auf Update prüfen';
   btn.disabled = false;
 }
 
 async function applyUpdate() {
   const status = document.getElementById('update-status');
-  status.textContent = 'â³ Wird geladen...';
+  status.textContent = '⏳ Wird geladen...';
   try {
     const keys = await caches.keys();
     await Promise.all(keys.map(k => caches.delete(k)));
