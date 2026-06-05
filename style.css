@@ -444,6 +444,7 @@ input[type=range]::-moz-range-thumb {
   cursor: pointer;
   position: relative;
   transition: background 0.15s;
+  touch-action: none;
 }
 .sheet-handle::before {
   content: '';
