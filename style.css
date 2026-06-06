@@ -26,7 +26,7 @@ body.theme-cafe  { --sun: 255, 160,  60; --sun-rim: rgba(255,160,60,0.6); }
 
 html, body {
   height: 100%;
-  background: #030a0f;
+  background: #0a2535;
   font-family: 'Inter', system-ui, sans-serif;
   color: #fff;
   overflow: hidden;
@@ -36,20 +36,15 @@ html, body {
 }
 
 /* ─── Hintergrund ─────────────────────────────────────────── */
-/* Hintergrund-Ebenen mit negativem bottom-Overscan: top:0 + bottom:-120px zieht
-   das Element bewusst weit über die untere Displaykante hinaus. Liegt ganz hinten
-   (z-index 0) und ist background:cover → Überstand unsichtbar, aber GARANTIERT
-   kein Bodenstreifen, egal wie iOS die Viewport-Unterkante im black-translucent
-   Standalone interpretiert. Hängt nicht von screen.height/innerHeight ab. */
 #bg {
-  position: fixed; top: 0; left: 0; right: 0; bottom: -120px; z-index: 0;
-  background: #030a0f;
+  position: fixed; inset: 0; z-index: 0;
+  background: #0a2535;
   transition: background 0.7s ease;
   will-change: transform;
 }
 #bg-slide {
-  position: fixed; top: 0; left: 0; right: 0; bottom: -120px; z-index: 0;
-  background: #030a0f;
+  position: fixed; inset: 0; z-index: 0;
+  background: #0a2535;
   pointer-events: none;
   transform: translateX(100%);
   will-change: transform;
@@ -67,13 +62,13 @@ html, body {
 #bg.bg-cafe       { background: url('cafe_0.1.jpg') center/cover no-repeat; }
 
 #bg-shade {
-  position: fixed; top: 0; left: 0; right: 0; bottom: -120px; z-index: 0; pointer-events: none;
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background: linear-gradient(to bottom, transparent 45%, rgba(0,0,0,0.35) 100%);
 }
 
 /* ─── Display abdunkeln ───────────────────────────────────── */
 #dim-overlay {
-  position: fixed; top: 0; left: 0; right: 0; bottom: -120px; z-index: 4;
+  position: fixed; inset: 0; z-index: 4;
   background: #000;
   opacity: 0;
   pointer-events: none;
@@ -81,10 +76,10 @@ html, body {
 }
 
 /* ─── App-Wrapper ─────────────────────────────────────────── */
-/* #app = sichtbarer Bereich (inset:0). Die Bedienleiste #lower (bottom:0) sitzt
-   damit an der echten Unterkante; ihr padding-bottom mit env(safe-area-inset-bottom)
-   hält die Buttons über dem Home-Indicator. Dahinter (im Home-Indicator-Bereich)
-   scheint das übergroße Hintergrundbild durch – wie bei der MeditationsApp. */
+/* position:fixed + top/bottom:0 statt height:100dvh –
+   garantiert exakt denselben Viewport wie der Splash-Screen.
+   100dvh ist auf iOS PWA manchmal minimal kleiner als die
+   physische Displayhöhe, was den Streifen am unteren Rand erzeugt. */
 #app {
   position: fixed; z-index: 3;
   inset: 0;
@@ -543,12 +538,8 @@ input[type=range]::-moz-range-thumb {
 .sheet-footer-links a:active { color: var(--w55); }
 
 /* ─── Splash Screen ──────────────────────────────────────── */
-/* Gleicher bottom-Overscan wie die Hintergrund-Ebenen, damit beim Start kein
-   Streifen aufblitzt. padding-bottom:120px kompensiert den Overscan, sodass
-   Icon + Titel optisch im sichtbaren Bereich zentriert bleiben. */
 #splash {
-  position: fixed; top: 0; left: 0; right: 0; bottom: -120px; z-index: 200;
-  padding-bottom: 120px;
+  position: fixed; inset: 0; z-index: 200;
   background: #0a2535;   /* Landingpage-Blau – konsistentes Design */
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;

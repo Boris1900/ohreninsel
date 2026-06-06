@@ -1,13 +1,11 @@
 // Version
-const APP_VERSION = 'v0.9.8';
+const APP_VERSION = 'v0.9.9';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
 });
 
-// ── Service Worker (nicht auf localhost – sonst stört der Cache beim Entwickeln) ─
-// Hinweis: Der iPhone-Bodenstreifen wird rein per CSS gelöst (negatives bottom auf
-// den Hintergrund-Ebenen, siehe style.css) – kein JS-Höhenrechnen mehr nötig.
+// â”€â”€ Service Worker (nicht auf localhost â€“ sonst stÃ¶rt der Cache beim Entwickeln) â”€
 const isLocalDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if ('serviceWorker' in navigator && !isLocalDev) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
