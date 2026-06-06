@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'ohreninsel-v0.9.10';
+﻿const CACHE_NAME = 'ohreninsel-v0.9.11';
 
 const CACHE_FILES = [
   './',
@@ -41,6 +41,14 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
+  // Navigation (HTML-Seite): immer Netzwerk zuerst – so bekommt iOS stets die aktuelle index.html
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
   // Update-Check-Button: Netzwerk zuerst, dann Cache aktualisieren
   if (event.request.cache === 'reload') {
     event.respondWith(

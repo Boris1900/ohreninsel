@@ -257,5 +257,46 @@
   </div>
 
   <script src="app.js"></script>
+
+  <!-- Debug-Overlay: inline damit kein Service Worker es wegcachen kann -->
+  <script>
+  (function() {
+    var search = location.search || '';
+    var isDebug = search.indexOf('debug') !== -1;
+    // Flag in sessionStorage speichern – bleibt auch nach URL-Cleanup erhalten
+    if (isDebug) sessionStorage.setItem('oi-debug', '1');
+    if (!isDebug && sessionStorage.getItem('oi-debug') === '1') isDebug = true;
+    if (!isDebug) return;
+
+    // safe-area-inset-bottom per CSS-Trick auslesen
+    var probe = document.createElement('div');
+    probe.style.cssText = 'position:fixed;bottom:0;left:0;width:0;height:0;padding-bottom:env(safe-area-inset-bottom);pointer-events:none;visibility:hidden;';
+    document.body.appendChild(probe);
+
+    var box = document.createElement('div');
+    box.style.cssText = 'position:fixed;top:44px;right:8px;z-index:99999;background:rgba(0,0,0,0.85);color:#7fed57;font:11px/1.65 monospace;padding:8px 11px;border-radius:8px;pointer-events:none;white-space:pre;';
+    document.body.appendChild(box);
+
+    function update() {
+      var safeB = getComputedStyle(probe).paddingBottom;
+      var appEl = document.getElementById('app');
+      var bgEl  = document.getElementById('bg');
+      var appR  = appEl ? appEl.getBoundingClientRect() : null;
+      var bgR   = bgEl  ? bgEl.getBoundingClientRect()  : null;
+      box.textContent =
+        '── iOS Debug v0.9.11 ──\n' +
+        'screen.h:    ' + screen.height + '\n' +
+        'innerH:      ' + window.innerHeight + '\n' +
+        'vpH:         ' + (window.visualViewport ? Math.round(window.visualViewport.height) : 'n/a') + '\n' +
+        'safe-bot:    ' + safeB + '\n' +
+        '#app h:      ' + (appR ? appR.height.toFixed(1) : 'n/a') + '\n' +
+        '#app.bottom: ' + (appR ? appR.bottom.toFixed(1) : 'n/a') + '\n' +
+        '#bg  h:      ' + (bgR  ? bgR.height.toFixed(1)  : 'n/a') + '\n' +
+        '#bg.bottom:  ' + (bgR  ? bgR.bottom.toFixed(1)  : 'n/a');
+      requestAnimationFrame(update);
+    }
+    update();
+  })();
+  </script>
 </body>
 </html>
