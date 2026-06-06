@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>Ohreninsel Debug</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: #0a2535;
+      color: #7fed57;
+      font: 14px/1.8 monospace;
+      height: 100%;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    }
+    #wrap {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 20px;
+    }
+    h1 { color: #fff; font-size: 16px; margin-bottom: 10px; }
+    .row { width: 100%; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(127,237,87,0.2); padding: 4px 0; }
+    .label { color: #aaa; }
+    .val { color: #7fed57; font-weight: bold; }
+    a {
+      margin-top: 20px;
+      background: rgba(127,237,87,0.15);
+      color: #7fed57;
+      text-decoration: none;
+      padding: 12px 28px;
+      border-radius: 50px;
+      border: 1px solid #7fed57;
+      font-family: monospace;
+    }
+    #probe {
+      position: fixed; bottom: 0; left: 0;
+      width: 0; height: 0;
+      padding-bottom: env(safe-area-inset-bottom);
+      visibility: hidden; pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+<div id="probe"></div>
+<div id="wrap">
+  <h1>iOS Debug – Ohreninsel</h1>
+  <div class="row"><span class="label">screen.height</span><span class="val" id="v1">–</span></div>
+  <div class="row"><span class="label">innerHeight</span><span class="val" id="v2">–</span></div>
+  <div class="row"><span class="label">visualViewport.height</span><span class="val" id="v3">–</span></div>
+  <div class="row"><span class="label">safe-area-inset-bottom</span><span class="val" id="v4">–</span></div>
+  <div class="row"><span class="label">documentElement.clientHeight</span><span class="val" id="v5">–</span></div>
+  <div class="row"><span class="label">Fenster-Breite</span><span class="val" id="v6">–</span></div>
+  <a href="./">→ Zur App</a>
+</div>
+<script>
+  function update() {
+    var probe = document.getElementById('probe');
+    document.getElementById('v1').textContent = screen.height + 'px';
+    document.getElementById('v2').textContent = window.innerHeight + 'px';
+    document.getElementById('v3').textContent = window.visualViewport ? Math.round(window.visualViewport.height) + 'px' : 'n/a';
+    document.getElementById('v4').textContent = getComputedStyle(probe).paddingBottom;
+    document.getElementById('v5').textContent = document.documentElement.clientHeight + 'px';
+    document.getElementById('v6').textContent = window.innerWidth + 'px';
+    requestAnimationFrame(update);
+  }
+  update();
+</script>
+</body>
+</html>
