@@ -1,5 +1,5 @@
 // Version
-const APP_VERSION = 'v0.9.11';
+const APP_VERSION = 'v0.9.12';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
@@ -953,7 +953,8 @@ mediStartBtn.addEventListener('click', (e) => {
 
 // Debug-Param VOR dem URL-Cleanup abgreifen
 const _debugMode = new URLSearchParams(window.location.search).has('debug');
-if (window.location.search) {
+// URL nur bereinigen wenn KEIN ?debug drin – sonst sieht iOS beim "Zum Homescreen hinzufügen" die falsche URL
+if (window.location.search && !_debugMode) {
   history.replaceState(null, '', window.location.pathname);
 }
 

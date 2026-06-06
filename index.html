@@ -263,9 +263,9 @@
   (function() {
     var search = location.search || '';
     var isDebug = search.indexOf('debug') !== -1;
-    // Flag in sessionStorage speichern – bleibt auch nach URL-Cleanup erhalten
-    if (isDebug) sessionStorage.setItem('oi-debug', '1');
-    if (!isDebug && sessionStorage.getItem('oi-debug') === '1') isDebug = true;
+    // Flag in localStorage speichern – bleibt auch nach URL-Cleanup erhalten
+    if (isDebug) localStorage.setItem('oi-debug', '1');
+    if (!isDebug && localStorage.getItem('oi-debug') === '1') isDebug = true;
     if (!isDebug) return;
 
     // safe-area-inset-bottom per CSS-Trick auslesen
