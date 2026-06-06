@@ -1,7 +1,7 @@
 # TinnitusMediApp – Projektdokumentation
 
 **Arbeitstitel:** TinnitusMediApp | **Produktname:** Ohreninsel
-**Stand:** v0.9.5 (iPhone-Streifen, Impressum/Datenschutz – 06.06.2026)
+**Stand:** v0.9.6 (iPhone-Bodenstreifen-Fix – 06.06.2026)
 
 **PWA live:** https://boris1900.github.io/ohreninsel/ (GitHub Pages, master-Branch)
 Für iPhone (Katharina): URL in Safari → Teilen → Zum Home-Bildschirm.
@@ -120,7 +120,7 @@ GitHub: `Boris1900/ohreninsel` · **PWA + APK immer zusammen aktuell halten.**
 
 ## Offene Punkte
 
-- **iPhone-Streifen unten: noch unklar ob behoben.** v0.9.5 hat `max-width: 420px` entfernt (→ Seitenstreifen auf 430px-iPhones). Ob der Bodenstreifen damit auch weg ist, muss Katharina/Axel testen. Falls noch da: Modell erfragen, genau beschreiben (Dicke, durchgehend oder nur Ecken), dann gezielt fixen.
+- **iPhone-Streifen unten: Fix in v0.9.6, Bestätigung durch Katharina/Axel ausstehend.** Gleiche Methode wie MeditationsApp: `window.screen.height` per JS, CSS ohne `bottom: 0`.
 - **Impressum/Datenschutz-URLs prüfen:** Links gehen auf `tinnituspraxis-seedorf.de/impressum` und `/datenschutz` – Wix-Pfade bestätigen oder korrigieren.
 - **Lead Magnet**: Landingpage + App gegen E-Mail-Adresse. Projektordner: `C:\Users\Boris\Projekte\OhreninselLanding\` (bereits angelegt)
 - Optional: eigene Subdomain statt github.io
@@ -128,6 +128,7 @@ GitHub: `Boris1900/ohreninsel` · **PWA + APK immer zusammen aktuell halten.**
 
 ## Erledigt (Meilensteine)
 
+- **v0.9.6** (06.06.2026): Bodenstreifen-Fix (iPhone 12 + SE2). Ansatz wie MeditationsApp: `#bg`, `#bg-slide`, `#bg-shade`, `#dim-overlay` und `#app` haben kein `bottom: 0` mehr in CSS (nur noch `top/left/right: 0`). JS `fixScreenHeight()` setzt alle fünf auf `window.screen.height` (= physische Bildschirmhöhe in CSS-Pixeln) – wird sofort beim Laden und bei `resize` gesetzt. Außerdem: body/`#bg`/`#bg-slide` Fallback-Farbe von `#0a2535` auf `#030a0f` geändert (= Farbton des Gradient-Bodens).
 - **v0.9.5** (06.06.2026): `#app` max-width:420px + margin:auto entfernt → `inset:0` (iPhone 15 Plus/Pro Max = 430px: Seitenstreifen). Impressum, Datenschutz, tinnituspraxis-seedorf.de im Menü ergänzt (.sheet-footer-links).
 - **v0.9.4** (06.06.2026): Handle-Drag: `overflowY = hidden` während Drag (overflow:auto des Sheets hat touch-action:none gewonnen). MainActivity.java: `getWindow().setBackgroundDrawable(#0a2535)` vor super.onCreate() – frühestmöglicher Eingriff gegen dunklen Startblitz. Minimaler System-Launcher-Blitz bleibt (außerhalb App-Kontrolle).
 - **v0.9.3** (06.06.2026): Handle-Drag-Fix (overflowY), Versions-Bug (build-android.ps1 vergessen) behoben.

@@ -1,11 +1,25 @@
 // Version
-const APP_VERSION = 'v0.9.5';
+const APP_VERSION = 'v0.9.6';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
 });
 
 // â”€â”€ Service Worker (nicht auf localhost â€“ sonst stÃ¶rt der Cache beim Entwickeln) â”€
+// ── Screen-Höhe fixieren (iOS-PWA-Fix) ─────────────────────────────────────────
+// position:fixed ohne explizite height deckt auf manchen iPhones im PWA-Modus
+// die Safe Area (Home-Indicator-Zone, ~34px) nicht ab → Hintergrundfarbe scheint
+// als Streifen durch. window.screen.height = physische Höhe in CSS-Pixeln, immer.
+function fixScreenHeight() {
+  const h = window.screen.height + 'px';
+  ['bg', 'bg-slide', 'bg-shade', 'dim-overlay', 'app'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.height = h;
+  });
+}
+fixScreenHeight();
+window.addEventListener('resize', fixScreenHeight);
+
 const isLocalDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if ('serviceWorker' in navigator && !isLocalDev) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
