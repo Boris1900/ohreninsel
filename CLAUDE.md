@@ -1,7 +1,7 @@
 # TinnitusMediApp – Projektdokumentation
 
 **Arbeitstitel:** TinnitusMediApp | **Produktname:** Ohreninsel
-**Stand:** v0.9.4 (Handle-Drag, Encoding, Splash-Fix – 06.06.2026)
+**Stand:** v0.9.5 (iPhone-Streifen, Impressum/Datenschutz – 06.06.2026)
 
 **PWA live:** https://boris1900.github.io/ohreninsel/ (GitHub Pages, master-Branch)
 Für iPhone (Katharina): URL in Safari → Teilen → Zum Home-Bildschirm.
@@ -120,16 +120,15 @@ GitHub: `Boris1900/ohreninsel` · **PWA + APK immer zusammen aktuell halten.**
 
 ## Offene Punkte
 
----
-
-- **Splash-Screen Feintuning** (04.06.2026): Sofort blaues Vollbild, dann sanftes Fade-in mit App-Icon + Ladepunkten, dann weiches Überblenden in die App. Kein harter Schnitt.
-- **Lead Magnet**: Landingpage + App gegen E-Mail-Adresse.
-  Projektordner: `C:\Users\Boris\Projekte\OhreninselLanding\` (bereits angelegt)
+- **iPhone-Streifen unten: noch unklar ob behoben.** v0.9.5 hat `max-width: 420px` entfernt (→ Seitenstreifen auf 430px-iPhones). Ob der Bodenstreifen damit auch weg ist, muss Katharina/Axel testen. Falls noch da: Modell erfragen, genau beschreiben (Dicke, durchgehend oder nur Ecken), dann gezielt fixen.
+- **Impressum/Datenschutz-URLs prüfen:** Links gehen auf `tinnituspraxis-seedorf.de/impressum` und `/datenschutz` – Wix-Pfade bestätigen oder korrigieren.
+- **Lead Magnet**: Landingpage + App gegen E-Mail-Adresse. Projektordner: `C:\Users\Boris\Projekte\OhreninselLanding\` (bereits angelegt)
 - Optional: eigene Subdomain statt github.io
 - Optional: typischerer Berg-Sound (aktuell Vogel/Wald-Aufnahme)
 
 ## Erledigt (Meilensteine)
 
+- **v0.9.5** (06.06.2026): `#app` max-width:420px + margin:auto entfernt → `inset:0` (iPhone 15 Plus/Pro Max = 430px: Seitenstreifen). Impressum, Datenschutz, tinnituspraxis-seedorf.de im Menü ergänzt (.sheet-footer-links).
 - **v0.9.4** (06.06.2026): Handle-Drag: `overflowY = hidden` während Drag (overflow:auto des Sheets hat touch-action:none gewonnen). MainActivity.java: `getWindow().setBackgroundDrawable(#0a2535)` vor super.onCreate() – frühestmöglicher Eingriff gegen dunklen Startblitz. Minimaler System-Launcher-Blitz bleibt (außerhalb App-Kontrolle).
 - **v0.9.3** (06.06.2026): Handle-Drag-Fix (overflowY), Versions-Bug (build-android.ps1 vergessen) behoben.
 - **v0.9.2** (06.06.2026): touch-action:none auf .sheet-handle. styles.xml: windowSplashScreenBackground + postSplashScreenTheme.
@@ -154,6 +153,8 @@ GitHub: `Boris1900/ohreninsel` · **PWA + APK immer zusammen aktuell halten.**
 - **Version an 4 Stellen hochzählen:** `app.js` (APP_VERSION) + `sw.js` (CACHE_NAME) + `android/app/build.gradle` (versionCode + versionName) + GitHub Release-Tag.
 - **build.gradle nie mit PowerShell Set-Content schreiben** – das erzeugt BOM und bricht den Build. Stattdessen `[System.IO.File]::WriteAllText(..., $false)` oder Edit-Tool verwenden.
 - **Diktierfehler beachten:** Fachbegriffe, Domains, Dateinamen gegenchecken.
+- **build-android.ps1 VOR Gradle immer ausführen** – sonst landen alte Web-Dateien im APK (war Bug in v0.9.2).
+- **PWA-Push und APK-Build immer zusammen** – nie einzeln.
 
 ---
 
