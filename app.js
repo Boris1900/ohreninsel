@@ -1,5 +1,5 @@
 // Version
-const APP_VERSION = 'v0.9.9';
+const APP_VERSION = 'v0.9.10';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
@@ -951,7 +951,47 @@ mediStartBtn.addEventListener('click', (e) => {
   startSession({ mode: 'meditieren', filePath, minutes, gongFile });
 });
 
+// Debug-Param VOR dem URL-Cleanup abgreifen
+const _debugMode = new URLSearchParams(window.location.search).has('debug');
 if (window.location.search) {
   history.replaceState(null, '', window.location.pathname);
+}
+
+// ── Debug-Overlay (per ?debug aktivieren) ──────────────────────────────────
+// Zeigt iOS-spezifische Messwerte live an – nur für Diagnose des Bodenstreifens.
+// Katharina öffnet: https://boris1900.github.io/ohreninsel/?debug
+// Dann fotografieren, danach gezielt fixen.
+if (_debugMode) {
+  // CSS-Trick: padding-bottom:env(safe-area-inset-bottom) auslesen
+  const _probe = document.createElement('div');
+  _probe.style.cssText = 'position:fixed;bottom:0;left:0;width:0;height:0;' +
+    'padding-bottom:env(safe-area-inset-bottom);pointer-events:none;visibility:hidden;';
+  document.body.appendChild(_probe);
+
+  const _dbg = document.createElement('div');
+  _dbg.style.cssText =
+    'position:fixed;top:44px;right:8px;z-index:9999;' +
+    'background:rgba(0,0,0,0.82);color:#7fed57;' +
+    'font:11px/1.65 monospace;padding:8px 11px;border-radius:8px;' +
+    'pointer-events:none;white-space:pre;';
+  document.body.appendChild(_dbg);
+
+  function _dbgUpdate() {
+    const safeB = getComputedStyle(_probe).paddingBottom;
+    const appR  = document.getElementById('app')?.getBoundingClientRect();
+    const bgR   = document.getElementById('bg')?.getBoundingClientRect();
+    _dbg.textContent =
+      '── iOS Debug ──\n' +
+      `screen.h:    ${screen.height}\n` +
+      `innerH:      ${window.innerHeight}\n` +
+      `vpH:         ${visualViewport ? Math.round(visualViewport.height) : 'n/a'}\n` +
+      `safe-bot:    ${safeB}\n` +
+      `#app h:      ${appR ? appR.height.toFixed(1) : 'n/a'}\n` +
+      `#app.bottom: ${appR ? appR.bottom.toFixed(1) : 'n/a'}\n` +
+      `#bg  h:      ${bgR  ? bgR.height.toFixed(1)  : 'n/a'}\n` +
+      `#bg.bottom:  ${bgR  ? bgR.bottom.toFixed(1)  : 'n/a'}`;
+    requestAnimationFrame(_dbgUpdate);
+  }
+  _dbgUpdate();
 }
 
