@@ -1,7 +1,7 @@
 # TinnitusMediApp – Projektdokumentation
 
 **Arbeitstitel:** TinnitusMediApp | **Produktname:** Ohreninsel
-**Stand:** v0.9.7 (iPhone-Bodenstreifen – Ursachenfix lvh + getrennte Höhen – 06.06.2026)
+**Stand:** v0.9.8 (iPhone-Vollbild – Hintergrund-Overscan per negativem bottom – 06.06.2026)
 
 **PWA live:** https://boris1900.github.io/ohreninsel/ (GitHub Pages, master-Branch)
 Für iPhone (Katharina): URL in Safari → Teilen → Zum Home-Bildschirm.
@@ -120,7 +120,7 @@ GitHub: `Boris1900/ohreninsel` · **PWA + APK immer zusammen aktuell halten.**
 
 ## Offene Punkte
 
-- **iPhone-Streifen unten: Ursachenfix in v0.9.7, Bestätigung durch Katharina/Axel ausstehend.** Falls noch da: nächster Schritt wäre `status-bar-style` von `black-translucent` auf `black` (wie MediApp) – beseitigt den Streifen sicher, kostet aber das randlose Bild oben hinter der Statusleiste. Erst testen ob v0.9.7 reicht.
+- **iPhone-Vollbild: Lösung in v0.9.8 (bottom:-120px Overscan), Bestätigung durch Katharina/Axel ausstehend.** Falls wider Erwarten noch ein Spalt: Overscan-Wert (120px) erhöhen. Letzter Ausweg wäre `status-bar-style` von `black-translucent` auf `black` (wie MediApp) – beseitigt es sicher, kostet aber das randlose Bild oben hinter der Statusleiste.
 - **Impressum/Datenschutz-URLs prüfen:** Links gehen auf `tinnituspraxis-seedorf.de/impressum` und `/datenschutz` – Wix-Pfade bestätigen oder korrigieren.
 - **Lead Magnet**: Landingpage + App gegen E-Mail-Adresse. Projektordner: `C:\Users\Boris\Projekte\OhreninselLanding\` (bereits angelegt)
 - Optional: eigene Subdomain statt github.io
@@ -128,6 +128,7 @@ GitHub: `Boris1900/ohreninsel` · **PWA + APK immer zusammen aktuell halten.**
 
 ## Erledigt (Meilensteine)
 
+- **v0.9.8** (06.06.2026): **Vollbild-Lösung Bodenstreifen.** v0.9.7 (Overscan nur +4px per JS) ließ unten einen schwarzen Balken – auf iPhone 12/SE2 sind `screen.height`/`innerHeight`/`visualViewport.height` im black-translucent Standalone ALLE um die Home-Indicator-Höhe zu klein, +4px reichte nicht. **Robuste CSS-only-Lösung:** `#bg`, `#bg-slide`, `#bg-shade`, `#dim-overlay`, `#splash` bekommen `position:fixed; top:0; left:0; right:0; bottom:-120px` – das Element ragt bewusst 120px über die untere Kante hinaus. Liegt ganz hinten, `background:cover` → Überstand unsichtbar, NIE ein Spalt, unabhängig davon wie iOS die Viewport-Unterkante interpretiert. `#app` wieder `inset:0` (sichtbarer Bereich), `#lower` bottom:0 + safe-area-padding → Bedienleiste über dem Home-Indicator, dahinter scheint das übergroße Bild durch (wie MeditationsApp). `#splash` zusätzlich `padding-bottom:120px` (kompensiert Overscan → Icon bleibt zentriert). JS `fixHeights()` komplett entfernt (war kontraproduktiv). **Lehre: Bei iOS-Vollbild Hintergrund per negativem bottom überdimensionieren, NICHT per JS-Höhe rechnen.**
 - **v0.9.7** (06.06.2026): **Bodenstreifen-Ursachenfix** (iPhone 12 + SE2). Diagnose: Bei `status-bar-style=black-translucent` ist der Viewport der volle Screen; `window.screen.height` weicht auf iOS minimal nach unten ab → Hintergrund zu kurz → body-Farbe als Streifen sichtbar (v0.9.6 hat ihn nur dunkler gefärbt, nicht beseitigt). **Lösung – Hintergrund und Layout getrennt:** (1) `#bg`/`#bg-slide`/`#bg-shade`/`#dim-overlay` bekommen CSS `height: 100lvh` (volle Höhe inkl. Safe-Areas, greift vor JS) + JS `fixHeights()` setzt sie auf `max(visualViewport, screen, inner) + 4px` Overscan (liegen hinten, `cover` → Überstand unsichtbar, nie ein Spalt). (2) `#app` (Layout mit `#lower bottom:0`) bekommt EXAKT `visualViewport.height`, damit das Bedienpanel genau an der Unterkante sitzt. Lauscht auf `resize`/`orientationchange`/`visualViewport.resize`. Warum MediApp das Problem nie hatte: dort `status-bar-style=black` → screen.height ist dort überdimensioniert und deckt zufällig alles.
 - **v0.9.6** (06.06.2026): Erster Streifen-Versuch (Symptom): `screen.height` auf alle Layer + Fallback-Farbe `#030a0f`. Streifen blieb (nur dunkler) → in v0.9.7 richtig gelöst.
 - **v0.9.5** (06.06.2026): `#app` max-width:420px + margin:auto entfernt → `inset:0` (iPhone 15 Plus/Pro Max = 430px: Seitenstreifen). Impressum, Datenschutz, tinnituspraxis-seedorf.de im Menü ergänzt (.sheet-footer-links).

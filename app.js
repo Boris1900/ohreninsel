@@ -1,36 +1,13 @@
 // Version
-const APP_VERSION = 'v0.9.7';
+const APP_VERSION = 'v0.9.8';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
 });
 
-// â”€â”€ Service Worker (nicht auf localhost â€“ sonst stÃ¶rt der Cache beim Entwickeln) â”€
-// ── Höhen fixieren (iOS-PWA-Bodenstreifen-Fix) ──────────────────────────────────
-// Ursache des Streifens: Bei status-bar-style=black-translucent ist der Viewport
-// der volle Screen. window.screen.height weicht auf iOS minimal nach unten ab,
-// daher war der Hintergrund zu kurz → body-Farbe schien als Streifen durch.
-// Lösung: Hintergrund und Layout getrennt behandeln.
-function fixHeights() {
-  // Sichtbarer Viewport (visualViewport ist auf iOS am genauesten, sonst innerHeight)
-  const vh = Math.round((window.visualViewport && window.visualViewport.height) || window.innerHeight);
-  // Hintergrund-Layer dürfen überstehen (liegen ganz hinten, background:cover):
-  // großzügig über den Rand ziehen → garantiert NIE ein Spalt.
-  const bgH = Math.max(vh, window.screen.height, window.innerHeight) + 4 + 'px';
-  ['bg', 'bg-slide', 'bg-shade', 'dim-overlay'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.height = bgH;
-  });
-  // App-Layout muss EXAKT den sichtbaren Viewport treffen, damit das Bedienpanel
-  // (#lower, bottom:0) genau an der Unterkante sitzt – nicht zu hoch, nicht zu tief.
-  const app = document.getElementById('app');
-  if (app) app.style.height = vh + 'px';
-}
-fixHeights();
-window.addEventListener('resize', fixHeights);
-window.addEventListener('orientationchange', fixHeights);
-if (window.visualViewport) window.visualViewport.addEventListener('resize', fixHeights);
-
+// ── Service Worker (nicht auf localhost – sonst stört der Cache beim Entwickeln) ─
+// Hinweis: Der iPhone-Bodenstreifen wird rein per CSS gelöst (negatives bottom auf
+// den Hintergrund-Ebenen, siehe style.css) – kein JS-Höhenrechnen mehr nötig.
 const isLocalDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if ('serviceWorker' in navigator && !isLocalDev) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
