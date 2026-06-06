@@ -38,12 +38,14 @@ html, body {
 /* ─── Hintergrund ─────────────────────────────────────────── */
 #bg {
   position: fixed; top: 0; left: 0; right: 0; z-index: 0;
+  height: 100lvh; /* CSS-Fallback vor JS; fixHeights() überschreibt mit Overscan */
   background: #030a0f;
   transition: background 0.7s ease;
   will-change: transform;
 }
 #bg-slide {
   position: fixed; top: 0; left: 0; right: 0; z-index: 0;
+  height: 100lvh;
   background: #030a0f;
   pointer-events: none;
   transform: translateX(100%);
@@ -63,12 +65,14 @@ html, body {
 
 #bg-shade {
   position: fixed; top: 0; left: 0; right: 0; z-index: 0; pointer-events: none;
+  height: 100lvh;
   background: linear-gradient(to bottom, transparent 45%, rgba(0,0,0,0.35) 100%);
 }
 
 /* ─── Display abdunkeln ───────────────────────────────────── */
 #dim-overlay {
   position: fixed; top: 0; left: 0; right: 0; z-index: 4;
+  height: 100lvh;
   background: #000;
   opacity: 0;
   pointer-events: none;
@@ -76,13 +80,14 @@ html, body {
 }
 
 /* ─── App-Wrapper ─────────────────────────────────────────── */
-/* position:fixed + top/bottom:0 statt height:100dvh –
-   garantiert exakt denselben Viewport wie der Splash-Screen.
-   100dvh ist auf iOS PWA manchmal minimal kleiner als die
-   physische Displayhöhe, was den Streifen am unteren Rand erzeugt. */
+/* Layout-Höhe = exakt der sichtbare Viewport (per fixHeights() in app.js auf
+   visualViewport.height gesetzt), damit #lower (bottom:0) genau an der
+   Unterkante sitzt. CSS-Fallback 100lvh greift vor dem JS. Der Hintergrund
+   (#bg) wird separat mit Overscan behandelt – nie ein Bodenstreifen. */
 #app {
   position: fixed; z-index: 3;
   top: 0; left: 0; right: 0;
+  height: 100lvh;
   display: flex;
   flex-direction: column;
 }
