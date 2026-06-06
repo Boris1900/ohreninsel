@@ -1,7 +1,7 @@
 # TinnitusMediApp – Projektdokumentation
 
 **Arbeitstitel:** TinnitusMediApp | **Produktname:** Ohreninsel
-**Stand:** v0.9.8 (iPhone-Vollbild – Hintergrund-Overscan per negativem bottom – 06.06.2026)
+**Stand:** v0.9.9 (Rollback auf stabilen v0.9.5-Code – App voll bedienbar – 06.06.2026)
 
 **PWA live:** https://boris1900.github.io/ohreninsel/ (GitHub Pages, master-Branch)
 Für iPhone (Katharina): URL in Safari → Teilen → Zum Home-Bildschirm.
@@ -120,7 +120,11 @@ GitHub: `Boris1900/ohreninsel` · **PWA + APK immer zusammen aktuell halten.**
 
 ## Offene Punkte
 
-- **iPhone-Vollbild: Lösung in v0.9.8 (bottom:-120px Overscan), Bestätigung durch Katharina/Axel ausstehend.** Falls wider Erwarten noch ein Spalt: Overscan-Wert (120px) erhöhen. Letzter Ausweg wäre `status-bar-style` von `black-translucent` auf `black` (wie MediApp) – beseitigt es sicher, kostet aber das randlose Bild oben hinter der Statusleiste.
+- **iPhone-Bodenstreifen: UNGELÖST, bewusst zurückgestellt.** Kosmetischer dünner Farbrand am unteren Displayrand auf iPhone 12 + SE2 (Standalone-PWA). Drei Blindversuche (v0.9.6–v0.9.8) haben es NICHT gelöst und v0.9.8 hat sogar Play-Button + Menü-Handle blockiert → Rollback auf v0.9.9.
+  - **⛔ NICHT erneut blind raten.** Der Bug ist iOS-Standalone-spezifisch und im Desktop-Browser NICHT reproduzierbar (lokal mit Playwright verifiziert: CSS-Stacking sauber, Play-Button klickbar). Ohne echtes iPhone-Feedback ist jeder CSS-Versuch Glücksspiel.
+  - **Nächster Schritt NUR mit Messung:** Debug-Overlay einbauen, das auf dem iPhone die echten Werte zeigt (`screen.height`, `innerHeight`, `visualViewport.height`, `env(safe-area-inset-bottom)`, gerenderte Höhe von `#bg`/`#app`). Katharina/Axel fotografieren → DANN gezielt fixen.
+  - **Sichere Alternative (falls es wirklich weg muss):** `status-bar-style` von `black-translucent` auf `black` (wie MediApp, dort nachweislich randfrei) – kostet das randlose Bild oben hinter der Statusleiste. Diese Entscheidung trifft Boris.
+  - **Einordnung:** Rein kosmetisch, die App funktioniert voll. Priorität niedrig gegen echte Ziele (E-Mail-Liste, Intensivtage).
 - **Impressum/Datenschutz-URLs prüfen:** Links gehen auf `tinnituspraxis-seedorf.de/impressum` und `/datenschutz` – Wix-Pfade bestätigen oder korrigieren.
 - **Lead Magnet**: Landingpage + App gegen E-Mail-Adresse. Projektordner: `C:\Users\Boris\Projekte\OhreninselLanding\` (bereits angelegt)
 - Optional: eigene Subdomain statt github.io
@@ -128,9 +132,8 @@ GitHub: `Boris1900/ohreninsel` · **PWA + APK immer zusammen aktuell halten.**
 
 ## Erledigt (Meilensteine)
 
-- **v0.9.8** (06.06.2026): **Vollbild-Lösung Bodenstreifen.** v0.9.7 (Overscan nur +4px per JS) ließ unten einen schwarzen Balken – auf iPhone 12/SE2 sind `screen.height`/`innerHeight`/`visualViewport.height` im black-translucent Standalone ALLE um die Home-Indicator-Höhe zu klein, +4px reichte nicht. **Robuste CSS-only-Lösung:** `#bg`, `#bg-slide`, `#bg-shade`, `#dim-overlay`, `#splash` bekommen `position:fixed; top:0; left:0; right:0; bottom:-120px` – das Element ragt bewusst 120px über die untere Kante hinaus. Liegt ganz hinten, `background:cover` → Überstand unsichtbar, NIE ein Spalt, unabhängig davon wie iOS die Viewport-Unterkante interpretiert. `#app` wieder `inset:0` (sichtbarer Bereich), `#lower` bottom:0 + safe-area-padding → Bedienleiste über dem Home-Indicator, dahinter scheint das übergroße Bild durch (wie MeditationsApp). `#splash` zusätzlich `padding-bottom:120px` (kompensiert Overscan → Icon bleibt zentriert). JS `fixHeights()` komplett entfernt (war kontraproduktiv). **Lehre: Bei iOS-Vollbild Hintergrund per negativem bottom überdimensionieren, NICHT per JS-Höhe rechnen.**
-- **v0.9.7** (06.06.2026): **Bodenstreifen-Ursachenfix** (iPhone 12 + SE2). Diagnose: Bei `status-bar-style=black-translucent` ist der Viewport der volle Screen; `window.screen.height` weicht auf iOS minimal nach unten ab → Hintergrund zu kurz → body-Farbe als Streifen sichtbar (v0.9.6 hat ihn nur dunkler gefärbt, nicht beseitigt). **Lösung – Hintergrund und Layout getrennt:** (1) `#bg`/`#bg-slide`/`#bg-shade`/`#dim-overlay` bekommen CSS `height: 100lvh` (volle Höhe inkl. Safe-Areas, greift vor JS) + JS `fixHeights()` setzt sie auf `max(visualViewport, screen, inner) + 4px` Overscan (liegen hinten, `cover` → Überstand unsichtbar, nie ein Spalt). (2) `#app` (Layout mit `#lower bottom:0`) bekommt EXAKT `visualViewport.height`, damit das Bedienpanel genau an der Unterkante sitzt. Lauscht auf `resize`/`orientationchange`/`visualViewport.resize`. Warum MediApp das Problem nie hatte: dort `status-bar-style=black` → screen.height ist dort überdimensioniert und deckt zufällig alles.
-- **v0.9.6** (06.06.2026): Erster Streifen-Versuch (Symptom): `screen.height` auf alle Layer + Fallback-Farbe `#030a0f`. Streifen blieb (nur dunkler) → in v0.9.7 richtig gelöst.
+- **v0.9.9** (06.06.2026): **Rollback.** Code-Dateien (index.html, style.css, app.js, sw.js, build.gradle) auf den stabilen v0.9.5-Stand zurückgesetzt, Version auf v0.9.9 hochgezählt (damit SW die kaputte v0.9.8 verwirft). App wieder voll bedienbar. Lokal mit Playwright verifiziert: Play-Button reagiert, Splash wird entfernt, keine Ladefehler.
+- **v0.9.6–v0.9.8 (VERWORFEN, 06.06.2026):** Drei Blindversuche gegen den iPhone-Bodenstreifen ohne echtes iPhone-Testing. v0.9.6: `screen.height` + Fallback-Farbe (Streifen blieb). v0.9.7: getrennte Höhen lvh + `visualViewport` (schwarzer Balken). v0.9.8: `bottom:-120px` Overscan – **blockierte Play-Button + Menü-Handle auf iOS** (im Desktop nicht reproduzierbar). **Lehre für die ganze Episode: Symptom-Raten ohne Reproduktion/Messung kostet Zeit und richtet Schaden an. Bei gerätespezifischen Bugs erst messen (Debug-Overlay) oder im echten Browser reproduzieren, dann fixen.** Details siehe Offene Punkte.
 - **v0.9.5** (06.06.2026): `#app` max-width:420px + margin:auto entfernt → `inset:0` (iPhone 15 Plus/Pro Max = 430px: Seitenstreifen). Impressum, Datenschutz, tinnituspraxis-seedorf.de im Menü ergänzt (.sheet-footer-links).
 - **v0.9.4** (06.06.2026): Handle-Drag: `overflowY = hidden` während Drag (overflow:auto des Sheets hat touch-action:none gewonnen). MainActivity.java: `getWindow().setBackgroundDrawable(#0a2535)` vor super.onCreate() – frühestmöglicher Eingriff gegen dunklen Startblitz. Minimaler System-Launcher-Blitz bleibt (außerhalb App-Kontrolle).
 - **v0.9.3** (06.06.2026): Handle-Drag-Fix (overflowY), Versions-Bug (build-android.ps1 vergessen) behoben.
