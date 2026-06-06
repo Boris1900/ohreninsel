@@ -37,13 +37,16 @@ html, body {
 
 /* ─── Hintergrund ─────────────────────────────────────────── */
 #bg {
-  position: fixed; inset: 0; z-index: 0;
+  /* bottom: -60px statt inset:0 – iOS PWA meldet innerHeight=762 bei screen.height=812,
+     die 50px Luecke am unteren Bildschirmrand zeigt sonst das nackte #0a2535 (Kackbalken).
+     -60px deckt alle iPhone-Modelle ab. Rein visuelles Element, blockiert nichts. */
+  position: fixed; top: 0; left: 0; right: 0; bottom: -60px; z-index: 0;
   background: #0a2535;
   transition: background 0.7s ease;
   will-change: transform;
 }
 #bg-slide {
-  position: fixed; inset: 0; z-index: 0;
+  position: fixed; top: 0; left: 0; right: 0; bottom: -60px; z-index: 0;
   background: #0a2535;
   pointer-events: none;
   transform: translateX(100%);
