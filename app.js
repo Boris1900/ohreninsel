@@ -1,5 +1,5 @@
 // Version
-const APP_VERSION = 'v0.9.17';
+const APP_VERSION = 'v0.9.18';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
@@ -85,7 +85,7 @@ function removeAutoDim() {
 // â”€â”€ Audio-Konstanten â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const CF_DUR           = 4;    // Crossfade am Loop-Punkt (Sekunden)
 const FADE_IN          = 1;    // Einblenden beim normalen Start
-const STOP_FADE_OUT    = 1.5;  // Ausblenden bei manuellem Stop
+const STOP_FADE_OUT    = 1.0;  // Ausblenden bei manuellem Stop (gleich wie FADE_IN)
 const GONG_FADEIN      = 3;    // Ambient Fade-in nach Start-Gong
 const MEDI_END_FADE    = 6;    // Meditieren: Ausblenden am Ende (Sekunden)
 
