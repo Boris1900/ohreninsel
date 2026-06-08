@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'ohreninsel-v0.9.18';
+﻿const CACHE_NAME = 'ohreninsel-v0.9.19';
 
 const CACHE_FILES = [
   './',
@@ -6,10 +6,6 @@ const CACHE_FILES = [
   './style.css',
   './app.js',
   './manifest.json',
-  './background.jpg',
-  './background_laecheln_v0.4.jpg',
-  './gong.png',
-  './gong_ohne_halter.png',
   './icon-1024.png',
   './berglandschaft_0.1.jpg',
   './meer_0.2.jpg',
