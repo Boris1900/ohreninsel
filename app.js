@@ -1,11 +1,11 @@
 // Version
-const APP_VERSION = 'v0.9.19';
+const APP_VERSION = 'v0.9.20';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
 });
 
-// â”€â”€ Service Worker (nicht auf localhost â€“ sonst stÃ¶rt der Cache beim Entwickeln) â”€
+// â”€â”€ Service Worker (nicht auf localhost â€“ sonst stört der Cache beim Entwickeln) â”€
 const isLocalDev = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 if ('serviceWorker' in navigator && !isLocalDev) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
@@ -34,15 +34,15 @@ const bgEl       = document.getElementById('bg');
 // â”€â”€ UI-State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let isRunning       = false;
 let elemHidden      = false;
-let carouselIdx     = 2; // Startposition: VÃ¶gel (wird durch localStorage Ã¼berschrieben)
+let carouselIdx     = 2; // Startposition: Vögel (wird durch localStorage überschrieben)
 let autoFade        = null;
 let stopVisualTimer = null;
 let glowRafId       = null;
 let glowPhase       = 0;
-let endFadeTimer    = null;   // fÃ¼r Einschlafen/Meditieren Fade-out
-let countdownInterval = null; // fÃ¼r Meditieren-Timer-Anzeige
-let mediActiveTimer = null;   // fÃ¼r verzÃ¶gertes Einblenden von #lower nach Stop
-let autoDimActive   = false;  // Auto-Dim lÃ¤uft gerade
+let endFadeTimer    = null;   // für Einschlafen/Meditieren Fade-out
+let countdownInterval = null; // für Meditieren-Timer-Anzeige
+let mediActiveTimer = null;   // für verzögertes Einblenden von #lower nach Stop
+let autoDimActive   = false;  // Auto-Dim läuft gerade
 
 // â”€â”€ Glow-Animation (JS-gesteuert, kein CSS-Keyframe) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function startGlow() {
@@ -175,7 +175,7 @@ function runScheduler() {
 
 // â”€â”€ EIN persistenter AudioContext (iOS-tauglich) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // iOS limitiert die Zahl der AudioContexts und bindet Audio an User-Gesten.
-// Darum genau EINEN Context erstellen, bei Gesten aufwÃ¤rmen und NIE schlieÃŸen.
+// Darum genau EINEN Context erstellen, bei Gesten aufwärmen und NIE schließen.
 function ensureCtx() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -184,7 +184,7 @@ function ensureCtx() {
   return audioCtx;
 }
 
-// Bei jeder BerÃ¼hrung den Context aufwÃ¤rmen (resume lÃ¤uft so in der Geste)
+// Bei jeder Berührung den Context aufwärmen (resume läuft so in der Geste)
 document.addEventListener('pointerdown', () => { ensureCtx(); }, { passive: true });
 
 // â”€â”€ Audio starten â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -215,7 +215,7 @@ function playGong(filePath) {
   const buf = decodedCache.get(filePath);
   if (!buf) return;
 
-  // Eigener Kontext: unabhÃ¤ngig vom Ambient-Stop, rÃ¤umt sich selbst auf
+  // Eigener Kontext: unabhängig vom Ambient-Stop, räumt sich selbst auf
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   if (ctx.state === 'suspended') ctx.resume();
 
@@ -256,7 +256,7 @@ function stopCountdown() {
   countdownInterval = null;
 }
 
-// Kleiner Timer rechts unten (fÃ¼r Einschlafen-Modus)
+// Kleiner Timer rechts unten (für Einschlafen-Modus)
 function startSmallCountdown(totalMs) {
   const startTime = Date.now();
   function tick() {
@@ -278,7 +278,7 @@ function stopAudio(withFade = true) {
   isAudioActive = false;
   clearTimeout(schedulerTimer);
 
-  const ctx   = audioCtx;          // persistent â€“ NICHT schlieÃŸen, NICHT auf null
+  const ctx   = audioCtx;          // persistent â€“ NICHT schließen, NICHT auf null
   const gain  = masterGain;
   const nodes = activeNodes.splice(0);
   masterGain  = null;
@@ -312,7 +312,7 @@ function doStop(withAudioFade = true) {
   clearTimeout(endFadeTimer);
   clearTimeout(mediActiveTimer);
   stopCountdown();
-  updateDisplay(parseInt(slider.value)); // kleinen Timer zurÃ¼cksetzen
+  updateDisplay(parseInt(slider.value)); // kleinen Timer zurücksetzen
   const wasMedi = body.classList.contains('medi-active');
   body.classList.remove('idle', 'medi-mode');
   body.classList.add('stopping');
@@ -335,7 +335,7 @@ function doStop(withAudioFade = true) {
 }
 
 // â”€â”€ Start / Stop Button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// â”€â”€ Session starten (zentral fÃ¼r Hauptseite + Meditieren) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€ Session starten (zentral für Hauptseite + Meditieren) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // mode: 'ambient' (endlos) | 'einschlafen' (Timer + Ausblenden) | 'meditieren' (Gong)
 async function startSession({ mode, filePath, minutes, gongFile }) {
   clearTimeout(stopVisualTimer);
@@ -343,7 +343,7 @@ async function startSession({ mode, filePath, minutes, gongFile }) {
 
   const gongOn = mode === 'meditieren' && !!gongFile;
 
-  // BenÃ¶tigte Dateien vorab laden
+  // Benötigte Dateien vorab laden
   const loadQueue = [];
   if (filePath && !decodedCache.has(filePath)) loadQueue.push(filePath);
   if (gongFile && !decodedCache.has(gongFile)) loadQueue.push(gongFile);
@@ -351,7 +351,7 @@ async function startSession({ mode, filePath, minutes, gongFile }) {
   if (loadQueue.length > 0) {
     try {
       startBtn.disabled = true;
-      statusW.textContent = 'LÃ¤dtâ€¦';
+      statusW.textContent = 'Lädtâ€¦';
       await Promise.all(loadQueue.map(f => loadFile(f)));
       startBtn.disabled = false;
     } catch {
@@ -370,10 +370,10 @@ async function startSession({ mode, filePath, minutes, gongFile }) {
   elemHidden = false;
   autoDimActive = false;
   removeAutoDim();
-  statusW.textContent = 'LÃ¤uft';
+  statusW.textContent = 'Läuft';
   startGlow();
 
-  // Audio starten (bei "Nur Gong" lÃ¤uft kein Dauerklang)
+  // Audio starten (bei "Nur Gong" läuft kein Dauerklang)
   if (filePath) {
     const fadeIn = gongOn ? GONG_FADEIN : FADE_IN;
     await startAudio(filePath, fadeIn);
@@ -400,7 +400,7 @@ async function startSession({ mode, filePath, minutes, gongFile }) {
 
   if (minutes > 0) {
     if (mode === 'einschlafen') {
-      // Ausblenden Ã¼ber letztes Sechstel der Zeit, maximal 10 Minuten
+      // Ausblenden über letztes Sechstel der Zeit, maximal 10 Minuten
       const fadeSecs    = Math.min(totalSecs / 6, 600);
       const fadeStartMs = (totalSecs - fadeSecs) * 1000;
 
@@ -416,7 +416,7 @@ async function startSession({ mode, filePath, minutes, gongFile }) {
 
     } else if (mode === 'meditieren') {
       if (gongOn) {
-        // End-Gong: Gong schlÃ¤gt an, parallel Ambient ausblenden
+        // End-Gong: Gong schlägt an, parallel Ambient ausblenden
         timerTimeout = setTimeout(() => {
           if (!isRunning) return;
           playGong(gongFile);
@@ -444,7 +444,7 @@ async function startSession({ mode, filePath, minutes, gongFile }) {
   }
 }
 
-// â”€â”€ GroÃŸer Play-Button: Hauptseite (Ambient / Einschlafen) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€ Großer Play-Button: Hauptseite (Ambient / Einschlafen) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 startBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   if (isRunning) { doStop(true); return; }
@@ -490,7 +490,7 @@ async function initApp() {
   const splash  = document.getElementById('splash');
   const minWait = new Promise(r => setTimeout(r, 2500));
   await Promise.all([preloadAllSounds(), minWait]);
-  // Letzten Stand aus localStorage wiederherstellen (Standard: VÃ¶gel/Wald)
+  // Letzten Stand aus localStorage wiederherstellen (Standard: Vögel/Wald)
   const saved = parseInt(localStorage.getItem('ohreninsel-carousel') ?? '2');
   carouselIdx = (saved >= 0 && saved < carouselItems.length) ? saved : 2;
   const startItem = carouselItems[carouselIdx];
@@ -502,8 +502,8 @@ async function initApp() {
 }
 initApp();
 
-// â”€â”€ Sound-Kacheln (immer genau eine aktiv â€“ kein AbwÃ¤hlen mehr) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-// Tippen verhÃ¤lt sich wie Swipen: Hintergrund wechselt und â€“ falls Audio lÃ¤uft â€“
+// â”€â”€ Sound-Kacheln (immer genau eine aktiv â€“ kein Abwählen mehr) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Tippen verhält sich wie Swipen: Hintergrund wechselt und â€“ falls Audio läuft â€“
 // wird per Crossfade auf den neuen Klang umgeblendet (switchToCarousel).
 document.querySelectorAll('.sound-tile').forEach(tile => {
   tile.addEventListener('click', (e) => {
@@ -658,7 +658,7 @@ function setBg(cls) {
 document.querySelectorAll('.bg-swatch').forEach(s =>
   s.addEventListener('click', () => setBg(s.dataset.bg)));
 
-// â”€â”€ MenÃ¼ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€ Menü â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const menuBtn = document.getElementById('menu-btn');
 const mOver   = document.getElementById('menu-overlay');
 const mSheet  = document.getElementById('menu-sheet');
@@ -717,7 +717,7 @@ mOver.addEventListener('click', () => {
 // touch-action: pan-y auf #stage (CSS) gibt horizontale Gesten an JS ab â€“
 // funktioniert auf Android WebView und iOS Safari PWA ohne preventDefault-Hack.
 
-// Berg hat noch keinen Sound â€“ erscheint im Karussell, Ã¤ndert nur den Hintergrund
+// Berg hat noch keinen Sound â€“ erscheint im Karussell, ändert nur den Hintergrund
 const carouselItems = [
   { key: 'wellen',   bg: 'bg-meer' },
   { key: 'rauschen', bg: 'bg-nacht-meer' },
@@ -921,7 +921,7 @@ document.querySelectorAll('.medi-chip').forEach(chip => {
   });
 });
 
-// Dauer-Slider (Feintuning, hÃ¤lt die Chips synchron)
+// Dauer-Slider (Feintuning, hält die Chips synchron)
 mediSlider.addEventListener('input', () => {
   const val = parseInt(mediSlider.value);
   updateMediDisplay(val);
@@ -936,7 +936,7 @@ document.querySelectorAll('.medi-toggle').forEach(btn => {
     document.querySelectorAll('.medi-toggle').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     mediKlang = btn.dataset.medi;
-    // Gong-Schalen nur wÃ¤hlbar, wenn Gong dabei ist
+    // Gong-Schalen nur wählbar, wenn Gong dabei ist
     mediSheet.classList.toggle('no-gong', mediKlang === 'klang');
   });
 });
