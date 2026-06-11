@@ -101,6 +101,7 @@ header {
   align-items: center;
   padding: calc(env(safe-area-inset-top, 0px) + 20px) 24px 0;
   flex-shrink: 0;
+  transition: opacity var(--fade) ease;
 }
 .app-title-wrap {
   display: flex;
@@ -135,6 +136,7 @@ header {
   color: rgba(255,255,255,0.82);
   padding: 8px; margin: -8px;
   display: flex; flex-direction: column; gap: 5px;
+  margin-top: 2px;
 }
 /* box-shadow direkt auf den Strichen (nicht drop-shadow am Container –
    das wirkt auf iOS zu schwach). Doppelter Schatten = klar lesbar
@@ -294,9 +296,15 @@ body.running #status-word { color: var(--sun-rim); }
   text-shadow: 0 1px 3px rgba(0,0,0,0.7);
 }
 body.running.idle #lower { opacity: 0; pointer-events: none; }
+body.running.idle header  { opacity: 0; pointer-events: none; }
 
 /* Meditieren läuft: #lower immer weg, unabhängig von idle */
 body.medi-active #lower {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+body.medi-active header {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.8s ease;

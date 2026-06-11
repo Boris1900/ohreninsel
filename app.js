@@ -1,5 +1,5 @@
 // Version
-const APP_VERSION = 'v0.9.21';
+const APP_VERSION = 'v0.9.22';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
