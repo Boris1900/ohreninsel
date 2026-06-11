@@ -1,153 +1,74 @@
 # TinnitusMediApp – Projektdokumentation
 
-**Arbeitstitel:** TinnitusMediApp | **Produktname:** Ohreninsel
-**Stand:** v0.9.9 (Rollback auf stabilen v0.9.5-Code – App voll bedienbar – 06.06.2026)
+**Produktname:** Ohreninsel | **Stand:** v0.9.22 (11.06.2026)
 
 **PWA live:** https://boris1900.github.io/ohreninsel/ (GitHub Pages, master-Branch)
-Für iPhone (Katharina): URL in Safari → Teilen → Zum Home-Bildschirm.
+Für iPhone (Katharina): URL in Safari → Teilen → Zum Startbildschirm.
 
 ---
 
-## Entscheidungs-Kompass (immer anwenden)
+## Entscheidungs-Kompass
 
 ```
 Wert = Impact ÷ Ressourcen (Geld + Zeit + Emotionen)
 ```
 Riesen-Impact → rein in den Plan. Homöopathisch (<5%) → weglassen.
-CEO-Brille: Was würde ein CEO denken, nicht ein Nerd?
 
 ---
 
 ## Was ist dieses Projekt?
 
-Ambient-Sound-App für Tinnitus-Betroffene. Primär-Positionierung: Einschlafhilfe.
-PWA + Android APK, basierend auf der MediApp (Augenblick v1.79).
-Offline-fähig, werbefrei, kein Tracking – bewusster USP für Tinnitus-Betroffene.
-
-**7 eigene Field Recordings:**
-Wellen · Rauschen · Vögel im Wald · Bach · Regen & Gewitter · Straßencafé · Berg
-
-Zielgruppe: Tinnitus-Betroffene (Patienten, Websitebesucher).
-Strategisches Endziel: **Lead Magnet** (App gegen E-Mail-Adresse) – **Landingpage live** unter `ohreninsel.tinnituspraxis-seedorf.de` (seit 04.06.2026). Landingpage-Projekt: `C:\Users\Boris\Projekte\Landingspages\OhreninselLanding\`
-
----
-
-## Bedienmodell (ab v0.8)
-
-**Hauptseite (schnell, der 90%-Fall):**
-- Sound-Kacheln: immer genau eine aktiv (kein Abwählen). Tippen ODER Wischen wechselt Klang + Hintergrund, bei laufendem Audio per Crossfade (`switchToCarousel`).
-- Großer Play-Button startet den gewählten Klang.
-- **Einschlaf-Timer** (Label + Chips Aus/20/40/60 + Slider bis 90): Ohne Timer läuft es endlos (einfach hören). Mit Timer blendet der Klang am Ende über das letzte Sechstel der Zeit aus. „Einschlafen" ist also kein eigener Modus, sondern nur der Timer.
-
-**Meditieren (eigenes Panel, dezenter Einstieg unten):**
-- Dauer: Chips 10/20/30 + Slider bis 90.
-- Klang-Variante: „Nur Klang" / „Klang + Gong" / „Nur Gong" (`mediKlang`).
-- Gong-Schale: Morgenstern/Mittagspause/Abendrot, wählbar außer bei „Nur Klang" (`#medi-sheet.no-gong`).
-- Eigener Start-Button. Meditation endet **definiert**: kurzes 6-Sek-Ausblenden bzw. End-Gong, nicht das lange Einschlaf-Ausblenden.
-- Start-Logik zentral in `startSession({mode, filePath, minutes, gongFile})`. mode: `ambient` | `einschlafen` | `meditieren`.
-
-**Audio-Engine (iOS-tauglich, wichtig):**
-- EIN persistenter AudioContext (`ensureCtx()`), nie geschlossen, bei jedem `pointerdown` aufgewärmt.
-- Grund: iOS limitiert die Zahl der AudioContexts und bindet Audio an User-Gesten. Beim Sound-Wechsel nur den Track-Gain tauschen, NIE einen neuen Context. Das war der Fix für „kein Ton beim Sliden auf iPhone".
-
----
-
-## Wisch-Karussell + Hintergründe
-
-7 Hintergründe per Swipe (links/rechts) auf der Stage: Wellen → Rauschen → Vögel → Bach → Regen → Café → Berg (`carouselItems` in app.js). Start-Preset: Vögel/Wald (per localStorage `ohreninsel-carousel` gemerkt).
-- Slide-Transition: alter Hintergrund gleitet raus, neuer (`#bg-slide`) rein (~380ms). Beim Snap am Ende erst `transition:none` auf `#bg`, dann `setBg()`, dann reflow, dann Transition wieder an – sonst blitzt der alte Hintergrund durch (Bug, gefixt v0.6.5).
-- Swipe-Technik: Pointer Events + `touch-action: pan-y` auf `#stage`. Läuft auf Android WebView UND iOS Safari. `pointerdown` ignoriert Starts im `#lower`-Bereich, sonst klaut der Swipe den Slider.
-- Farben (Grün/Blau/Grau/Nacht/Schwarz) bewusst NICHT im Karussell, nur im Menü.
-
-**Sound-Hintergrund-Pairing:**
-
-| Sound | Hintergrund | Theme |
-|---|---|---|
-| Vögel (Preset) | `wald_0.1.jpg` | Grün |
-| Wellen | `meer_0.2.jpg` | Türkis |
-| Rauschen | `nacht_meer_0.1.jpg` | Blau |
-| Bach | `bach_0.1.jpg` | Teal |
-| Regen | `regen_0.1.jpg` | Amber |
-| Café | `cafe_0.1.jpg` | Orange |
-| Berg | `berglandschaft_0.1.jpg` | Gold |
-
----
-
-## Start-Button (Glaskugel-Logik)
-
-- Glas-Effekt liegt auf `#start-btn::after`: konstanter `blur(10px)` + dunkles Fill. Idle opacity 1, Running opacity 0 (fadet 1.8s ease-in-out).
-- **Grund für opacity statt blur-Transition:** backdrop-filter-blur-Werte animieren auf iOS/WebView nicht weich (springen), opacity ist überall butterweich.
-- Wald + Bach: weißer Rand im Idle (Themenfarbe sonst zu ähnlich zum Bild).
-- Play/Pause-Symbol: `will-change: opacity` + `translateZ(0)` gegen Compositing-Sprung beim Umschalten.
+Ambient-Sound-App für Tinnitus-Betroffene. Primär: Einschlafhilfe.
+PWA + Android APK. Offline-fähig, werbefrei, kein Tracking.
+7 eigene Field Recordings: Wellen · Rauschen · Vögel · Bach · Regen · Café · Berg
+Strategisches Ziel: **Lead Magnet** (App gegen E-Mail-Adresse).
+Landingpage live: `ohreninsel.tinnituspraxis-seedorf.de`
 
 ---
 
 ## Dateiübersicht
 
-| Datei | Inhalt |
+| Datei / Ordner | Inhalt |
 |---|---|
 | `index.html` | Haupt-App |
 | `app.js` | Gesamte App-Logik |
 | `style.css` | Styling |
-| `sw.js` | Service Worker (Cache-Name = Version, z.B. `ohreninsel-v0.8.1`) |
+| `sw.js` | Service Worker (Cache-Name = Version) |
 | `manifest.json` | PWA-Manifest |
 | `build-android.ps1` | Build-Script (Root → www → APK) |
-| `make-icon.js` / `make-icons.js` | Icon-Generatoren (sharp / Android-Mipmaps) |
+| `A - Projektbeschreibung.md` | Projektübersicht |
+| `B - Aufgaben.md` | Aufgaben + Phasen + Meilensteine |
+| `C - Protokoll.md` | Änderungsprotokoll |
+| `F - Entscheidungen.md` | Entscheidungslog |
+| `G - Technische Referenz.md` | Bedienmodell, Audio-Engine, Karussell, Button-Logik, iPhone-Bug |
 | `02-Audio/` · `03-Design/` | Field Recordings · Design-Referenzen |
+| `05-Für Videoaufnahme/` | Handy-Shortcuts für Bildschirmaufnahmen |
 | `xold/` | Veraltete Dateien (nie löschen, hierhin verschieben) |
+
+---
+
+## Offene Punkte
+
+- **iPhone-Bodenstreifen (Fix in v0.9.17+ enthalten, ungetestet):** Katharina muss testen. Details in G.
+- **iPhone Statusleiste/Header-Ausblenden:** Statusleiste + Header werden beim Start ausgeblendet — bisher nur auf Android (APK) verifiziert. Auf iOS-PWA blendet `StatusBar.hide()` nicht (kein Capacitor), Header-Fade per CSS läuft aber. Katharina-Check offen.
+- **Impressum/Datenschutz-URLs:** Links gehen auf `tinnituspraxis-seedorf.de/impressum` + `/datenschutz` — Wix-Pfade bestätigen.
+- **Lead Magnet:** E-Mail-Provider-Entscheidung ausstehend (LEAD-01).
+- **Eigene Subdomain:** Optional, aktuell github.io (PWA-01).
 
 ---
 
 ## Build & Release-Workflow
 
 ```powershell
-# 1. Version hochziehen: app.js (APP_VERSION) + sw.js (CACHE_NAME) + Release-Tag
-# 2. Push (PWA aktualisiert sich automatisch über GitHub Pages)
+# Version an 4 Stellen hochzählen: app.js + sw.js + build.gradle (versionCode+versionName) + Git-Tag
 git add -A; git commit -m "..."; git push origin master
-# 3. APK bauen
 .\build-android.ps1
 $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 cd android; .\gradlew assembleDebug
-# 4. APK umbenennen + Release
-Copy-Item android\app\build\outputs\apk\debug\app-debug.apk Ohreninsel-vX.Y.Z.apk
+Rename-Item android\app\build\outputs\apk\debug\app-debug.apk Ohreninsel-vX.Y.Z.apk
 gh release create vX.Y.Z Ohreninsel-vX.Y.Z.apk --title "Ohreninsel vX.Y.Z" --notes "..."
 ```
-
-GitHub: `Boris1900/ohreninsel` · **PWA + APK immer zusammen aktuell halten.**
-
----
-
-## Offene Punkte
-
-- **iPhone-Bodenstreifen: UNGELÖST, bewusst zurückgestellt.** Kosmetischer dünner Farbrand am unteren Displayrand auf iPhone 12 + SE2 (Standalone-PWA). Drei Blindversuche (v0.9.6–v0.9.8) haben es NICHT gelöst und v0.9.8 hat sogar Play-Button + Menü-Handle blockiert → Rollback auf v0.9.9.
-  - **⛔ NICHT erneut blind raten.** Der Bug ist iOS-Standalone-spezifisch und im Desktop-Browser NICHT reproduzierbar (lokal mit Playwright verifiziert: CSS-Stacking sauber, Play-Button klickbar). Ohne echtes iPhone-Feedback ist jeder CSS-Versuch Glücksspiel.
-  - **Nächster Schritt NUR mit Messung:** Debug-Overlay einbauen, das auf dem iPhone die echten Werte zeigt (`screen.height`, `innerHeight`, `visualViewport.height`, `env(safe-area-inset-bottom)`, gerenderte Höhe von `#bg`/`#app`). Katharina/Axel fotografieren → DANN gezielt fixen.
-  - **Sichere Alternative (falls es wirklich weg muss):** `status-bar-style` von `black-translucent` auf `black` (wie MediApp, dort nachweislich randfrei) – kostet das randlose Bild oben hinter der Statusleiste. Diese Entscheidung trifft Boris.
-  - **Einordnung:** Rein kosmetisch, die App funktioniert voll. Priorität niedrig gegen echte Ziele (E-Mail-Liste, Intensivtage).
-- **Impressum/Datenschutz-URLs prüfen:** Links gehen auf `tinnituspraxis-seedorf.de/impressum` und `/datenschutz` – Wix-Pfade bestätigen oder korrigieren.
-- **Lead Magnet**: Landingpage + App gegen E-Mail-Adresse. Projektordner: `C:\Users\Boris\Projekte\OhreninselLanding\` (bereits angelegt)
-- Optional: eigene Subdomain statt github.io
-- Optional: typischerer Berg-Sound (aktuell Vogel/Wald-Aufnahme)
-
-## Erledigt (Meilensteine)
-
-- **v0.9.9** (06.06.2026): **Rollback.** Code-Dateien (index.html, style.css, app.js, sw.js, build.gradle) auf den stabilen v0.9.5-Stand zurückgesetzt, Version auf v0.9.9 hochgezählt (damit SW die kaputte v0.9.8 verwirft). App wieder voll bedienbar. Lokal mit Playwright verifiziert: Play-Button reagiert, Splash wird entfernt, keine Ladefehler.
-- **v0.9.6–v0.9.8 (VERWORFEN, 06.06.2026):** Drei Blindversuche gegen den iPhone-Bodenstreifen ohne echtes iPhone-Testing. v0.9.6: `screen.height` + Fallback-Farbe (Streifen blieb). v0.9.7: getrennte Höhen lvh + `visualViewport` (schwarzer Balken). v0.9.8: `bottom:-120px` Overscan – **blockierte Play-Button + Menü-Handle auf iOS** (im Desktop nicht reproduzierbar). **Lehre für die ganze Episode: Symptom-Raten ohne Reproduktion/Messung kostet Zeit und richtet Schaden an. Bei gerätespezifischen Bugs erst messen (Debug-Overlay) oder im echten Browser reproduzieren, dann fixen.** Details siehe Offene Punkte.
-- **v0.9.5** (06.06.2026): `#app` max-width:420px + margin:auto entfernt → `inset:0` (iPhone 15 Plus/Pro Max = 430px: Seitenstreifen). Impressum, Datenschutz, tinnituspraxis-seedorf.de im Menü ergänzt (.sheet-footer-links).
-- **v0.9.4** (06.06.2026): Handle-Drag: `overflowY = hidden` während Drag (overflow:auto des Sheets hat touch-action:none gewonnen). MainActivity.java: `getWindow().setBackgroundDrawable(#0a2535)` vor super.onCreate() – frühestmöglicher Eingriff gegen dunklen Startblitz. Minimaler System-Launcher-Blitz bleibt (außerhalb App-Kontrolle).
-- **v0.9.3** (06.06.2026): Handle-Drag-Fix (overflowY), Versions-Bug (build-android.ps1 vergessen) behoben.
-- **v0.9.2** (06.06.2026): touch-action:none auf .sheet-handle. styles.xml: windowSplashScreenBackground + postSplashScreenTheme.
-- **v0.9.1** (06.06.2026): Sheet-Handle-CSS vereinfacht. Splash-FOUC-Schutz inline. Encoding-Mojibake in checkForUpdate/applyUpdate repariert (⏳ ✅ 🆕 ⚠️).
-- **v0.9.0** (06.06.2026): Android-Startblitz: styles.xml `android:background=@null` → `android:windowBackground=@color/colorPrimary`. Swipe friert auf Android ein: `pointerup`/`pointercancel` auf `document`-Ebene (nicht nur `#stage`), außerdem `bgSlidingTarget` für korrekte Ziel-Bg bei schnellen Doppelwischen. Menü-Handle + Medi-Handle: Tap oder Wischen nach unten schließt das Sheet (Pointer-Capture, Drag-Tracking).
-- **v0.8.9** (06.06.2026): Menü-Button jetzt 82% Weiß + box-shadow direkt auf den Strichen (drop-shadow am Container wirkt auf iOS zu schwach). iPhone-Streifen: `#app` auf `position: fixed; top:0; bottom:0` umgestellt – exakt wie Splash. `height:100dvh` war auf iOS PWA manchmal minimal kürzer als die physische Displayhöhe, daher der sichtbare Streifen. Wirkungsloses `body::after` aus v0.8.8 entfernt.
-- **v0.8.8** (05.06.2026): Menü-Button vergrößert (22px/2px) + drop-shadow (zu schwach, in v0.8.9 korrigiert). iPhone-Streifen-Fix `body::after` (war hinter #app, wirkungslos – in v0.8.9 korrigiert).
-- **v0.8.7** (04.06.2026): Weißer Statusbalken behoben (theme-color + backgroundColor auf #0a2535). Gilt für PWA + APK.
-- **v0.8.6** (04.06.2026): Flash-Fix als eigenständige Version – grüner Zwischenbildschirm beim Start behoben.
-- **v0.8.5** (04.06.2026): App-Hintergrund + Splash auf Landingpage-Blau (#0a2535), bg-nacht auf Nachtblau, body-bg vereinheitlicht.
-- **iOS-Test (Katharina) bestanden** (v0.8.3): Bedienpanel, Meditieren, Audio beim Sliden/Tippen, neues Icon, Splash – alles läuft auf iPhone. Der persistente AudioContext löst den iOS-Slide-Sound-Bug.
-- App-Icon neu (Insel + Ohr-Sonne), iOS-randvoll ohne weißen Rand, Android randfüllend.
-- Splashscreen passend zur dunklen App (rundes Icon + weicher Schein).
 
 ---
 
@@ -155,22 +76,21 @@ GitHub: `Boris1900/ohreninsel` · **PWA + APK immer zusammen aktuell halten.**
 
 - **Nie Dateien löschen** → nach `xold/` verschieben.
 - **Nicht pushen ohne Boris-OK.**
-- **Neue (visuelle) Features erst lokal testen** (Boris beurteilt visuell), dann APK, dann Release.
-- **Version an 4 Stellen hochzählen:** `app.js` (APP_VERSION) + `sw.js` (CACHE_NAME) + `android/app/build.gradle` (versionCode + versionName) + GitHub Release-Tag.
-- **build.gradle nie mit PowerShell Set-Content schreiben** – das erzeugt BOM und bricht den Build. Stattdessen `[System.IO.File]::WriteAllText(..., $false)` oder Edit-Tool verwenden.
+- **Neue Features erst lokal testen**, dann APK, dann Release.
+- **build-android.ps1 VOR Gradle** — sonst landen alte Web-Dateien im APK.
+- **PWA-Push und APK immer zusammen** — nie einzeln.
+- **build.gradle nie mit PowerShell Set-Content** — erzeugt BOM, bricht Build. → `[System.IO.File]::WriteAllText(...)` oder Edit-Tool.
+- **Dateien immer als UTF-8 OHNE BOM schreiben:** `New-Object System.Text.UTF8Encoding($false)`. Sonst doppelt kodierte Umlaute (ä → `Ã¤`, sichtbar z.B. als „Läuft" mit Viereck). Bei PowerShell-Replace auf CRLF (`\r\n`) achten — Suchstrings mit `\n` matchen sonst nicht.
 - **Diktierfehler beachten:** Fachbegriffe, Domains, Dateinamen gegenchecken.
-- **build-android.ps1 VOR Gradle immer ausführen** – sonst landen alte Web-Dateien im APK (war Bug in v0.9.2).
-- **PWA-Push und APK-Build immer zusammen** – nie einzeln.
 
 ---
 
 ## Technischer Kontext
 
-- PWA via HTML/CSS/JS + Capacitor für Android APK. Audio: Web Audio API (gapless loop + Crossfade).
-- Testgeräte: OnePlus 5 / Android 10 (Boris), iPhone (Katharina).
-- SDK: `C:\Users\Boris\AppData\Local\Android\Sdk` · Java: `C:\Program Files\Android\Android Studio\jbr`
-- Referenz-Projekt: MediApp `C:\Users\Boris\Projekte\MeditationsApp\`
-- Sprache: Deutsch.
+PWA via HTML/CSS/JS + Capacitor für Android APK. Audio: Web Audio API (gapless loop + Crossfade).
+Testgeräte: OnePlus 5 / Android 10 (Boris), iPhone (Katharina).
+SDK: `C:\Users\Boris\AppData\Local\Android\Sdk` · Java: `C:\Program Files\Android\Android Studio\jbr`
+GitHub: `Boris1900/ohreninsel`
 
 ---
 
