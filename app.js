@@ -1,5 +1,5 @@
 // Version
-const APP_VERSION = 'v0.9.20';
+const APP_VERSION = 'v0.9.21';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
@@ -19,6 +19,17 @@ window.addEventListener('load', () => {
     StatusBar.setStyle({ style: 'DARK' });
   }
 });
+
+function hideStatusBar() {
+  if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+    window.Capacitor.Plugins.StatusBar.hide();
+  }
+}
+function showStatusBar() {
+  if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+    window.Capacitor.Plugins.StatusBar.show();
+  }
+}
 
 // â”€â”€ DOM-Refs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const body       = document.body;
@@ -319,6 +330,7 @@ function doStop(withAudioFade = true) {
   elemHidden = false;
   statusW.textContent = 'Start';
   stopGlow();
+  showStatusBar();
   removeAutoDim();
   if (isAudioActive) stopAudio(withAudioFade);
 
@@ -351,7 +363,7 @@ async function startSession({ mode, filePath, minutes, gongFile }) {
   if (loadQueue.length > 0) {
     try {
       startBtn.disabled = true;
-      statusW.textContent = 'Lädtâ€¦';
+      statusW.textContent = 'Lädt…';
       await Promise.all(loadQueue.map(f => loadFile(f)));
       startBtn.disabled = false;
     } catch {
@@ -367,6 +379,7 @@ async function startSession({ mode, filePath, minutes, gongFile }) {
   startBtn.style.setProperty('--glow-transition', '0ms');
   body.classList.add('running');
   body.classList.remove('idle');
+  hideStatusBar();
   elemHidden = false;
   autoDimActive = false;
   removeAutoDim();
