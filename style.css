@@ -37,11 +37,12 @@ html, body {
 
 /* ─── Hintergrund ─────────────────────────────────────────── */
 #bg {
-  /* env(safe-area-inset-bottom) deckt die Home-Indicator-Zone ab (iPhone ohne Home-Button).
-     calc(-1 * ...) streckt den Hintergrund nach unten ueber den sichtbaren Bereich hinaus –
-     kein Streifen unten. black-translucent erlaubt randloses Bild oben hinter Statusleiste. */
+  /* Hoehe wird per JS auf window.screen.height fixiert (fixBgHeight in app.js) –
+     wie in der MeditationsApp, am iPhone verifiziert. Die physische Bildschirmhoehe
+     deckt immer den ganzen Screen ab, egal was der iOS-Viewport meldet.
+     height: 100% ist nur Fallback bis das JS laeuft. */
   position: fixed; top: 0; left: 0; right: 0;
-  bottom: calc(-1 * env(safe-area-inset-bottom, 20px));
+  height: 100%;
   z-index: 0;
   background: #0a2535;
   transition: background 0.7s ease;
@@ -49,7 +50,7 @@ html, body {
 }
 #bg-slide {
   position: fixed; top: 0; left: 0; right: 0;
-  bottom: calc(-1 * env(safe-area-inset-bottom, 20px));
+  height: 100%;
   z-index: 0;
   background: #0a2535;
   pointer-events: none;
