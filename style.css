@@ -100,7 +100,10 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: calc(env(safe-area-inset-top, 0px) + 20px) 24px 0;
+  /* var(--safe-top) wird beim Start eingefroren (app.js), solange die Statusleiste
+     noch sichtbar ist. So springt der Header nicht, wenn StatusBar.hide() die Leiste
+     ausblendet (sonst faellt env(safe-area-inset-top) auf 0). Fallback: live env(). */
+  padding: calc(var(--safe-top, env(safe-area-inset-top, 0px)) + 20px) 24px 0;
   flex-shrink: 0;
   transition: opacity var(--fade) ease;
 }

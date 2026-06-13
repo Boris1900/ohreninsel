@@ -1,5 +1,5 @@
 // Version
-const APP_VERSION = 'v0.9.24';
+const APP_VERSION = 'v0.9.25';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
@@ -20,8 +20,25 @@ window.addEventListener('load', () => {
   }
 });
 
+// Misst den aktuellen safe-area-inset-top und friert ihn als CSS-Variable
+// --safe-top ein. Wird aufgerufen, SOLANGE die Statusleiste noch sichtbar ist
+// (direkt vor StatusBar.hide). So bleibt das Header-Padding konstant und der
+// obere Bereich springt beim Aus-/Einblenden der Leiste nicht mehr.
+function freezeSafeAreaTop() {
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;top:0;left:0;width:0;height:0;'
+    + 'padding-top:env(safe-area-inset-top);visibility:hidden;pointer-events:none;';
+  document.body.appendChild(probe);
+  const top = getComputedStyle(probe).paddingTop;
+  probe.remove();
+  if (top && top !== '0px') {
+    document.documentElement.style.setProperty('--safe-top', top);
+  }
+}
+
 function hideStatusBar() {
   if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+    freezeSafeAreaTop();   // Wert sichern, solange die Leiste noch da ist
     window.Capacitor.Plugins.StatusBar.hide();
   }
 }
