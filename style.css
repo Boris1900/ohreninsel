@@ -37,20 +37,20 @@ html, body {
 
 /* ─── Hintergrund ─────────────────────────────────────────── */
 #bg {
-  /* Hoehe wird per JS auf window.screen.height fixiert (fixBgHeight in app.js) –
-     wie in der MeditationsApp, am iPhone verifiziert. Die physische Bildschirmhoehe
-     deckt immer den ganzen Screen ab, egal was der iOS-Viewport meldet.
-     height: 100% ist nur Fallback bis das JS laeuft. */
-  position: fixed; top: 0; left: 0; right: 0;
-  height: 100%;
+  /* Oben UND unten ueber den Viewport hinaus verankert (top/bottom negativ).
+     Keine feste Pixelhoehe -> passt sich jeder Geraetehoehe selbst an. Der
+     100px-Ueberstand deckt iOS-Statusleiste (oben) und Home-Indicator (unten)
+     sicher ab, egal was screen.height/innerHeight auf iOS melden. */
+  position: fixed; left: 0; right: 0;
+  top: -100px; bottom: -100px;
   z-index: 0;
   background: #0a2535;
   transition: background 0.7s ease;
   will-change: transform;
 }
 #bg-slide {
-  position: fixed; top: 0; left: 0; right: 0;
-  height: 100%;
+  position: fixed; left: 0; right: 0;
+  top: -100px; bottom: -100px;
   z-index: 0;
   background: #0a2535;
   pointer-events: none;

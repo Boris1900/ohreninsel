@@ -1,5 +1,5 @@
 // Version
-const APP_VERSION = 'v0.9.25';
+const APP_VERSION = 'v0.9.26';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
@@ -47,19 +47,6 @@ function showStatusBar() {
     window.Capacitor.Plugins.StatusBar.show();
   }
 }
-
-// Hintergrund-Hoehe auf physische Bildschirmhoehe fixieren. Der iOS-Viewport
-// meldet unten zu wenig -> dunkelblauer Streifen. window.screen.height deckt
-// immer den ganzen Screen ab. Muster aus der MeditationsApp (iPhone-verifiziert).
-function fixBgHeight() {
-  const h = window.screen.height + 'px';
-  const bg    = document.getElementById('bg');
-  const slide = document.getElementById('bg-slide');
-  if (bg)    bg.style.height = h;
-  if (slide) slide.style.height = h;
-}
-window.addEventListener('load', fixBgHeight);
-window.addEventListener('resize', fixBgHeight);
 
 // â”€â”€ DOM-Refs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const body       = document.body;
