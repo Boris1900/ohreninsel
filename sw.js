@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ohreninsel-v0.9.28';
+const CACHE_NAME = 'ohreninsel-v0.9.29';
 
 const CACHE_FILES = [
   './',
@@ -7,6 +7,9 @@ const CACHE_FILES = [
   './app.js',
   './manifest.json',
   './icon-1024.png',
+  './icon-192.png',
+  './icon-512.png',
+  './apple-touch-icon.png',
   './berglandschaft_0.1.jpg',
   './meer_0.2.jpg',
   './nacht_meer_0.1.jpg',

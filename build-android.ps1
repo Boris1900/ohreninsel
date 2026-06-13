@@ -17,8 +17,10 @@ Copy-Item "$src\app.js"                        $www -Force
 Copy-Item "$src\sw.js"                         $www -Force
 Copy-Item "$src\manifest.json"                 $www -Force
 Copy-Item "$src\icon-1024.png"                 $www -Force
-Copy-Item "$src\background.jpg"                $www -Force
-Copy-Item "$src\background_laecheln_v0.4.jpg"  $www -Force
+Copy-Item "$src\icon-192.png"                  $www -Force
+Copy-Item "$src\icon-512.png"                  $www -Force
+Copy-Item "$src\apple-touch-icon.png"          $www -Force
+Copy-Item "$src\ohr3.png"                      $www -Force
 Copy-Item "$src\berglandschaft_0.1.jpg"        $www -Force
 Copy-Item "$src\meer_0.2.jpg"                  $www -Force
 Copy-Item "$src\nacht_meer_0.1.jpg"            $www -Force
@@ -26,11 +28,6 @@ Copy-Item "$src\wald_0.1.jpg"                  $www -Force
 Copy-Item "$src\bach_0.1.jpg"                  $www -Force
 Copy-Item "$src\regen_0.1.jpg"                 $www -Force
 Copy-Item "$src\cafe_0.1.jpg"                  $www -Force
-Copy-Item "$src\gong.png"                      $www -Force
-Copy-Item "$src\gong_ohne_halter.png"          $www -Force
-Copy-Item "$src\ohr.png"                       $www -Force
-Copy-Item "$src\ohr2.png"                      $www -Force
-Copy-Item "$src\ohr3.png"                      $www -Force
 Copy-Item "$src\icons\*"                       "$www\icons\" -Force
 
 # Nur mp3 aus Sounds/ – keine Unterordner kopieren
