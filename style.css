@@ -34,6 +34,15 @@ html, body {
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
 }
+/* <html> bis zum physischen Bildschirmrand strecken (large viewport height).
+   Der Hintergrund wird per JS (setBg) auf <html> gelegt und fuellt so die
+   untere tote Zone, die fixed-Elemente auf iOS nicht erreichen. */
+html {
+  min-height: 100vh;
+  min-height: 100lvh;
+  background-size: cover;
+  background-position: center;
+}
 
 /* ─── Hintergrund ─────────────────────────────────────────── */
 #bg {

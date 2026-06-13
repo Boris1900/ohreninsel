@@ -261,19 +261,17 @@
   <!-- Debug-Overlay: inline damit kein Service Worker es wegcachen kann -->
   <script>
   (function() {
-    // DIAGNOSE-BUILD v0.9.27: Overlay immer an (sonst hinter ?debug versteckt)
-    var isDebug = true;
+    var search = location.search || '';
+    var isDebug = search.indexOf('debug') !== -1;
+    // Flag in localStorage speichern – bleibt auch nach URL-Cleanup erhalten
+    if (isDebug) localStorage.setItem('oi-debug', '1');
+    if (!isDebug && localStorage.getItem('oi-debug') === '1') isDebug = true;
+    if (!isDebug) return;
 
     // safe-area-inset-bottom + top per CSS-Trick auslesen
     var probe = document.createElement('div');
     probe.style.cssText = 'position:fixed;bottom:0;left:0;width:0;height:0;padding-bottom:env(safe-area-inset-bottom);padding-top:env(safe-area-inset-top);pointer-events:none;visibility:hidden;';
     document.body.appendChild(probe);
-
-    // Roter Rahmen um #bg + gelber um #app -> man SIEHT, wo sie enden
-    var bgEl0  = document.getElementById('bg');
-    var appEl0 = document.getElementById('app');
-    if (bgEl0)  bgEl0.style.outline  = '3px solid red';
-    if (appEl0) appEl0.style.outline = '2px dashed yellow';
 
     var box = document.createElement('div');
     box.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:99999;background:rgba(0,0,0,0.9);color:#7fed57;font:13px/1.7 monospace;padding:10px 14px;border-radius:10px;pointer-events:none;white-space:pre;';
@@ -286,7 +284,7 @@
       var appR  = appEl ? appEl.getBoundingClientRect() : null;
       var bgR   = bgEl  ? bgEl.getBoundingClientRect()  : null;
       box.textContent =
-        '── DIAGNOSE v0.9.27 ──\n' +
+        '── iOS Debug ──\n' +
         'screen.h:    ' + screen.height + '\n' +
         'innerH:      ' + window.innerHeight + '\n' +
         'vpH:         ' + (window.visualViewport ? Math.round(window.visualViewport.height) : 'n/a') + '\n' +

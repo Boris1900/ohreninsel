@@ -1,5 +1,5 @@
 // Version
-const APP_VERSION = 'v0.9.27';
+const APP_VERSION = 'v0.9.28';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
@@ -678,6 +678,11 @@ const soundBgMap = {
 
 function setBg(cls) {
   bgEl.className = cls;
+  // Gleichen Hintergrund auf <html> legen: das Wurzelelement wird auf iOS NICHT
+  // am Viewport abgeschnitten und reicht bis zum physischen Bildschirmrand. So
+  // wird die tote untere Zone (innerHeight < screen.height) mit demselben Bild
+  // gefuellt -> kein blauer Streifen mehr in der iOS-PWA.
+  document.documentElement.style.background = bgStyleMap[cls] || '#0b1a0b';
   document.querySelectorAll('.bg-swatch').forEach(s =>
     s.classList.toggle('active', s.dataset.bg === cls));
   body.classList.remove('theme-meer','theme-berg','theme-blau','theme-nacht','theme-wald','theme-bach','theme-regen','theme-cafe');
