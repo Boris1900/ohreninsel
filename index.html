@@ -261,37 +261,40 @@
   <!-- Debug-Overlay: inline damit kein Service Worker es wegcachen kann -->
   <script>
   (function() {
-    var search = location.search || '';
-    var isDebug = search.indexOf('debug') !== -1;
-    // Flag in localStorage speichern – bleibt auch nach URL-Cleanup erhalten
-    if (isDebug) localStorage.setItem('oi-debug', '1');
-    if (!isDebug && localStorage.getItem('oi-debug') === '1') isDebug = true;
-    if (!isDebug) return;
+    // DIAGNOSE-BUILD v0.9.27: Overlay immer an (sonst hinter ?debug versteckt)
+    var isDebug = true;
 
-    // safe-area-inset-bottom per CSS-Trick auslesen
+    // safe-area-inset-bottom + top per CSS-Trick auslesen
     var probe = document.createElement('div');
-    probe.style.cssText = 'position:fixed;bottom:0;left:0;width:0;height:0;padding-bottom:env(safe-area-inset-bottom);pointer-events:none;visibility:hidden;';
+    probe.style.cssText = 'position:fixed;bottom:0;left:0;width:0;height:0;padding-bottom:env(safe-area-inset-bottom);padding-top:env(safe-area-inset-top);pointer-events:none;visibility:hidden;';
     document.body.appendChild(probe);
 
+    // Roter Rahmen um #bg + gelber um #app -> man SIEHT, wo sie enden
+    var bgEl0  = document.getElementById('bg');
+    var appEl0 = document.getElementById('app');
+    if (bgEl0)  bgEl0.style.outline  = '3px solid red';
+    if (appEl0) appEl0.style.outline = '2px dashed yellow';
+
     var box = document.createElement('div');
-    box.style.cssText = 'position:fixed;top:44px;right:8px;z-index:99999;background:rgba(0,0,0,0.85);color:#7fed57;font:11px/1.65 monospace;padding:8px 11px;border-radius:8px;pointer-events:none;white-space:pre;';
+    box.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:99999;background:rgba(0,0,0,0.9);color:#7fed57;font:13px/1.7 monospace;padding:10px 14px;border-radius:10px;pointer-events:none;white-space:pre;';
     document.body.appendChild(box);
 
     function update() {
-      var safeB = getComputedStyle(probe).paddingBottom;
+      var cs    = getComputedStyle(probe);
       var appEl = document.getElementById('app');
       var bgEl  = document.getElementById('bg');
       var appR  = appEl ? appEl.getBoundingClientRect() : null;
       var bgR   = bgEl  ? bgEl.getBoundingClientRect()  : null;
       box.textContent =
-        '── iOS Debug v0.9.11 ──\n' +
+        '── DIAGNOSE v0.9.27 ──\n' +
         'screen.h:    ' + screen.height + '\n' +
         'innerH:      ' + window.innerHeight + '\n' +
         'vpH:         ' + (window.visualViewport ? Math.round(window.visualViewport.height) : 'n/a') + '\n' +
-        'safe-bot:    ' + safeB + '\n' +
-        '#app h:      ' + (appR ? appR.height.toFixed(1) : 'n/a') + '\n' +
+        'clientH:     ' + document.documentElement.clientHeight + '\n' +
+        'safe-top:    ' + cs.paddingTop + '\n' +
+        'safe-bot:    ' + cs.paddingBottom + '\n' +
         '#app.bottom: ' + (appR ? appR.bottom.toFixed(1) : 'n/a') + '\n' +
-        '#bg  h:      ' + (bgR  ? bgR.height.toFixed(1)  : 'n/a') + '\n' +
+        '#bg.top:     ' + (bgR  ? bgR.top.toFixed(1)     : 'n/a') + '\n' +
         '#bg.bottom:  ' + (bgR  ? bgR.bottom.toFixed(1)  : 'n/a');
       requestAnimationFrame(update);
     }
