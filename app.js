@@ -1,5 +1,5 @@
 // Version
-const APP_VERSION = 'v0.9.29';
+const APP_VERSION = 'v0.9.30';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
@@ -47,6 +47,23 @@ function showStatusBar() {
     window.Capacitor.Plugins.StatusBar.show();
   }
 }
+
+// Wake Lock: haelt das Display an, solange eine Sitzung laeuft. Ohne ihn legt
+// Android die App bei Display-Aus schlafen -> lange Timer (End-Gong, Einschlaf-
+// Ausblenden) feuern nicht mehr. Muster aus der MeditationsApp. Der Lock geht
+// bei Display-Aus/App-Wechsel verloren und wird per visibilitychange neu geholt.
+let wakeLock = null;
+async function requestWakeLock() {
+  if ('wakeLock' in navigator) {
+    try { wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+  }
+}
+async function releaseWakeLock() {
+  if (wakeLock) { try { await wakeLock.release(); } catch (e) {} wakeLock = null; }
+}
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && isRunning) requestWakeLock();
+});
 
 // â”€â”€ DOM-Refs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const body       = document.body;
@@ -348,6 +365,7 @@ function doStop(withAudioFade = true) {
   statusW.textContent = 'Start';
   stopGlow();
   showStatusBar();
+  releaseWakeLock();
   removeAutoDim();
   if (isAudioActive) stopAudio(withAudioFade);
 
@@ -397,6 +415,7 @@ async function startSession({ mode, filePath, minutes, gongFile }) {
   body.classList.add('running');
   body.classList.remove('idle');
   hideStatusBar();
+  requestWakeLock();
   elemHidden = false;
   autoDimActive = false;
   removeAutoDim();
