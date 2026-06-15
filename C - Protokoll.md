@@ -11,6 +11,7 @@
 
 | Log | Datum | Beschreibung |
 |---|---|---|
+| LOG-020 | 13.06.2026 | iOS-PWA-Finale v0.9.23–v0.9.29: viewport-fit, Header-Sprung, blauer Streifen (Diagnose → html-Hintergrund), Homescreen-Icon. iPhone-verifiziert |
 | LOG-019 | 11.06.2026 | Politur-Serie v0.9.18–v0.9.22: Fade-Out, SW-Cleanup, Umlaut-Fix, Statusleiste + Header beim Start ausblenden, Menü-Button |
 | LOG-018 | 06.06.2026 | Projekt-Review (Hochglanz): Protokoll nachgeholt, Aufgaben aktualisiert, CLAUDE.md gekürzt |
 | LOG-017 | 06.06.2026 | iPhone-Bodenstreifen-Diagnose + Fix-Versuche v0.9.10–v0.9.16 (nicht getestet) |
@@ -34,6 +35,22 @@
 ---
 
 ## Protokoll-Verlauf (neueste oben!)
+
+### LOG-020 — 13.06.2026 — iOS-PWA-Finale v0.9.23–v0.9.29
+
+Die hartnäckigen iPhone-Ränder endgültig gelöst — diesmal mit Messung statt Raten. Jeweils PWA + APK zusammen.
+
+- **v0.9.23:** `viewport-fit=cover` ins viewport-Meta. Behebt den dunkelblauen Streifen OBEN (iOS ließ sonst die Statusleisten-Zone in body-Farbe stehen). Nebenwirkung: unterer Streifen kam zurück.
+- **v0.9.24:** Hintergrund-Höhe per JS auf `window.screen.height` (Muster aus MediApp). Löste den unteren Streifen auf Android, aber NICHT auf der iOS-PWA (screen.height weicht dort ab).
+- **v0.9.25:** Header-Sprung beim Play behoben. `StatusBar.hide()` ließ `safe-area-inset-top` auf 0 fallen → Header schrumpfte, Play-Button sprang hoch. Fix: `freezeSafeAreaTop()` friert den Wert als `--safe-top` ein, solange die Leiste noch sichtbar ist.
+- **v0.9.26:** Hintergrund oben+unten am Viewport verankert (`top:-100px; bottom:-100px`) statt fester Höhe. Half auf iOS-PWA trotzdem nicht → Beweis, dass der Streifen NICHT „Hintergrund zu kurz" ist.
+- **v0.9.27:** DIAGNOSE-Build (nur PWA): Debug-Overlay dauerhaft an, roter Rahmen um `#bg`. **Messung am iPhone:** `screen.h 812`, `innerH/vpH/clientH 762`, `safe-top 50px`, `safe-bot 34px`, `#bg.bottom 862`. Erkenntnis: Der Web-Viewport ist 50px kürzer als der physische Screen; fixed-Elemente werden bei 762 geclippt (gemeldete 862 sind nominal). Die untere tote Zone zeigt die body-Farbe.
+- **v0.9.28:** **Fix.** Hintergrund zusätzlich auf `<html>` legen (in `setBg()`), `<html>` per `min-height:100lvh` bis zum physischen Rand gestreckt. Das Wurzelelement wird NICHT geclippt und füllt die tote Zone mit demselben Bild. Diagnose-Overlay wieder hinter `?debug`. **iPhone-verifiziert: beide Streifen weg.**
+- **v0.9.29:** Homescreen-Icon gefixt. `icon-1024.png` (1,9 MB) war iOS als apple-touch-icon zu groß → iOS zeigte einen Splash-Schnappschuss (schwarzes Icon mit hellem Kreis). Fix: dediziertes opakes `apple-touch-icon.png` (180×180) + saubere 192/512-PNG-Icons im Manifest (die `.webp` ignoriert iOS fürs Icon).
+
+**Methodischer Lernpunkt:** Drei Blindversuche (v0.9.23–v0.9.26) kosteten je einen Build+Test-Zyklus. Der EINE Diagnose-Build (v0.9.27) hat die Ursache in einem Schritt geklärt. → Bei reproduzierbaren, aber gerätespezifischen UI-Bugs zuerst messen, nicht raten. Details + Wiederverwendung in `G - Technische Referenz.md`.
+
+---
 
 ### LOG-019 — 11.06.2026 — Politur-Serie v0.9.18–v0.9.22
 

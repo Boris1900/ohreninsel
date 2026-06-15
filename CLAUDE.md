@@ -1,6 +1,6 @@
 # TinnitusMediApp – Projektdokumentation
 
-**Produktname:** Ohreninsel | **Stand:** v0.9.22 (11.06.2026)
+**Produktname:** Ohreninsel | **Stand:** v0.9.29 (13.06.2026, iPhone-Ränder + Icon erledigt)
 
 **PWA live:** https://boris1900.github.io/ohreninsel/ (GitHub Pages, master-Branch)
 Für iPhone (Katharina): URL in Safari → Teilen → Zum Startbildschirm.
@@ -49,11 +49,11 @@ Landingpage live: `ohreninsel.tinnituspraxis-seedorf.de`
 
 ## Offene Punkte
 
-- **iPhone-Bodenstreifen (Fix in v0.9.17+ enthalten, ungetestet):** Katharina muss testen. Details in G.
-- **iPhone Statusleiste/Header-Ausblenden:** Statusleiste + Header werden beim Start ausgeblendet — bisher nur auf Android (APK) verifiziert. Auf iOS-PWA blendet `StatusBar.hide()` nicht (kein Capacitor), Header-Fade per CSS läuft aber. Katharina-Check offen.
 - **Impressum/Datenschutz-URLs:** Links gehen auf `tinnituspraxis-seedorf.de/impressum` + `/datenschutz` — Wix-Pfade bestätigen.
-- **Lead Magnet:** E-Mail-Provider-Entscheidung ausstehend (LEAD-01).
+- **Lead Magnet:** E-Mail-Provider-Entscheidung ausstehend (LEAD-01). **Nächster echter Hebel** Richtung Intensivtage/E-Mail-Liste — wichtiger als weitere Pixel-Politur.
 - **Eigene Subdomain:** Optional, aktuell github.io (PWA-01).
+
+**Erledigt (13.06., v0.9.17–v0.9.29, iPhone-verifiziert):** Bodenstreifen oben + unten weg, Statusleiste/Header blenden beim Start aus, Header-Sprung beim Play, Homescreen-Icon. iOS-PWA-Details in G.
 
 ---
 
