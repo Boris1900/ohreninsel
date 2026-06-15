@@ -1,6 +1,6 @@
 # TinnitusMediApp – Projektdokumentation
 
-**Produktname:** Ohreninsel | **Stand:** v0.9.29 (13.06.2026, iPhone-Ränder + Icon erledigt)
+**Produktname:** Ohreninsel | **Stand:** v0.9.30 (15.06.2026, Wake Lock gegen Timer-Einfrieren)
 
 **PWA live:** https://boris1900.github.io/ohreninsel/ (GitHub Pages, master-Branch)
 Für iPhone (Katharina): URL in Safari → Teilen → Zum Startbildschirm.

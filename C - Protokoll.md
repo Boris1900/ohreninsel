@@ -11,6 +11,7 @@
 
 | Log | Datum | Beschreibung |
 |---|---|---|
+| LOG-021 | 15.06.2026 | Wake Lock (v0.9.30): End-Gong der Meditation kam bei Display-Aus nicht (Android fror App ein). Display bleibt jetzt während der Sitzung an. Android-verifiziert |
 | LOG-020 | 13.06.2026 | iOS-PWA-Finale v0.9.23–v0.9.29: viewport-fit, Header-Sprung, blauer Streifen (Diagnose → html-Hintergrund), Homescreen-Icon. iPhone-verifiziert |
 | LOG-019 | 11.06.2026 | Politur-Serie v0.9.18–v0.9.22: Fade-Out, SW-Cleanup, Umlaut-Fix, Statusleiste + Header beim Start ausblenden, Menü-Button |
 | LOG-018 | 06.06.2026 | Projekt-Review (Hochglanz): Protokoll nachgeholt, Aufgaben aktualisiert, CLAUDE.md gekürzt |
@@ -35,6 +36,18 @@
 ---
 
 ## Protokoll-Verlauf (neueste oben!)
+
+### LOG-021 — 15.06.2026 — Wake Lock (v0.9.30)
+
+**Bug (Boris-Test):** Meditation „Nur Gong", 30 Min. Nach Ablauf kam KEIN End-Gong, Display war schwarz. Ursache: Androids Display-Timeout (30 s) schaltete das Display aus → Android legte die App schlafen (Doze) → der lange `setTimeout` für den End-Gong feuerte nie.
+
+**Verfeinerte Diagnose durch zweiten Test:** Einschlafen 1 Min funktionierte trotz Display-Aus, weil kurze Timer (~20–30 s nach Display-Aus) noch feuern, bevor die App tief eingefroren wird. Lange Timer (30 Min) nicht. → Bug betrifft alle langen Timer, nicht nur die Meditation.
+
+**Fix:** Wake Lock (Screen Wake Lock API), Muster aus der MeditationsApp. `requestWakeLock()` bei Sitzungsstart, `releaseWakeLock()` bei Stop, Re-Acquire per `visibilitychange`. Gilt für alle Modi (Meditation, Einschlafen, Endlos). Das Display bleibt während der Sitzung an und wird von der APP abgedunkelt (Dim-Regler) statt von Androids Timeout ausgeschaltet → einheitliches Verhalten, Restzeit jederzeit antippbar. **Android-verifiziert.**
+
+**Bekannte Grenze:** Aktiver Power-Button-Druck schaltet das Display hart aus, dagegen ist auch der Wake Lock machtlos. Echte Lösung wäre Hintergrund-Audio (Capacitor-Plugin/Foreground-Service) — eigenes To-Do, falls je relevant.
+
+---
 
 ### LOG-020 — 13.06.2026 — iOS-PWA-Finale v0.9.23–v0.9.29
 

@@ -28,6 +28,17 @@
 
 ---
 
+## Wake Lock (Display-Aus / Timer-Einfrieren) — ab v0.9.30
+
+Ohne Wake Lock legt Android die App bei Display-Aus schlafen (Doze). Folge: lange `setTimeout` (End-Gong der Meditation, Einschlaf-Ausblenden) feuern nicht. Kurze Timer (~20–30 s nach Display-Aus) überleben noch — daher trat der Bug erst bei langen Timern auf.
+
+- `requestWakeLock()` bei Sitzungsstart (in `startSession`, nach `isRunning = true`), `releaseWakeLock()` in `doStop()`.
+- Wake Lock geht bei Display-Aus/App-Wechsel verloren → `visibilitychange`-Handler holt ihn neu, wenn `!document.hidden && isRunning`.
+- Display bleibt damit an, die App dunkelt selbst ab (Dim-Overlay) statt Androids Timeout → einheitliches Verhalten auf allen Geräten, Restzeit jederzeit antippbar.
+- **Grenze:** aktiver Power-Button schaltet das Display hart aus → Wake Lock machtlos. Echte Lösung nur über Hintergrund-Audio (Capacitor-Plugin / Foreground-Service). Bisher nicht nötig.
+
+---
+
 ## Wisch-Karussell + Hintergründe
 
 7 Hintergründe per Swipe (links/rechts) auf der Stage: Wellen → Rauschen → Vögel → Bach → Regen → Café → Berg (`carouselItems` in app.js). Start-Preset: Vögel/Wald (per localStorage `ohreninsel-carousel` gemerkt).
