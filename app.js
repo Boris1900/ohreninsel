@@ -1,8 +1,22 @@
 // Version
-const APP_VERSION = 'v0.9.31';
+const APP_VERSION = 'v0.9.32';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
+
+  // Feedback-Link: mailto mit Betreff + automatisch Gerät & Version,
+  // damit Boris bei Rückmeldungen sofort den Kontext sieht.
+  const fb = document.getElementById('feedback-btn');
+  if (fb) {
+    const ua = navigator.userAgent;
+    const geraet = /iPhone/.test(ua) ? 'iPhone'
+                 : /iPad/.test(ua)   ? 'iPad'
+                 : /Android/.test(ua) ? 'Android'
+                 : 'Computer/Sonstiges';
+    const subject = `Feedback zur Ohreninsel (${APP_VERSION})`;
+    const body = `\n\n\n— — —\nMein Gerät: ${geraet} · App-Version: ${APP_VERSION}`;
+    fb.href = `mailto:post@tinnituspraxis-seedorf.de?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
 });
 
 // â”€â”€ Service Worker (nicht auf localhost â€“ sonst stört der Cache beim Entwickeln) â”€

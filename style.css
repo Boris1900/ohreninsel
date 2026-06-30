@@ -550,23 +550,23 @@ input[type=range]::-moz-range-thumb {
   line-height: 1.5;
 }
 
-/* ─── Menü: Update-Button ────────────────────────────────── */
+/* ─── Menü: Update-Button (betont, grüner Akzent) ────────── */
 #update-btn {
   width: 100%;
-  padding: 10px 0;
-  background: var(--w06);
-  border: 1px solid var(--w12);
+  padding: 11px 0;
+  background: rgba(126, 217, 87, 0.10);
+  border: 1px solid var(--gruen-soft);
   border-radius: 22px;
   font-family: inherit;
-  font-size: 12px;
-  font-weight: 400;
+  font-size: 13px;
+  font-weight: 500;
   letter-spacing: 0.3px;
-  color: var(--w55);
+  color: var(--gruen);
   cursor: pointer;
   text-align: center;
   transition: background 0.2s, color 0.2s;
 }
-#update-btn:active { background: var(--w12); }
+#update-btn:active { background: rgba(126, 217, 87, 0.20); }
 #update-btn:disabled { opacity: 0.5; cursor: default; }
 
 #update-status {
@@ -577,6 +577,26 @@ input[type=range]::-moz-range-thumb {
   min-height: 18px;
   line-height: 1.5;
 }
+
+/* ─── Menü: Feedback-Button (dezent, zurückhaltend) ──────── */
+#feedback-btn {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px 0;
+  background: var(--w06);
+  border: 1px solid var(--w12);
+  border-radius: 22px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  color: var(--w55);
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+#feedback-btn:active { background: var(--w12); }
 
 /* ─── Menü: Versionsnummer ───────────────────────────────── */
 #menu-version {
