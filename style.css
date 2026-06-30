@@ -282,6 +282,47 @@ body.running #start-btn::after {
 }
 body.running #status-word { color: var(--sun-rim); }
 
+/* ─── Stummschalter-Hinweis (iPhone, Homescreen-Start) ──────── */
+#mute-hint {
+  position: fixed;
+  left: 20px; right: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  z-index: 150;
+  background: rgba(10, 37, 53, 0.94);
+  border: 1px solid var(--gruen-soft);
+  border-radius: 14px;
+  padding: 16px 18px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #fff;
+  text-align: left;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+}
+#mute-hint.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+#mute-hint p { margin: 0 0 10px; }
+#mute-hint strong { color: var(--gruen); font-weight: 600; }
+#mute-hint button {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px;
+  background: var(--gruen);
+  color: #0a2535;
+  border: none;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 /* ─── Unterer Block ───────────────────────────────────────── */
 #lower {
   position: absolute;

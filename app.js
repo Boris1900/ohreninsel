@@ -1,5 +1,5 @@
 // Version
-const APP_VERSION = 'v0.9.30';
+const APP_VERSION = 'v0.9.31';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
@@ -548,8 +548,37 @@ async function initApp() {
   setBg(startItem.bg);
   splash.classList.add('fade-out');
   setTimeout(() => splash.remove(), 1000);
+  showMuteHintOnce();
 }
 initApp();
+
+// ── Stummschalter-Hinweis (iPhone, vom Homescreen gestartet) ──────────────
+// iOS schaltet Web-Audio-Ausgabe (AudioContext) stumm, wenn der seitliche
+// Stummschalter aktiv ist – anders als bei nativen Apps gibt es dafür in
+// Safari/PWA keine Umgehung über die AudioSession-API.
+function showMuteHintOnce() {
+  const isIPhone = /iPhone/.test(navigator.userAgent);
+  const isStandalone = navigator.standalone === true;
+  if (!isIPhone || !isStandalone) return;
+  if (localStorage.getItem('ohreninsel-mute-hint-shown')) return;
+
+  const hint = document.createElement('div');
+  hint.id = 'mute-hint';
+  hint.innerHTML =
+    '<p><strong>Kein Ton?</strong> Schalte den Stummschalter an der linken Seite deines iPhones aus.</p>' +
+    '<p><strong>Tipp für die Nacht:</strong> Stell das iPhone in den Flugmodus oder den Nicht-stören-Modus. So unterbricht keine eingehende Nachricht deine Klangkulisse.</p>' +
+    '<button type="button">Verstanden</button>';
+  document.body.appendChild(hint);
+
+  // Erst beim Bestätigen merken – sonst ginge der Hinweis verloren,
+  // falls die App während der Einblendung geschlossen wird.
+  hint.querySelector('button').addEventListener('click', () => {
+    localStorage.setItem('ohreninsel-mute-hint-shown', '1');
+    hint.classList.remove('show');
+    setTimeout(() => hint.remove(), 600);
+  });
+  setTimeout(() => hint.classList.add('show'), 1200);
+}
 
 // â”€â”€ Sound-Kacheln (immer genau eine aktiv â€“ kein Abwählen mehr) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Tippen verhält sich wie Swipen: Hintergrund wechselt und â€“ falls Audio läuft â€“
