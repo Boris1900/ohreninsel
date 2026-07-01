@@ -1,5 +1,5 @@
 // Version
-const APP_VERSION = 'v0.9.33';
+const APP_VERSION = 'v0.9.34';
 document.addEventListener('DOMContentLoaded', () => {
   const mv = document.getElementById('menu-version');
   if (mv) mv.textContent = APP_VERSION;
@@ -607,6 +607,12 @@ function checkWhatsNew() {
   const seenKey = 'ohreninsel-seen-version';
   const seen = localStorage.getItem(seenKey);
   if (seen === APP_VERSION) return;
+
+  // Nicht mit dem Stummschalter-Hinweis kollidieren: ist der gerade sichtbar,
+  // stellen wir das Pop-up für diesen Start zurück (Version NICHT als gesehen
+  // merken), damit es beim nächsten Öffnen nachgeholt wird – so überlappen sich
+  // die beiden Kästchen nie.
+  if (document.getElementById('mute-hint')) return;
 
   // Kennen wir den Nutzer schon? (hat bereits irgendeinen ohreninsel-Wert)
   let bekannt = false;
