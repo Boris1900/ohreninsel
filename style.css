@@ -323,6 +323,42 @@ body.running #status-word { color: var(--sun-rim); }
   cursor: pointer;
 }
 
+/* ─── „Was ist neu"-Pop-up (gleicher Stil wie Stummschalter-Hinweis) ─── */
+#whatsnew {
+  position: fixed;
+  left: 20px; right: 20px;
+  bottom: calc(20px + env(safe-area-inset-bottom));
+  z-index: 150;
+  background: rgba(10, 37, 53, 0.94);
+  border: 1px solid var(--gruen-soft);
+  border-radius: 14px;
+  padding: 16px 18px;
+  color: #fff;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+}
+#whatsnew.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+#whatsnew .wn-title {
+  margin: 0 0 10px;
+  font-size: 10px; font-weight: 500; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--gruen);
+}
+#whatsnew ul {
+  margin: 0 0 14px; padding-left: 20px;
+  font-size: 14px; line-height: 1.5;
+}
+#whatsnew li { margin-bottom: 6px; }
+#whatsnew button {
+  display: block; width: 100%;
+  padding: 10px;
+  background: var(--gruen); color: #0a2535;
+  border: none; border-radius: 10px;
+  font-family: inherit; font-size: 15px; font-weight: 600;
+  cursor: pointer;
+}
+
 /* ─── Unterer Block ───────────────────────────────────────── */
 #lower {
   position: absolute;

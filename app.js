@@ -563,6 +563,7 @@ async function initApp() {
   splash.classList.add('fade-out');
   setTimeout(() => splash.remove(), 1000);
   showMuteHintOnce();
+  checkWhatsNew();
 }
 initApp();
 
@@ -592,6 +593,48 @@ function showMuteHintOnce() {
     setTimeout(() => hint.remove(), 600);
   });
   setTimeout(() => hint.classList.add('show'), 1200);
+}
+
+// ── „Was ist neu" nach einem Update ───────────────────────────────────────
+// Zeigt einmalig nach einem Versionswechsel, was sich geändert hat.
+// Frisch Installierte (leerer Speicher) werden NICHT mit einem Changelog
+// begrüßt – sie sehen nichts, es wird nur die Version gemerkt.
+const CHANGELOG = {
+  'v0.9.33': ['Klang der Kulissen „Vögel" und „Berg" in höherer Qualität'],
+};
+
+function checkWhatsNew() {
+  const seenKey = 'ohreninsel-seen-version';
+  const seen = localStorage.getItem(seenKey);
+  if (seen === APP_VERSION) return;
+
+  // Kennen wir den Nutzer schon? (hat bereits irgendeinen ohreninsel-Wert)
+  let bekannt = false;
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('ohreninsel-') && k !== seenKey) { bekannt = true; break; }
+  }
+
+  const punkte = CHANGELOG[APP_VERSION];
+  localStorage.setItem(seenKey, APP_VERSION);   // ab jetzt gemerkt
+  if (punkte && (seen !== null || bekannt)) {
+    showWhatsNew(punkte);
+  }
+}
+
+function showWhatsNew(punkte) {
+  const card = document.createElement('div');
+  card.id = 'whatsnew';
+  card.innerHTML =
+    '<p class="wn-title">Neu in dieser Version</p>' +
+    '<ul>' + punkte.map(p => '<li>' + p + '</li>').join('') + '</ul>' +
+    '<button type="button">Verstanden</button>';
+  document.body.appendChild(card);
+  card.querySelector('button').addEventListener('click', () => {
+    card.classList.remove('show');
+    setTimeout(() => card.remove(), 600);
+  });
+  setTimeout(() => card.classList.add('show'), 1200);
 }
 
 // â”€â”€ Sound-Kacheln (immer genau eine aktiv â€“ kein Abwählen mehr) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
