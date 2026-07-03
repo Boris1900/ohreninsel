@@ -736,7 +736,13 @@ input[type=range]::-moz-range-thumb {
   line-height: 1.5;
   text-align: center;
   color: rgba(255,255,255,0.5);
-  animation: splash-fadein 1.2s ease-out both;
+  /* Erst sanft einblenden, danach ruhig weiteratmen (pulsieren) */
+  animation: splash-fadein 1.2s ease-out both,
+             splash-hint-pulse 3.8s ease-in-out 1.2s infinite;
+}
+@keyframes splash-hint-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
 }
 
 /* Klangschalen-Auswahl im Meditieren-Panel – wählbar, außer bei "Nur Klang" */
