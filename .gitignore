@@ -12,6 +12,23 @@ android/
 dist/
 www/
 *.apk
+*.aab
+
+# Signierschlüssel & Secrets (NIEMALS committen!)
+*.keystore
+*.jks
+keystore.properties
+
+# Play-Store-Doku (Konto-/Verifizierungsdetails, nur lokal – Repo ist öffentlich)
+H - Play Store.md
+
+# Interne Projekt-Doku – nur lokal, gehört nicht ins öffentliche Repo
+A - Projektbeschreibung.md
+B - Aufgaben.md
+C - Protokoll.md
+F - Entscheidungen.md
+G - Technische Referenz.md
+CLAUDE.md
 
 # System
 .DS_Store
